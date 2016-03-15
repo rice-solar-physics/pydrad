@@ -88,7 +88,7 @@ class QuickViewer(object):
         axes[0,0].set_ylabel(r'$T$ $(\mathrm{MK})$',fontsize=self.fontsize)
         axes[0,1].set_ylabel(r'$n$  $(\mathrm{cm}^{-3})$',fontsize=self.fontsize)
         axes[1,0].set_ylabel(r'$v$ $(\mathrm{cm/s})$',fontsize=self.fontsize)
-        axes[1,1].set_ylabel(r'$p$ $(\mathrm{dyne}\,\mathrm{cm}^{-2}\,\mathrm{s}^{-1})$',fontsize=self.fontsize)
+        axes[1,1].set_ylabel(r'$p$ $(\mathrm{dyne}\,\mathrm{cm}^{-2})$',fontsize=self.fontsize)
         axes[1,0].set_xlabel(r'$s$ $(\mathrm{cm})$',fontsize=self.fontsize)
         axes[1,1].set_xlabel(r'$s$ $(\mathrm{cm})$',fontsize=self.fontsize)
         axes[0,1].set_yscale('log')
@@ -154,7 +154,7 @@ class QuickViewer(object):
         #plot styling
         axes[0].set_ylabel(r'$T$ $(\mathrm{MK})$',fontsize=self.fontsize)
         axes[1].set_ylabel(r'$n$  $(10^8\,\mathrm{cm}^{-3})$',fontsize=self.fontsize)
-        axes[2].set_ylabel(r'$p$ $(\mathrm{dyne}\,\mathrm{cm}^{-2}\,\mathrm{s}^{-1})$',fontsize=self.fontsize)
+        axes[2].set_ylabel(r'$p$ $(\mathrm{dyne}\,\mathrm{cm}^{-2})$',fontsize=self.fontsize)
         axes[2].set_xlabel(r'$t$ $(\mathrm{s})$',fontsize=self.fontsize)
         axes[0].set_xlim([self.time[0],self.time[-1]])
         
