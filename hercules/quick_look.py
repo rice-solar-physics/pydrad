@@ -128,14 +128,14 @@ class QuickViewer(object):
         min_p,max_p=1.e+300,0.
         for r in self.results:
             #temperature
-            if r['Te'].min() < min_t or r['Ti'] < min_t:
+            if r['Te'].min() < min_t or r['Ti'].min() < min_t:
                 min_t=min(r['Te'].min(),r['Ti'].min())
-            if r['Te'].max() > max_t or r['Ti'] > max_t:
+            if r['Te'].max() > max_t or r['Ti'].max() > max_t:
                 max_t=max(r['Te'].max(),r['Ti'].max())
             #density
-            if r['ne'].min() < min_n or r['ni'] < min_n:
+            if r['ne'].min() < min_n or r['ni'].min() < min_n:
                 min_n=min(r['ne'].min(),r['ni'].min())
-            if r['ne'].max() > max_n or r['ni'] > max_n:
+            if r['ne'].max() > max_n or r['ni'].max() > max_n:
                 max_n=max(r['ne'].max(),r['ni'].max())
             #velocity
             if r['v'].min() < min_v:
@@ -143,9 +143,9 @@ class QuickViewer(object):
             if r['v'].max() > max_v:
                 max_v=r['v'].max() 
             #pressure
-            if r['pe'].min() < min_p or r['pi'] < min_p:
+            if r['pe'].min() < min_p or r['pi'].min() < min_p:
                 min_p=min(r['pe'].min(),r['pi'].min())
-            if r['pe'].max() > max_p or r['pi'] > max_p:
+            if r['pe'].max() > max_p or r['pi'].max() > max_p:
                 max_p=max(r['pe'].max(),r['pi'].max())
             
         #y axes
