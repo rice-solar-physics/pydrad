@@ -11,9 +11,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
 import seaborn.apionly as sns
-from IPython.display import HTML
-from tempfile import NamedTemporaryFile
-import base64
 
 class QuickViewer(object):
     """
@@ -113,7 +110,7 @@ class QuickViewer(object):
             plt.show()
 
 
-    def make_profile_movie(self,line_cm='coolwarm',movie_filename=None,interval=20,fps=30,encoding_options=[],show_in_notebook=True,**kwargs):
+    def make_profile_movie(self, line_cm='coolwarm', movie_filename=None, interval=20, fps=30, encoding_options=[], **kwargs):
         """Make movie showing loop profile at each time t"""
 
         if not hasattr(self,'results'):
@@ -175,6 +172,7 @@ class QuickViewer(object):
         plt.tight_layout()
 
         #setup plotters for each axes
+        labelt=axes[0,0].text(0.02,0.95,'')
         lineTe,=axes[0,0].plot([],[],linestyle='-',linewidth=2)
         lineTi,=axes[0,0].plot([],[],linestyle='--',linewidth=2)
         linene,=axes[0,1].plot([],[],linestyle='-',linewidth=2)
@@ -183,13 +181,10 @@ class QuickViewer(object):
         linepe,=axes[1,1].plot([],[],linestyle='-',linewidth=2)
         linepi,=axes[1,1].plot([],[],linestyle='--',linewidth=2)
 
-        #set title with current time
-        #time_title=fig.suptitle('',fontsize=self.fontsize)
-
         #initialization function
         def init():
             """initialize animation"""
-            #time_title.set_text('')
+            labelt.set_text('')
             #temperature
             lineTe.set_data([],[])
             lineTe.set_color([])
@@ -208,12 +203,12 @@ class QuickViewer(object):
             linepe.set_color([])
             linepi.set_data([],[])
             linepi.set_color([])
-            return lineTe,lineTi,linene,lineni,linev,linepe,linepi,#time_title
+            return lineTe,lineTi,linene,lineni,linev,linepe,linepi,labelt
 
         #animation function
         def animate(i):
             r=self.results[i]
-            #time_title.set_text(r'$t=%.2f$'%(self.time[i]))
+            labelt.set_text(r'$t=%.2f$ $\mathrm{s}$'%(self.time[i]))
             #temperature
             lineTe.set_data(r['s'],r['Te']/1e+6)
             lineTe.set_color(colors[i])
@@ -232,42 +227,16 @@ class QuickViewer(object):
             linepe.set_color(colors[i])
             linepi.set_data(r['s'],r['pi'])
             linepi.set_color(colors[i])
-            return lineTe,lineTi,linene,lineni,linev,linepe,linepi,#time_title
+            return lineTe,lineTi,linene,lineni,linev,linepe,linepi,labelt
 
         #make the animation
-        anim=animation.FuncAnimation(fig,animate,init_func=init,frames=self.num_phy_files,blit=True,interval=interval)
+        anim=animation.FuncAnimation(fig, animate, init_func=init, frames=self.num_phy_files, blit=True, interval=interval)
 
-        #save or show
+        #save or return animation handler
         if movie_filename is not None:
             anim.save(movie_filename,fps=fps,extra_args=encoding_options)
         else:
             return anim
-            #if show_in_notebook:
-            #    self._display_animation(anim)
-            #else:
-            #    plt.show()
-                
-
-    def _anim_to_html(self,anim):
-        """Encoding for notebook display"""
-        if not hasattr(anim, '_encoded_video'):
-            with NamedTemporaryFile(suffix='.mp4') as f:
-                anim.save(f.name, fps=20, extra_args=['-vcodec', 'libx264', '-pix_fmt', 'yuv420p'])
-                video = open(f.name, "rb").read()
-            anim._encoded_video = base64.b64encode(video)
-
-        VIDEO_TAG = """<video controls>
-         <source src="data:video/x-m4v;base64,{0}" type="video/mp4">
-         Your browser does not support the video tag.
-        </video>"""
-
-        return VIDEO_TAG.format(anim._encoded_video)
-
-
-    def _display_animation(self,anim):
-        """Write to HTML for notebook display"""
-        plt.close(anim._fig)
-        return HTML(self._anim_to_html(anim))
 
 
     def make_timeseries(self,lower_percent=0.25,upper_percent=0.25,**kwargs):
