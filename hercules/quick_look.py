@@ -110,7 +110,7 @@ class QuickViewer(object):
             plt.show()
 
 
-    def make_profile_movie(self, line_cm='coolwarm', movie_filename=None, interval=20, fps=30, encoding_options=[], **kwargs):
+    def make_profile_movie(self, line_cm='coolwarm', movie_filename=None, interval=20, fps=30, **kwargs):
         """Make movie showing loop profile at each time t"""
 
         if not hasattr(self,'results'):
@@ -172,7 +172,7 @@ class QuickViewer(object):
         plt.tight_layout()
 
         #setup plotters for each axes
-        labelt=axes[0,0].text(0.02,0.95,'')
+        labelt=axes[0,0].text(0.1*self.results[0]['s'],0.95*max_t,'',fontsize=self.fontsize)
         lineTe,=axes[0,0].plot([],[],linestyle='-',linewidth=2)
         lineTi,=axes[0,0].plot([],[],linestyle='--',linewidth=2)
         linene,=axes[0,1].plot([],[],linestyle='-',linewidth=2)
@@ -234,7 +234,8 @@ class QuickViewer(object):
 
         #save or return animation handler
         if movie_filename is not None:
-            anim.save(movie_filename,fps=fps,extra_args=encoding_options)
+	    metadata={'title':'HYDRAD T,n,v,p profiles'}
+            anim.save(movie_filename,writer=animation.writers['ffmpeg'](fps=fps,metadata=metadata,bitrate=1800))
         else:
             plt.close(ani._fig)
             return anim
