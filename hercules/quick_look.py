@@ -236,6 +236,7 @@ class QuickViewer(object):
         if movie_filename is not None:
             anim.save(movie_filename,fps=fps,extra_args=encoding_options)
         else:
+            plt.close(ani._fig)
             return anim
 
 
