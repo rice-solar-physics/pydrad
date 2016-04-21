@@ -237,7 +237,7 @@ class QuickViewer(object):
             metadata={'title':'HYDRAD T,n,v,p profiles'}
             anim.save(movie_filename,writer=animation.writers['ffmpeg'](fps=fps,metadata=metadata,bitrate=1800))
         else:
-            plt.close(anim._fig)
+            #plt.close(anim._fig)
             return anim
 
 
