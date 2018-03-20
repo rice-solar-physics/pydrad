@@ -1,16 +1,14 @@
-#name: quick_look.py
-#author: Will Barnes
-#date created: 8 March 2016
+"""
+Class for quickly and easily creating plots of HYDRAD data
+"""
 
-#description: Class for quickly and easily creating plots of HYDRAD data
-
-#import needed modules
-import os,sys
+import os, sys
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
 import seaborn.apionly as sns
+
 
 class QuickViewer(object):
     """
