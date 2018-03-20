@@ -8,7 +8,8 @@ setup(
     author='Will Barnes',
     url='https://github.com/rice-solar-physics/hydrad_tools',
     package_data={'hydrad_tools': ['configure/templates/*']},
-    packages=['hydrad_tools'],
+    packages=['hydrad_tools', 'hydrad_tools.configure', 'hydrad_tools.parse',
+              'hydrad_tools.visualize'],
     author_email='will.t.barnes@gmail.com',
     description='Tools for configuring and parsing HYDRAD simulations'
 )
