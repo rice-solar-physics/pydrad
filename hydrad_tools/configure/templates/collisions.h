@@ -9,6 +9,6 @@
 // ****
 
 // **** Physics ****
-#define MINIMUM_COLLISIONAL_COUPLING_TIME_SCALE {{ general.minimum_collisional_coupling_time_scale | units_filter('s') }}
-{% if general.force_single_fluid %}#define FORCE_SINGLE_FLUID{% endif %}
+#define MINIMUM_COLLISIONAL_COUPLING_TIME_SCALE {{ general.minimum_collisional_coupling_timescale | units_filter('s') }}
+{% if general.force_single_fluid -%}#define FORCE_SINGLE_FLUID{%- endif %}
 // **** End of Physics ****

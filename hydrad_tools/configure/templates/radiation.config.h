@@ -9,20 +9,24 @@
 // ****
 
 // **** Physics ****
-{% if radiation.use_power_law_radiative_losses %}
+{% if radiation.use_power_law_radiative_losses -%}
 #define USE_POWER_LAW_RADIATIVE_LOSSES
-{% else %}
-{% if radiation.non_equilibrium_radiation %}#define NON_EQUILIBRIUM_RADIATION{% endif %}
-{% if radiation.decouple_ionization_state_solver %}#define DECOUPLE_IONIZATION_STATE_SOLVER{% endif %}
+{%- else %}
+{% if radiation.non_equilibrium_radiation -%}
+#define NON_EQUILIBRIUM_RADIATION
+{%- endif %}
+{% if radiation.decouple_ionization_state_solver -%}
+#define DECOUPLE_IONIZATION_STATE_SOLVER
+{%- endif %}
 {% endif %}
-{% if radiation.density_dependent_rates %}#define DENSITY_DEPENDENT_RATES{% endif %}
-{% if radiation.optically_thick_radiation %}#define OPTICALLY_THICK_RADIATION{% endif %}
-{% if radiation.nlte_chromosphere %}#define NLTE_CHROMOSPHERE{% endif %}
+{% if radiation.density_dependent_rates -%}#define DENSITY_DEPENDENT_RATES{%- endif %}
+{% if radiation.optically_thick_radiation -%}#define OPTICALLY_THICK_RADIATION{%- endif %}
+{% if radiation.nlte_chromosphere -%}#define NLTE_CHROMOSPHERE{%- endif %}
 #include "../../HYDRAD/source/collisions.h"
 // **** End of Physics ****
 
 // **** Solver ****
-#define MAX_OPTICALLY_THIN_DENSITY {{ solver.maximum_optically_thin_density }}
+#define MAX_OPTICALLY_THIN_DENSITY {{ solver.maximum_optically_thin_density | units_filter('cm^-3') }}
 #define SAFETY_ATOMIC {{ solver.safety_atomic }}
 #define CUTOFF_ION_FRACTION {{ solver.cutoff_ion_fraction }}
 #define EPSILON_D {{ solver.epsilon_d }}
