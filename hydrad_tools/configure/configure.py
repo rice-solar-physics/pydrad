@@ -55,6 +55,7 @@ class Configure(object):
             else:
                 copy_tree(base_path, tmpdir)
             # Generate configuration files and copy them to the right locations
+            # Compile executables
             # Copy to output
             if name is None:
                 name = f'hydrad_{self.date}'
