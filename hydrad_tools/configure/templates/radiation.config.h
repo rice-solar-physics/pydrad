@@ -12,7 +12,7 @@
 {% if radiation.use_power_law_radiative_losses -%}
 #define USE_POWER_LAW_RADIATIVE_LOSSES
 {%- else %}
-{% if radiation.non_equilibrium_radiation -%}
+{% if radiation.elements_nonequilibrium -%}
 #define NON_EQUILIBRIUM_RADIATION
 {%- endif %}
 {% if radiation.decouple_ionization_state_solver -%}
