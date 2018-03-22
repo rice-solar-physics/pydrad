@@ -6,55 +6,28 @@ HYDRAD requires setting many different configuration files, making it difficult 
 ## Running the Simulation
 
 ## Configuration Parameters
-The table below gives an exhaustive list of all of the different HYDRAD configuration options
+The tables below give an exhaustive list of all of the different HYDRAD configuration options. If the units are listed, the input must have units that can be converted to the listed unit with the [Astropy units module](http://docs.astropy.org/en/stable/units/), e.g. `loop_length` can be input in Mm.
 
-<table>
-<!-- -->
-<tr><th>General</th></tr>
-<tr><th>Name</th><th>Description</th><th>Type</th></tr>
-<tr>
-    <td> total_time </td>
-    <td> Total duration of the simulation </td>
-    <td> int </td>
-</tr>
-<tr>
-    <td> output_interval </td>
-    <td> How often results are printed to file </td>
-    <td> int </td>
-</tr>
-<tr>
-    <td> loop_length </td>
-    <td> Footpoint-to-footpoint distance of the coronal loop </td>
-    <td> float </td>
-</tr>
-<tr>
-    <td> loop_inclination </td>
-    <td> Angle between loop and surface normal </td>
-    <td> float </td>
-</tr>
-<tr>
-    <td> footpoint_height </td>
-    <td> Height of loop footpoint above the solar surface </td>
-    <td> float </td>
-</tr>
-<!-- -->
-<tr><th>Initial Conditions</th></tr>
-<tr>
-    <td> footpoint_temperature </td>
-    <td> Temperature at the loop footpoint </td>
-    <td> float </td>
-</tr>
-<tr>
-    <td> footpoint_density </td>
-    <td> Density at the loop footpoint </td>
-    <td> float </td>
-</tr>
-<!-- -->
-<tr><th>Heating</th></tr>
-<!-- -->
-<tr><th>Radiation</th></tr>
-<!-- -->
-<tr><th>Solver</th></tr>
-<!-- -->
-<tr><th>Grid</th></tr>
-</table>
+### General
+| Name | Description | Type | Units |
+|:----:|:-----------|:----:|:-----:|
+| total_time | Total duration of the simulation | `int` | s |
+|output_interval | How often results are printed to file | `int` | s |
+| loop_length | Footpoint-to-footpoint distance of the coronal loop | `float` | cm |
+| loop_inclination | Angle between loop and surface normal | `float` | degree |
+| footpoint_height | Height of loop footpoint above the solar surface | `float` | cm |
+
+### Initial Conditions
+| Name | Description | Type | Units |
+|:----:|:-----------|:----:|:-----:|
+| footpoint_temperature | Temperature at the loop footpoint | `float` | K
+| footpoint_density | Density at the loop footpoint | `float` | cm<sup>-3</sup>|
+
+### Heating
+
+### Radiation
+
+### Solver 
+
+### Grid
+
