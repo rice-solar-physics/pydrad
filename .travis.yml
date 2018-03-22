@@ -1,0 +1,16 @@
+language: python
+python:
+- 3.6
+
+sudo: false
+env:
+  global:
+    secure: 
+
+install:
+- pip install mkdocs mkdocs-material doctr
+
+script:
+- set -e 
+- mkdocs build -d site
+- doctr deploy . --built-docs site/
