@@ -1,8 +1,8 @@
 """
 Class for quickly and easily creating plots of HYDRAD data
 """
-
-import os, sys
+import os
+import sys
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
