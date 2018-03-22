@@ -2,6 +2,7 @@
 Configure HYDRAD simulations
 """
 import os
+import warnings
 import datetime
 import tempfile
 import shutil
@@ -11,7 +12,10 @@ from distutils.dir_util import copy_tree
 import numpy as np
 from jinja2 import Environment, PackageLoader
 import yaml
-import git
+try:
+    import git
+except ImportError:
+    warnings.warn('GitPython not installed. Cannot retrieve base copy from GitHub.')
 
 from . import filters
 

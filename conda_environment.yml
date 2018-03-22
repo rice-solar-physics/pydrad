@@ -1,0 +1,14 @@
+name: hydrad_tools
+channels:
+- defaults
+dependencies:
+- python=3.6
+- numpy
+- scipy
+- matplotlib
+- astropy
+- PyYaml
+- Jinja2
+- pip:
+  - plasmapy
+  
