@@ -11,6 +11,17 @@ __all__ = ['Strand', 'Profile']
 
 
 class Strand(object):
+    """
+    Container for parsing HYDRAD results
+
+    Parameters
+    ----------
+    hydrad_root: `str`
+        Path to HYDRAD simulation directory
+
+    Examples
+    --------
+    """
 
     def __init__(self, hydrad_root):
         self.hydrad_root = hydrad_root
@@ -39,6 +50,14 @@ class Strand(object):
 
 
 class Profile(object):
+    """
+    Container for HYDRAD results at a given timestep. Typically accessed through `Strand`
+
+    Parameters
+    ----------
+    results_dir: `str`
+    index: `int`
+    """
 
     def __init__(self, results_dir, index):
         self.results = np.loadtxt(os.path.join(results_dir, f'profile{index:d}.phy'))

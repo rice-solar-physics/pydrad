@@ -2,6 +2,7 @@
 Configure HYDRAD simulations
 """
 import os
+import copy
 import warnings
 import datetime
 import tempfile
@@ -25,16 +26,19 @@ __all__ = ['Configure']
 
 
 class Configure(object):
+    """
+    Configure HYDRAD simulations from a single Python `dict`
 
-    def __init__(self, config, use_default_options=True):
-        if use_default_options:
-            with open(os.path.join(os.environ['HOME'], '.hydrad_tools', 'defaults.yml')) as f:
-                self.config = yaml.load(f)
-            for k in self.config:
-                if k in config:
-                    self.config.get(k, {}).update(config[k])
-        else:
-            self.config = config
+    Parameters
+    ----------
+    config : `dict`
+
+    Examples
+    --------
+    """
+
+    def __init__(self, config):
+        self.config = copy.deepcopy(config)
         self.env = Environment(loader=PackageLoader('hydrad_tools', 'configure/templates'))
         self.env.filters['units_filter'] = filters.units_filter
         self.env.filters['log10_filter'] = filters.log10_filter
@@ -42,6 +46,22 @@ class Configure(object):
         self.env.filters['get_atomic_number'] = filters.get_atomic_number
         self.env.filters['sort_elements'] = filters.sort_elements
 
+    @staticmethod
+    def load_config(filename):
+        """
+        Load a base configuration from a YAML file
+        """
+        with open(filename, 'r') as f:
+            config = yaml.load(f)
+        return config
+
+    def save_config(self, filename):
+        """
+        Save the simulation configuration as a YAML file
+        """
+        with open(filename, 'w') as f:
+            yaml.dump(self.config, f)
+    
     def setup_simulation(self, output_path, base_path=None, name=None, verbose=True):
         """
         Setup a HYDRAD simulation with desired outputs from a clean copy
