@@ -1,0 +1,37 @@
+# Site Info
+site_name: hydrad_tools
+site_description: Tools for running and parsing HYDRAD simulations
+site_author: Will Barnes
+site_url: 'https://rice-solar-physics.github.io/hydrad_tools'
+
+# Repository
+repo_name: rice-solar-physics/hydrad_tools
+repo_url: https://github.com/rice-solar-physics/hydrad_tools
+
+# Navigation
+pages:
+- Getting Started: index.md
+- Configuring a Simulation: configure.md
+- Parsing the Results: parse.md
+- Plotting: plot.md
+
+# Appearance
+theme:
+  name: 'material'
+  palette:
+    primary: 'grey'
+    accent: 'yellow'
+  logo:
+    icon: 'build'
+
+# Extensions
+markdown_extensions:
+  - codehilite
+
+# Social/Contact
+extra:
+  social:
+    - type: 'globe'
+      link: 'http://solar.rice.edu/'
+    - type: 'github'
+      link: 'https://github.com/rice-solar-physics'

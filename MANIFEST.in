@@ -1,0 +1,3 @@
+include README.md
+include LICENSE
+include hydrad_tools/configure/templates/*
