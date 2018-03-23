@@ -82,30 +82,26 @@ class Configure(object):
             # Generate configuration files and copy them to the right locations
             self.write_all_input_files(tmpdir)
             # Compile executables
-            sp = subprocess.Popen(['chmod', 'u+x', 'build_initial_conditions.bat'],
-                                  cwd=os.path.join(tmpdir, 'Initial_Conditions/build_scripts'),
-                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
+            cmd = subprocess.run(['chmod', 'u+x', 'build_initial_conditions.bat'],
+                                 cwd=os.path.join(tmpdir, 'Initial_Conditions/build_scripts'),
+                                 shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
             if verbose:
-                out, err = sp.communicate()
-                print(f"{out.decode('utf-8')}\n{err.decode('utf-8')}")
-            sp = subprocess.Popen(['sh', 'build_initial_conditions.bat'],
-                                  cwd=os.path.join(tmpdir, 'Initial_Conditions/build_scripts'),
-                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
+                print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
+            cmd = subprocess.run(['./build_initial_conditions.bat'],
+                                 cwd=os.path.join(tmpdir, 'Initial_Conditions/build_scripts'),
+                                 shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
             if verbose:
-                out, err = sp.communicate()
-                print(f"{out.decode('utf-8')}\n{err.decode('utf-8')}")
-            sp = subprocess.Popen(['chmod', 'u+x', 'build_hydrad.bat'],
-                                  cwd=os.path.join(tmpdir, 'HYDRAD/build_scripts'),
-                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
+                print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
+            cmd = subprocess.run(['chmod', 'u+x', 'build_HYDRAD.bat'],
+                                 cwd=os.path.join(tmpdir, 'HYDRAD/build_scripts'),
+                                 shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
             if verbose:
-                out, err = sp.communicate()
-                print(f"{out.decode('utf-8')}\n{err.decode('utf-8')}")
-            sp = subprocess.Popen(['sh', 'build_hydrad.bat'],
-                                  cwd=os.path.join(tmpdir, 'HYDRAD/build_scripts'),
-                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
+                print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
+            cmd = subprocess.run(['./build_HYDRAD.bat'],
+                                 cwd=os.path.join(tmpdir, 'HYDRAD/build_scripts'),
+                                 shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
             if verbose:
-                out, err = sp.communicate()
-                print(f"{out.decode('utf-8')}\n{err.decode('utf-8')}")
+                print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
             # Create needed directories
             if not os.path.exists(os.path.join(tmpdir, 'Initial_Conditions/profiles')):
                 os.mkdir(os.path.join(tmpdir, 'Initial_Conditions/profiles'))
@@ -128,7 +124,7 @@ class Configure(object):
             ('Heating_Model/config/heating_model.cfg', self.heating_cfg),
             ('HYDRAD/source/config.h', self.hydrad_header),
             ('HYDRAD/source/collisions.h', self.collisions_header),
-            ('HYDRAD/config/hydrad.cfg', self.hydrad_cfg),
+            ('HYDRAD/config/HYDRAD.cfg', self.hydrad_cfg),
         ]
         for filename, filestring in files:
             with open(os.path.join(root_dir, filename), 'w') as f:
