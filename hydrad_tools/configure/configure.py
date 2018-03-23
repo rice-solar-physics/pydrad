@@ -83,21 +83,29 @@ class Configure(object):
             self.write_all_input_files(tmpdir)
             # Compile executables
             sp = subprocess.Popen(['chmod', 'u+x', 'build_initial_conditions.bat'],
-                                  cwd=os.path.join(tmpdir, 'Initial_Conditions/build_scripts'))
+                                  cwd=os.path.join(tmpdir, 'Initial_Conditions/build_scripts'),
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
             if verbose:
-                print(sp.communicate())
+                out, err = sp.communicate()
+                print(f"{out.decode('utf-8')}\n{err.decode('utf-8')}")
             sp = subprocess.Popen(['sh', 'build_initial_conditions.bat'],
-                                  cwd=os.path.join(tmpdir, 'Initial_Conditions/build_scripts'))
+                                  cwd=os.path.join(tmpdir, 'Initial_Conditions/build_scripts'),
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
             if verbose:
-                print(sp.communicate())
+                out, err = sp.communicate()
+                print(f"{out.decode('utf-8')}\n{err.decode('utf-8')}")
             sp = subprocess.Popen(['chmod', 'u+x', 'build_hydrad.bat'],
-                                  cwd=os.path.join(tmpdir, 'HYDRAD/build_scripts'))
+                                  cwd=os.path.join(tmpdir, 'HYDRAD/build_scripts'),
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
             if verbose:
-                print(sp.communicate())
+                out, err = sp.communicate()
+                print(f"{out.decode('utf-8')}\n{err.decode('utf-8')}")
             sp = subprocess.Popen(['sh', 'build_hydrad.bat'],
-                                  cwd=os.path.join(tmpdir, 'HYDRAD/build_scripts'))
+                                  cwd=os.path.join(tmpdir, 'HYDRAD/build_scripts'),
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
             if verbose:
-                print(sp.communicate())
+                out, err = sp.communicate()
+                print(f"{out.decode('utf-8')}\n{err.decode('utf-8')}")
             # Create needed directories
             if not os.path.exists(os.path.join(tmpdir, 'Initial_Conditions/profiles')):
                 os.mkdir(os.path.join(tmpdir, 'Initial_Conditions/profiles'))
