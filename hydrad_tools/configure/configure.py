@@ -124,7 +124,7 @@ class Configure(object):
             ('Heating_Model/config/heating_model.cfg', self.heating_cfg),
             ('HYDRAD/source/config.h', self.hydrad_header),
             ('HYDRAD/source/collisions.h', self.collisions_header),
-            ('HYDRAD/config/hydrad.cfg', self.hydrad_cfg),
+            ('HYDRAD/config/HYDRAD.cfg', self.hydrad_cfg),
         ]
         for filename, filestring in files:
             with open(os.path.join(root_dir, filename), 'w') as f:
