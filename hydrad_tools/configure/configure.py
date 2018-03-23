@@ -92,12 +92,12 @@ class Configure(object):
                                  shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
             if verbose:
                 print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
-            cmd = subprocess.run(['chmod', 'u+x', 'build_hydrad.bat'],
+            cmd = subprocess.run(['chmod', 'u+x', 'build_HYDRAD.bat'],
                                  cwd=os.path.join(tmpdir, 'HYDRAD/build_scripts'),
                                  shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
             if verbose:
                 print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
-            cmd = subprocess.run(['./build_hydrad.bat'],
+            cmd = subprocess.run(['./build_HYDRAD.bat'],
                                  cwd=os.path.join(tmpdir, 'HYDRAD/build_scripts'),
                                  shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
             if verbose:
