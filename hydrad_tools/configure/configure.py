@@ -90,6 +90,13 @@ class Configure(object):
     def setup_initial_conditions(self, root_dir, execute=True, verbose=True):
         """
         Compile and execute code to get the initial loop profile
+
+        Parameters
+        ----------
+        root_dir : `str`
+        execute : `bool`, (optional)
+            If True (default), run the initial conditions code after compiling
+        verbose : `bool` (optional)
         """
         files = [
             ('Initial_Conditions/source/config.h', self.initial_conditions_header),
@@ -128,6 +135,14 @@ class Configure(object):
         return equilibrium_heating_rate
 
     def setup_hydrad(self, root_dir, verbose=True):
+        """
+        Compile HYDRAD code with appropriate header and config files
+
+        Parameters
+        ----------
+        root_dir : `str`
+        verbose : `bool`
+        """
         files = [
             ('Heating_Model/source/config.h', self.heating_header),
             ('Heating_Model/config/heating_model.cfg', self.heating_cfg),
