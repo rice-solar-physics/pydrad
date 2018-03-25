@@ -11,6 +11,7 @@ import subprocess
 from distutils.dir_util import copy_tree
 
 import numpy as np
+import astropy.units as u
 from jinja2 import Environment, PackageLoader
 import yaml
 try:
@@ -72,54 +73,62 @@ class Configure(object):
         base_path : `str`, optional
             If None (default), clone a new copy from GitHub (appropriate permissions required)
         name : `str`, optional
+        verbose : `bool`
         """
         with tempfile.TemporaryDirectory() as tmpdir:
-            # Get clean copy
             if base_path is None:
                 git.Repo.clone_from(REMOTE_REPO, tmpdir)
             else:
                 copy_tree(base_path, tmpdir)
-            # Generate configuration files and copy them to the right locations
-            self.write_all_input_files(tmpdir)
-            # Compile executables
-            cmd = subprocess.run(['chmod', 'u+x', 'build_initial_conditions.bat'],
-                                 cwd=os.path.join(tmpdir, 'Initial_Conditions/build_scripts'),
-                                 shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
-            if verbose:
-                print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
-            cmd = subprocess.run(['./build_initial_conditions.bat'],
-                                 cwd=os.path.join(tmpdir, 'Initial_Conditions/build_scripts'),
-                                 shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
-            if verbose:
-                print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
-            cmd = subprocess.run(['chmod', 'u+x', 'build_HYDRAD.bat'],
-                                 cwd=os.path.join(tmpdir, 'HYDRAD/build_scripts'),
-                                 shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
-            if verbose:
-                print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
-            cmd = subprocess.run(['./build_HYDRAD.bat'],
-                                 cwd=os.path.join(tmpdir, 'HYDRAD/build_scripts'),
-                                 shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
-            if verbose:
-                print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
-            # Create needed directories
-            if not os.path.exists(os.path.join(tmpdir, 'Initial_Conditions/profiles')):
-                os.mkdir(os.path.join(tmpdir, 'Initial_Conditions/profiles'))
-            if not os.path.exists(os.path.join(tmpdir, 'Results')):
-                os.mkdir(os.path.join(tmpdir, 'Results'))
-            # Copy to output
+            self.setup_initial_conditions(tmpdir, execute=True, verbose=verbose)
+            self.setup_hydrad(tmpdir, verbose=verbose)
             if name is None:
                 name = f'hydrad_{self.date}'
             output_dir = os.path.join(output_path, name)
             shutil.copytree(tmpdir, output_dir)
 
-    def write_all_input_files(self, root_dir):
+    def setup_initial_conditions(self, root_dir, execute=True, verbose=True):
+        """
+        Compile and execute code to get the initial loop profile
+        """
         files = [
             ('Initial_Conditions/source/config.h', self.initial_conditions_header),
             ('Initial_Conditions/config/initial_conditions.cfg', self.intial_conditions_cfg),
             ('Radiation_Model/source/config.h', self.radiation_header),
             ('Radiation_Model/config/elements_eq.cfg', self.radiation_equilibrium_cfg),
             ('Radiation_Model/config/elements_neq.cfg', self.radiation_nonequilibrium_cfg),
+        ]
+        for filename, filestring in files:
+            with open(os.path.join(root_dir, filename), 'w') as f:
+                f.write(filestring)
+        cmd = subprocess.run(['chmod', 'u+x', 'build_initial_conditions.bat'],
+                             cwd=os.path.join(root_dir, 'Initial_Conditions/build_scripts'),
+                             shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
+        if verbose:
+            print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
+        cmd = subprocess.run(['./build_initial_conditions.bat'],
+                             cwd=os.path.join(root_dir, 'Initial_Conditions/build_scripts'),
+                             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
+        if verbose:
+            print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
+        if not os.path.exists(os.path.join(root_dir, 'Initial_Conditions/profiles')):
+            os.mkdir(os.path.join(root_dir, 'Initial_Conditions/profiles'))
+        if execute:
+            cmd = subprocess.run(['./Initial_Conditions.exe'], cwd=root_dir, shell=True,
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
+            if verbose:
+                print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
+            if self.config['heating']['background_heating']:
+                self.equilibrium_heating_rate = self.get_equilibrium_heating_rate(root_dir)
+
+    def get_equilibrium_heating_rate(self, root_dir):
+        filename = os.path.join(root_dir, 'Initial_Conditions/profiles/initial.amr.sol')
+        with open(filename, 'r') as f:
+            equilibrium_heating_rate = float(f.readline()) * u.erg / u.s / (u.cm**3)
+        return equilibrium_heating_rate
+
+    def setup_hydrad(self, root_dir, verbose=True):
+        files = [
             ('Heating_Model/source/config.h', self.heating_header),
             ('Heating_Model/config/heating_model.cfg', self.heating_cfg),
             ('HYDRAD/source/config.h', self.hydrad_header),
@@ -129,7 +138,19 @@ class Configure(object):
         for filename, filestring in files:
             with open(os.path.join(root_dir, filename), 'w') as f:
                 f.write(filestring)
-
+        cmd = subprocess.run(['chmod', 'u+x', 'build_HYDRAD.bat'],
+                             cwd=os.path.join(root_dir, 'HYDRAD/build_scripts'),
+                             shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
+        if verbose:
+            print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
+        cmd = subprocess.run(['./build_HYDRAD.bat'],
+                             cwd=os.path.join(root_dir, 'HYDRAD/build_scripts'),
+                             shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
+        if verbose:
+            print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
+        if not os.path.exists(os.path.join(root_dir, 'Results')):
+            os.mkdir(os.path.join(root_dir, 'Results'))
+    
     @property
     def date(self):
         return datetime.datetime.now().strftime('%Y-%m-%d_%H.%M.%S')
@@ -153,7 +174,14 @@ class Configure(object):
 
     @property
     def heating_cfg(self):
-        return self.env.get_template('heating.cfg').render(date=self.date, **self.config)
+        if self.config['heating']['background_heating']:
+            if not hasattr(self, 'equilibrium_heating_rate'):
+                raise AttributeError('No background heating found')
+            background_heating_rate = self.equilibrium_heating_rate
+        else:
+            background_heating_rate = None
+        return self.env.get_template('heating.cfg').render(
+            date=self.date, background_heating_rate=background_heating_rate, **self.config)
 
     @property
     def heating_header(self):
