@@ -39,7 +39,7 @@
 #define SAFETY_CONDUCTION {{ solver.safety_conduction }}
 #define SAFETY_ADVECTION {{ solver.safety_advection }}
 #define SAFETY_VISCOSITY {{ solver.safety_viscosity }}
-#define TIME_STEP_INCREASE_LIMIT {{ solver.timestep_increase_limit }}
+#define TIME_STEP_INCREASE_LIMIT {{ solver.timestep_increase_limit | units_filter('%') / 100.0 + 1.0 }}
 {% if solver.relative_viscous_timescale -%}
 #define NUMERICAL_VISCOSITY
 #define RELATIVE_VISCOUS_TIME_SCALE {{ solver.relative_viscous_timescale }}
@@ -56,7 +56,7 @@
 {% if grid.refine_on_density %}#define REFINE_ON_DENSITY{% endif %}
 {% if grid.refine_on_electron_energy %}#define REFINE_ON_ELECTRON_ENERGY{% endif %}
 {% if grid.refine_on_hydrogen_energy %}#define REFINE_ON_HYDROGEN_ENERGY{% endif %}
-#define MIN_FRAC_DIFF {{ grid.minimum_fractional_difference  | units_filter('%') / 100.0 }}
+#define MIN_FRAC_DIFF {{ grid.minimum_fractional_difference | units_filter('%') / 100.0 }}
 #define MAX_FRAC_DIFF {{ grid.maximum_fractional_difference | units_filter('%') / 100.0 }}
 {% if grid.linear_restriction %}#define LINEAR_RESTRICTION{% endif %}
 {% if grid.enforce_conservation %}#define ENFORCE_CONSERVATION{% endif %}
