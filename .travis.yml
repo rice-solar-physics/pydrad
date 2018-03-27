@@ -24,4 +24,4 @@ before_script:
 script:
 - set -e 
 - mkdocs build -d site
-- 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; doctr deploy . --built-docs site/; fi'
+- 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then doctr deploy . --built-docs site/; fi'
