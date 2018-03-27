@@ -14,13 +14,8 @@ class Strand(object):
     """
     Container for parsing HYDRAD results
 
-    Parameters
-    ----------
-    hydrad_root: `str`
-        Path to HYDRAD simulation directory
-
-    Examples
-    --------
+    # Parameters
+    hydrad_root (`str`): Path to HYDRAD simulation directory
     """
 
     def __init__(self, hydrad_root):
@@ -28,6 +23,9 @@ class Strand(object):
 
     @property
     def time(self):
+        """
+        Simulation time
+        """
         amr_files = glob.glob(os.path.join(self.hydrad_root, 'Results/profile*.amr'))
         time = []
         for af in amr_files:
@@ -37,6 +35,9 @@ class Strand(object):
 
     @property
     def loop_length(self):
+        """
+        Footpoint-to-footpoint loop length
+        """
         with open(os.path.join(self.hydrad_root, 'Results/profile0.amr'), 'r') as f:
             tmp = f.readlines()
             loop_length = float(tmp[2])
@@ -51,12 +52,11 @@ class Strand(object):
 
 class Profile(object):
     """
-    Container for HYDRAD results at a given timestep. Typically accessed through `Strand`
+    Container for HYDRAD results at a given timestep. Typically accessed through #Strand
 
-    Parameters
-    ----------
-    results_dir: `str`
-    index: `int`
+    # Parameters
+    results_dir (`str`): Path to HYDRAD results directory
+    index (`int`): Timestep index
     """
 
     def __init__(self, results_dir, index):
@@ -64,32 +64,56 @@ class Profile(object):
 
     @property
     def coordinate(self):
+        """
+        Field-aligned loop coordinate $s$
+        """
         return self.results[:, 0] * u.cm
 
     @property
     def electron_temperature(self):
+        """
+        Electron temperature $T_e$ as a function of $s$
+        """
         return self.results[:, -4] * u.K
 
     @property
     def ion_temperature(self):
+        """
+        Ion temperature $T_i$ as a function of $s$
+        """
         return self.results[:, -3] * u.K
 
     @property
     def electron_density(self):
+        """
+        Electron density $n_e$ as a function of $s$
+        """
         return self.results[:, 3] * u.cm**(-3)
 
     @property
     def ion_density(self):
+        """
+        Ion density $n_i$ as a function of $s$
+        """
         return self.results[:, 4] * u.cm**(-3)
 
     @property
     def electron_pressure(self):
+        """
+        Electron pressure $p_e$ as a function of $s$
+        """
         return self.results[:, 5] * u.dyne * u.cm**(-2)
 
     @property
     def ion_pressure(self):
+        """
+        Ion pressure $p_i$ as a function of $s$
+        """
         return self.results[:, 6] * u.dyne * u.cm**(-2)
 
     @property
     def velocity(self):
+        """
+        Velocity $v$ as a function of $s$
+        """
         return self.results[:, 1] * u.cm / u.s

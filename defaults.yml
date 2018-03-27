@@ -31,7 +31,6 @@ solver:
   cutoff_ion_fraction: 1.0e-6
   epsilon_d: 0.1
   epsilon_r: 1.8649415311920072
-  timestep_increase_limit: 1.05
   relative_viscous_timescale: 
   zero_over_temperature_interval: 5.0e+2
 grid:
