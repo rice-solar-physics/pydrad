@@ -1,14 +1,21 @@
-language: python
-python:
-- 3.6
+language: c
+os:
+  - linux
 
 sudo: false
 env:
   global:
-    secure: "TxaoghfKEwqAL5s2XhWXhPj9lrVptH5Z89okaUqVlsnCCKP65RcJA0WnklRNKdRHL/imo9Ch9BUVySIbeBdnBvpq0zctWFkwLBMOm16nPK/v93C5CnJm/lUkeHF6ymhIB9A3zPLNCvElEQUGBOMaJGVQpyCvIBj4kGpI1wliQTwvn6ieCVeVxa6xbswZYxixGw3TL4Fk+/ZoGoXnMkp4OfHhttfmLRZ5lsVrOJO9DJvf/OWhvkxdHnDDZyo3ZbdyacdpLztgwRtsiteGUR0UOq5qTyH7D92GTYwPVLk0WTJpJUsnxp0LypwD4OywUAmM2f7PkDl2GmcGD1wcxxvyb1xeKT+wfh61Z92bRlkpJ7t4XVqUUhncJRSDa6XM2AQLwKP9XyTNvcl+r2onuD7oFNadPdSjeTfTqOVZPVLDyjIogK6Co6oe6Xg27qzvp93Caz+RLzXHVgeaavzIDXtJj14xVZhZh4vXQi6EigSZZL3A1VTXy+gpI0lTvt5/iHBmxs9B2t0uBdUZfiqQxvjXzZ6oVl8NJ/Uen1B8O8SzVjyvE2Ubxd//NJY0vPKoYOps/NYtL2vMCTsya/MrOtUrJVwJRIMPAr1fzrpx9d38a/mlcbx0WKZcst6ClLziQHauAaNKpbYOW9gjV/7Iherj8BWJfAV5v834zSRVcCWC+wk="
+    - PYTHON_VERSION=3.6
+    - NUMPY_VERSION=stable
+    - ASTROPY_VERSION=stable
+    - PIP_DEPENDENCIES='plasmapy mkdocs mkdocs-material doctr pydoc-markdown'
+    - CONDA_DEPENDENCIES='scipy matplotlib PyYaml Jinja2'
+    - EVENT_TYPE='pull_request push'
+    - secure: "TxaoghfKEwqAL5s2XhWXhPj9lrVptH5Z89okaUqVlsnCCKP65RcJA0WnklRNKdRHL/imo9Ch9BUVySIbeBdnBvpq0zctWFkwLBMOm16nPK/v93C5CnJm/lUkeHF6ymhIB9A3zPLNCvElEQUGBOMaJGVQpyCvIBj4kGpI1wliQTwvn6ieCVeVxa6xbswZYxixGw3TL4Fk+/ZoGoXnMkp4OfHhttfmLRZ5lsVrOJO9DJvf/OWhvkxdHnDDZyo3ZbdyacdpLztgwRtsiteGUR0UOq5qTyH7D92GTYwPVLk0WTJpJUsnxp0LypwD4OywUAmM2f7PkDl2GmcGD1wcxxvyb1xeKT+wfh61Z92bRlkpJ7t4XVqUUhncJRSDa6XM2AQLwKP9XyTNvcl+r2onuD7oFNadPdSjeTfTqOVZPVLDyjIogK6Co6oe6Xg27qzvp93Caz+RLzXHVgeaavzIDXtJj14xVZhZh4vXQi6EigSZZL3A1VTXy+gpI0lTvt5/iHBmxs9B2t0uBdUZfiqQxvjXzZ6oVl8NJ/Uen1B8O8SzVjyvE2Ubxd//NJY0vPKoYOps/NYtL2vMCTsya/MrOtUrJVwJRIMPAr1fzrpx9d38a/mlcbx0WKZcst6ClLziQHauAaNKpbYOW9gjV/7Iherj8BWJfAV5v834zSRVcCWC+wk="
 
 install:
-- pip install mkdocs mkdocs-material doctr pydoc-markdown
+- git clone --depth 1 git://github.com/astropy/ci-helpers.git
+- source ci-helpers/travis/setup_conda.sh
 
 before_script:
 - python setup.py install
