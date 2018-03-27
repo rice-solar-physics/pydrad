@@ -14,6 +14,10 @@ pages:
 - Configuring a Simulation: configure.md
 - Parsing the Results: parse.md
 - Plotting: plot.md
+- API:
+  - hydrad_tools.configure: api/configure.md
+  - hydrad_tools.parse: api/parse.md
+  - hydrad_tools.plot: api/plot.md
 
 # Appearance
 theme:
@@ -27,6 +31,10 @@ theme:
 # Extensions
 markdown_extensions:
   - codehilite
+  - pymdownx.arithmatex
+
+extra_javascript:
+  - 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML'
 
 # Social/Contact
 extra:

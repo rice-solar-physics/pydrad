@@ -1,3 +1,6 @@
+# Ignore auto-generated API docs
+docs/api/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
