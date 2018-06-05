@@ -53,6 +53,7 @@
 #define MAX_REFINEMENT_LEVEL {{ grid.maximum_refinement_level }}
 {% if grid.adapt -%}
 #define ADAPT
+#define ADAPT_EVERY_N_TIME_STEPS {{ grid.adapt_every_n_time_steps }}
 {% if grid.refine_on_density %}#define REFINE_ON_DENSITY{% endif %}
 {% if grid.refine_on_electron_energy %}#define REFINE_ON_ELECTRON_ENERGY{% endif %}
 {% if grid.refine_on_hydrogen_energy %}#define REFINE_ON_HYDROGEN_ENERGY{% endif %}
