@@ -35,6 +35,7 @@ solver:
   zero_over_temperature_interval: 5.0e+2
 grid:
   adapt: True
+  adapt_every_n_time_steps: 10
   minimum_cells: 150
   maximum_cells: 30000
   maximum_refinement_level: 12

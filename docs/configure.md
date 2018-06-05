@@ -326,6 +326,7 @@ elements = ['hydrogen', 'He', 'c', 26]
 | Name | Description | Type | Units |
 |:----:|:------------|:----:|:-----:|
 | adapt | Toggle using adaptive mesh refinement | `bool` | |
+| adapt_every_n_time_steps | How often to adapt on time step | `int` | |
 | minimum_cells | | `int` | |
 | maximum_cells | | `int` | |
 | maximum_refinement_level | How much to refine adaptive grid; see [BC13] | `int` | |
