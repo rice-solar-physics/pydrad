@@ -232,15 +232,15 @@ The tables below give an exhaustive list of all of the different HYDRAD configur
 | loop_length | Footpoint-to-footpoint distance of the coronal loop | `float` | cm |
 | loop_inclination | Angle between loop and surface normal | `float` | degree |
 | footpoint_height | Length of the chromosphere | `float` | cm |
-| tabulated_gravity_file | Path to file with tabulated gravitation profile | `str` | |
-| tabulated_cross_section_file | Path to file with tabulated cross-section expansion | `str` | |
+| tabulated_gravity_profile | Coefficients (in order of increasing exponent) for 6th order polynomial fit to the field-aligned gravitational acceleration | array-like | |
+| tabulated_cross_section_profile | Coefficients (in order of increasing exponent) for 6th order polynomial fit to the field-aligned gravitational acceleration | array-like | |
 | write_file_physical | Toggle writing `.phy` solutions file | `bool` | |
 | write_file_ion_populations | Toggle writing `.ine` file | `bool` | |
 | write_file_hydrogen_level_populations | Toggle writing `.Hstate` file | `bool` | |
 | write_file_timescales | Toggle writing `.scl` file | `bool` | |
 | write_file_equation_terms | Toggle writing `.trm` | `bool` | |
 | heat_flux_limiting_coefficient | See Eq. A15 of [BC13]| `float` | |
-| heat_flux_timestep_limit | Minimum value the heat flux will limit timestep to | `float` | |
+| heat_flux_timestep_limit | Minimum value the heat flux will limit timestep to | `float` | s |
 | use_kinetic_model | Toggle using kinetic model for heat flux | `bool` | |
 | minimum_collisional_coupling_timescale |  | `float` | s |
 | force_single_fluid | If true, force electron and ion quantities to be equal | `bool` | |
@@ -250,6 +250,7 @@ The tables below give an exhaustive list of all of the different HYDRAD configur
 ### Initial Conditions
 | Name | Description | Type | Units |
 |:----:|:------------|:----:|:-----|
+| use_tabulated_gravity | If true, read gravitational profile from file | `bool` | |
 | footpoint_temperature | Temperature at the loop footpoint | `float` | K
 | footpoint_density | Density at the loop footpoint | `float` | cm<sup>-3</sup>|
 | heating_location | Loop coordinate where equilibrium heat is injected | `float` | cm |
@@ -316,9 +317,9 @@ elements = ['hydrogen', 'He', 'c', 26]
 | timestep_increase_limit | | `float` | percent |
 | relative_viscous_timescale | | `float` | |
 | minimum_radiation_temperature | | `float` | K |
-| zero_over_temperature_interval | | `float` | |
+| zero_over_temperature_interval | Temperature interval over which the chromospheric radiative losses are set to zero | `float` | K |
 | minimum_temperature | | `float` | K |
-| maximum_optically_thin_density | | `float` | $\mathrm{cm}^{-3}$|
+| maximum_optically_thin_density | | `float` | $\mathrm{cm}^{-3}$ |
 
 [B09]: http://adsabs.harvard.edu/abs/2009A%26A...502..409B
 
@@ -330,8 +331,8 @@ elements = ['hydrogen', 'He', 'c', 26]
 | minimum_cells | | `int` | |
 | maximum_cells | | `int` | |
 | maximum_refinement_level | How much to refine adaptive grid; see [BC13] | `int` | |
-| minimum_delta_s | | `float` | |
-| maximum_variation | | `float` | |
+| minimum_delta_s | Smallest allowed grid cell width in the initial setup | `float` | cm |
+| maximum_variation | | `float` | percent |
 | refine_on_density | | `bool` | |
 | refine_on_electron_energy | | `bool` | |
 | refine_on_hydrogen_energy | | `bool` | |

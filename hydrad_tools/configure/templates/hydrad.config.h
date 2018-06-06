@@ -21,7 +21,7 @@
 #include "../../Heating_Model/source/config.h"
 #include "../../Radiation_Model/source/config.h"
 #define HEAT_FLUX_LIMITING_COEFFICIENT {{ general.heat_flux_limiting_coefficient }}
-#define TIME_STEP_LIMIT {{ general.heat_flux_timestep_limit }}
+#define TIME_STEP_LIMIT {{ general.heat_flux_timestep_limit | units_filter('s') }}
 {% if general.use_kinetic_model %}#define USE_KINETIC_MODEL{% endif %}
 #include "collisions.h"
 {% if general.tabulated_gravity_file -%}
@@ -45,7 +45,7 @@
 #define RELATIVE_VISCOUS_TIME_SCALE {{ solver.relative_viscous_timescale }}
 {%- endif %}
 #define MINIMUM_RADIATION_TEMPERATURE {{ solver.minimum_radiation_temperature | units_filter('K') }}
-#define ZERO_OVER_TEMPERATURE_INTERVAL {{ solver.zero_over_temperature_interval }}
+#define ZERO_OVER_TEMPERATURE_INTERVAL {{ solver.zero_over_temperature_interval | units_filter('K') }}
 #define MINIMUM_TEMPERATURE {{ solver.minimum_temperature | units_filter('K') }}
 // **** End of Solver ****
 
