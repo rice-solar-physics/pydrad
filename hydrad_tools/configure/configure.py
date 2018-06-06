@@ -106,7 +106,7 @@ class Configure(object):
         ]
         if self.config['initial_conditions']['use_tabulated_gravity']:
             self.config['general']['tabulated_gravity_file'] = 'tabulated.gravity'
-            files += ('tabulated.gravity', self.tabulated_gravity)
+            files += [('tabulated.gravity', self.tabulated_gravity)]
         for filename, filestring in files:
             with open(os.path.join(root_dir, filename), 'w') as f:
                 f.write(filestring)
@@ -159,10 +159,10 @@ class Configure(object):
         ]
         if 'tabulated_gravity_profile' in self.config['general']:
             self.config['general']['tabulated_gravity_file'] = 'tabulated.gravity'
-            files += ('tabulated.gravity', self.tabulated_gravity)
+            files += [('tabulated.gravity', self.tabulated_gravity)]
         if 'tabulated_cross_section_profile' in self.config['general']:
             self.config['general']['tabulated_cross_section_file'] = 'tabulated.cross_section'
-            files += ('tabulated.cross_section', self.tabulated_cross_section)
+            files += [('tabulated.cross_section', self.tabulated_cross_section)]
         for filename, filestring in files:
             with open(os.path.join(root_dir, filename), 'w') as f:
                 f.write(filestring)
