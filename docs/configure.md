@@ -234,6 +234,7 @@ The tables below give an exhaustive list of all of the different HYDRAD configur
 | footpoint_height | Length of the chromosphere | `float` | cm |
 | tabulated_gravity_profile | Coefficients (in order of increasing exponent) for 6th order polynomial fit to the field-aligned gravitational acceleration | array-like | |
 | tabulated_cross_section_profile | Coefficients (in order of increasing exponent) for 6th order polynomial fit to the field-aligned gravitational acceleration | array-like | |
+| logging_frequency | Frequency (in number of timesteps) that progress is printed to the screen | `int` | |
 | write_file_physical | Toggle writing `.phy` solutions file | `bool` | |
 | write_file_ion_populations | Toggle writing `.ine` file | `bool` | |
 | write_file_hydrogen_level_populations | Toggle writing `.Hstate` file | `bool` | |
