@@ -13,6 +13,7 @@ initial_conditions:
   isothermal: False
   heating_range_step_size: 0.001
   heating_range_fine_tuning: 10000.0
+  use_tabulated_gravity: False
 radiation:
   decouple_ionization_state_solver: False
   density_dependent_rates: False
@@ -32,15 +33,12 @@ solver:
   epsilon_d: 0.1
   epsilon_r: 1.8649415311920072
   relative_viscous_timescale: 
-  zero_over_temperature_interval: 5.0e+2
 grid:
   adapt: True
   adapt_every_n_time_steps: 10
   minimum_cells: 150
   maximum_cells: 30000
   maximum_refinement_level: 12
-  minimum_delta_s: 1.0
-  maximum_variation: 1.10
   refine_on_density: True
   refine_on_electron_energy: True
   refine_on_hydrogen_energy: True

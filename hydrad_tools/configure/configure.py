@@ -104,6 +104,9 @@ class Configure(object):
             ('Radiation_Model/config/elements_eq.cfg', self.radiation_equilibrium_cfg),
             ('Radiation_Model/config/elements_neq.cfg', self.radiation_nonequilibrium_cfg),
         ]
+        if self.config['initial_conditions']['use_tabulated_gravity']:
+            self.config['general']['tabulated_gravity_file'] = 'tabulated.gravity'
+            files += [('tabulated.gravity', self.tabulated_gravity)]
         for filename, filestring in files:
             with open(os.path.join(root_dir, filename), 'w') as f:
                 f.write(filestring)
@@ -154,6 +157,12 @@ class Configure(object):
             ('HYDRAD/source/collisions.h', self.collisions_header),
             ('HYDRAD/config/HYDRAD.cfg', self.hydrad_cfg),
         ]
+        if 'tabulated_gravity_profile' in self.config['general']:
+            self.config['general']['tabulated_gravity_file'] = 'tabulated.gravity'
+            files += [('tabulated.gravity', self.tabulated_gravity)]
+        if 'tabulated_cross_section_profile' in self.config['general']:
+            self.config['general']['tabulated_cross_section_file'] = 'tabulated.cross_section'
+            files += [('tabulated.cross_section', self.tabulated_cross_section)]
         for filename, filestring in files:
             with open(os.path.join(root_dir, filename), 'w') as f:
                 f.write(filestring)
@@ -260,3 +269,21 @@ class Configure(object):
         Collisions header file, `HYDRAD/source/collisions.h`
         """
         return self.env.get_template('collisions.h').render(date=self.date, **self.config)
+
+    @property
+    def tabulated_cross_section(self):
+        """
+        Sixth-order polynomial fit coefficients for computing flux tube expansion
+        """
+        return self.env.get_template('coefficients.cfg').render(
+            date=self.date,
+            coefficients=self.config['general']['tabulated_cross_section_profile'])
+
+    @property
+    def tabulated_gravity(self):
+        """
+        Sixth-order polynomial fit coefficients for computing gravitational acceleration
+        """
+        return self.env.get_template('coefficients.cfg').render(
+            date=self.date,
+            coefficients=self.config['general']['tabulated_gravity_profile'])

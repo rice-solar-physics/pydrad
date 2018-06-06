@@ -16,7 +16,7 @@
 {% if initial_conditions.isothermal -%}
 #define ISOTHERMAL
 {%- endif %}
-{% if general.tabulated_gravity_file -%}
+{% if initial_conditions.use_tabulated_gravity -%}
 #define USE_TABULATED_GRAVITY
 #define TABULATED_GRAVITY_FILE {{ general.tabulated_gravity_file }}
 {%- endif %}
@@ -29,5 +29,5 @@
 #define MIN_CELLS {{ grid.minimum_cells }}
 #define MAX_CELLS {{ grid.maximum_cells }}
 #define MAX_REFINEMENT_LEVEL {{ grid.maximum_refinement_level }}
-#define MIN_DS {{ grid.minimum_delta_s }}
-#define MAX_VARIATION {{ grid.maximum_variation }}
+#define MIN_DS {{ grid.minimum_delta_s | units_filter('cm') }}
+#define MAX_VARIATION {{ grid.maximum_variation | units_filter('%') / 100.0 + 1.0}}
