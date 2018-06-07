@@ -82,6 +82,7 @@ class Configure(object):
                 copy_tree(base_path, tmpdir)
             self.setup_initial_conditions(tmpdir, execute=True, verbose=verbose)
             self.setup_hydrad(tmpdir, verbose=verbose)
+            self.save_config(os.path.join(tmpdir, 'hydrad_tools_config.asdf'))
             if name is None:
                 name = f'hydrad_{self.date}'
             output_dir = os.path.join(output_path, name)
