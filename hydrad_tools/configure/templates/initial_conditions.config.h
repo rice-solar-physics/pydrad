@@ -30,4 +30,4 @@
 #define MAX_CELLS {{ grid.maximum_cells }}
 #define MAX_REFINEMENT_LEVEL {{ grid.maximum_refinement_level }}
 #define MIN_DS {{ grid.minimum_delta_s | units_filter('cm') }}
-#define MAX_VARIATION {{ grid.maximum_variation | units_filter('%') / 100.0 + 1.0}}
+#define MAX_VARIATION {{ grid.maximum_variation + 1.0}}
