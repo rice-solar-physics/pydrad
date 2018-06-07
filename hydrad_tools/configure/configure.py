@@ -13,7 +13,7 @@ from distutils.dir_util import copy_tree
 import numpy as np
 import astropy.units as u
 from jinja2 import Environment, PackageLoader
-import yaml
+import asdf
 try:
     import git
 except ImportError:
@@ -46,24 +46,23 @@ class Configure(object):
     @staticmethod
     def load_config(filename):
         """
-        Load a base configuration from a YAML file
+        Load a base configuration from as an ASDF file
 
         # Parameters
-        filename (`str`): Path to YAML configuration file
+        filename (`str`): Path to ASDF configuration file
         """
-        with open(filename, 'r') as f:
-            config = yaml.load(f)
+        with asdf.open(filename) as af:
+            config = af.tree
         return config
 
     def save_config(self, filename):
         """
-        Save the simulation configuration as a YAML file
+        Save the simulation configuration as an ASDF file
 
         # Parameters
         filename (`str`): Path to YAML configuration file
         """
-        with open(filename, 'w') as f:
-            yaml.dump(self.config, f)
+        asdf.AsdfFile(self.config).write_to(filename)
     
     def setup_simulation(self, output_path, base_path=None, name=None, verbose=True):
         """
