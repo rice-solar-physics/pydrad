@@ -179,44 +179,130 @@ c.setup_simulation('/path/to/simulation/dir', base_path='/path/to/clean/HYDRAD',
 This will create all of the needed input files from the options in `config`, compile the initial conditions code, run `Initial_Conditions.exe`, compile the main HYDRAD, and copy it all to the directory `/path/to/simulation/dir/new_hydrad_sim`.
 
 ## Setting a Default Configuration
-HYDRAD requires a lot of configuration options and it can be annoying to have put them all in a configuration file. To avoid this, you can load a default configuration from a YAML file, a human-readable, structured plain text file.
+HYDRAD requires a lot of configuration options and it can be annoying to have put them all in a configuration file. To avoid this, you can load a default configuration from an [ASDF file](https://asdf.readthedocs.io), a human-readable, structured plain text file in the YAML format.
 
-These YAML files are structured just like the config directory and can be easily read and written. As an example, a configuration file might look like, 
+These ASDF files are structured just like the config directory and can be easily read and written. As an example, a configuration file might look like, 
 
 ```YAML
+#ASDF 1.0.0
+#ASDF_STANDARD 1.2.0
+%YAML 1.1
+%TAG ! tag:stsci.edu:asdf/
+--- !core/asdf-1.1.0
+asdf_library: !core/software-1.0.0 {author: Space Telescope Science Institute, homepage: 'http://github.com/spacetelescope/asdf',
+  name: asdf, version: 2.0.1}
+history:
+  extensions:
+  - !core/extension_metadata-1.0.0
+    extension_class: asdf.extension.BuiltinExtension
+    software: {name: asdf, version: 2.0.1}
+  - !core/extension_metadata-1.0.0
+    extension_class: astropy.io.misc.asdf.extension.AstropyAsdfExtension
+    software: {name: astropy, version: 3.0.1}
 general:
-  write_file_physical: true
-  write_file_ion_populations: False
+  footpoint_height: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm', value: 500000000.0}
+  force_single_fluid: false
+  heat_flux_limiting_coefficient: 0.16666666666666666
+  heat_flux_timestep_limit: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's', value: 1.0e-10}
   logging_frequency: 1000
-  use_kinetic_model: False
-initial_conditions:
-  isothermal: False
-radiation:
-  decouple_ionization_state_solver: False
-  density_dependent_rates: False
+  loop_inclination: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'deg', value: 0.0}
+  loop_length: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'Mm', value: 80.0}
+  minimum_collisional_coupling_timescale: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's',
+    value: 0.01}
+  output_interval: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's', value: 5.0}
+  total_time: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's', value: 50000.0}
+  use_kinetic_model: false
+  write_file_equation_terms: false
+  write_file_hydrogen_level_populations: false
+  write_file_ion_populations: false
+  write_file_physical: true
+  write_file_timescales: false
+grid:
+  adapt: true
+  adapt_every_n_time_steps: 10
+  enforce_conservation: false
+  linear_restriction: true
+  maximum_cells: 30000
+  maximum_fractional_difference: 0.2
+  maximum_refinement_level: 12
+  maximum_variation: 0.1
+  minimum_cells: 150
+  minimum_delta_s: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm', value: 1.0}
+  minimum_fractional_difference: 0.1
+  refine_on_density: true
+  refine_on_electron_energy: true
+  refine_on_hydrogen_energy: false
 heating:
-  beam_heating: False
-  alfven_wave_heating: False
+  alfven_wave_heating: false
+  background_heating: false
+  beam_heating: false
+  events:
+  - decay_duration: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's', value: 100.0}
+    location: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm', value: 4000000000.0}
+    rate: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm-3 erg s-1', value: 0.1}
+    rise_duration: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's', value: 100.0}
+    scale_height: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm', value: 1.0e+300}
+    time_start: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's', value: 0.0}
+    total_duration: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's', value: 200.0}
+  heat_electrons: true
+initial_conditions:
+  footpoint_density: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm-3', value: 100000000000.0}
+  footpoint_temperature: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'K', value: 20000.0}
+  heating_location: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'Mm', value: 40.0}
+  heating_range_fine_tuning: 10000.0
+  heating_range_lower_bound: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm-3 erg
+      s-1', value: 1.0e-08}
+  heating_range_step_size: 0.01
+  heating_range_upper_bound: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm-3 erg
+      s-1', value: 100.0}
+  heating_scale_height: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm', value: 1.0e+300}
+  isothermal: false
+  use_tabulated_gravity: false
+radiation:
+  abundance_dataset: asplund
+  decouple_ionization_state_solver: false
+  density_dependent_rates: false
+  elements_equilibrium: [Fe]
+  elements_nonequilibrium: []
+  emissivity_dataset: chianti_v7
+  nlte_chromosphere: false
+  optically_thick_radiation: false
+  ranges_dataset: ranges
+  rates_dataset: chianti_v7
+  use_power_law_radiative_losses: true
 solver:
+  cutoff_ion_fraction: 1.0e-06
   epsilon: 0.01
-  safety_radiation: 1.0
-  cutoff_ion_fraction: 1.0e-6
   epsilon_d: 0.1
   epsilon_r: 1.8649415311920072
-grid:
-  adapt: True
-  minimum_cells: 150
-  maximum_cells: 30000
-  maximum_refinement_level: 12
-  enforce_conservation: True
+  maximum_optically_thin_density: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm-3',
+    value: 1000000000000.0}
+  minimum_radiation_temperature: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'K',
+    value: 20000.0}
+  minimum_temperature: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'K', value: 10000.0}
+  safety_advection: 1.0
+  safety_atomic: 1.0
+  safety_conduction: 1.0
+  safety_radiation: 0.1
+  safety_viscosity: 1.0
+  timestep_increase_limit: 0.05
+  zero_over_temperature_interval: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'K',
+    value: 500.0}
+...
 ```
 
 To load a configuration from a file,
 
 ```python
-config = configure.Configure.load_config('/path/to/config/defaults.yml')
+config = configure.Configure.load_config('/path/to/config/defaults.asdf')
 # Update configuration options in config
 c = configure.Configure(config)
+```
+
+And to save the configuration to disk,
+
+```python
+c.save_config('/path/to/config/my_config.asdf')
 ```
 
 An example default configuration file can be found in the root of the [hydrad_tools repository](https://github.com/wtbarnes/hydrad_tools).
@@ -315,7 +401,7 @@ elements = ['hydrogen', 'He', 'c', 26]
 | cutoff_ion_fraction | Population fractions below this value are set to 0 | `float` | |
 | epsilon_d | Safety factor for ion population solver; see [B09] | `float` | |
 | epsilon_r | Safety factor for ion population solver; see [B09] | `float` | |
-| timestep_increase_limit | | `float` | percent |
+| timestep_increase_limit | Allowed fractional difference (between 0 and 1) from 1 timestep to next | `float` | |
 | relative_viscous_timescale | | `float` | |
 | minimum_radiation_temperature | | `float` | K |
 | zero_over_temperature_interval | Temperature interval over which the chromospheric radiative losses are set to zero | `float` | K |
@@ -333,11 +419,11 @@ elements = ['hydrogen', 'He', 'c', 26]
 | maximum_cells | | `int` | |
 | maximum_refinement_level | How much to refine adaptive grid; see [BC13] | `int` | |
 | minimum_delta_s | Smallest allowed grid cell width in the initial setup | `float` | cm |
-| maximum_variation | | `float` | percent |
+| maximum_variation | | `float` | |
 | refine_on_density | | `bool` | |
 | refine_on_electron_energy | | `bool` | |
 | refine_on_hydrogen_energy | | `bool` | |
-| minimum_fractional_difference | | `float` | percent |
-| maximum_fractional_difference | | `float` | percent |
+| minimum_fractional_difference | Minimum allowed difference (between 0 and 1) between adjacent cells | `float` | |
+| maximum_fractional_difference | Maximum allowed difference (between 0 and 1) between adjacent cells | `float` | |
 | linear_restriction | | `bool` | |
 | enforce_conservation | | `bool` | |
