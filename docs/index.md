@@ -6,7 +6,7 @@ Python 3.6+ and the following dependencies are required to run this package:
 
 * numpy
 * jinja2
-* PyYaml
+* asdf (pip only)
 * astropy
 * matplotlib
 * plasmapy (pip only)

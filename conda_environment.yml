@@ -7,8 +7,8 @@ dependencies:
 - scipy
 - matplotlib
 - astropy
-- PyYaml
 - Jinja2
 - pip:
   - plasmapy
+  - asdf
   
