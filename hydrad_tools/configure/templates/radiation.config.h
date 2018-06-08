@@ -26,9 +26,9 @@
 // **** End of Physics ****
 
 // **** Solver ****
-#define MAX_OPTICALLY_THIN_DENSITY {{ solver.maximum_optically_thin_density | units_filter('cm^-3') }}
-#define SAFETY_ATOMIC {{ solver.safety_atomic }}
-#define CUTOFF_ION_FRACTION {{ solver.cutoff_ion_fraction }}
-#define EPSILON_D {{ solver.epsilon_d }}
-#define EPSILON_R {{ solver.epsilon_r }}
+#define MAX_OPTICALLY_THIN_DENSITY {{ solver.maximum_optically_thin_density | is_required | units_filter('cm^-3') }}
+#define SAFETY_ATOMIC {{ solver.safety_atomic | is_required }}
+#define CUTOFF_ION_FRACTION {{ solver.cutoff_ion_fraction | is_required }}
+#define EPSILON_D {{ solver.epsilon_d | is_required }}
+#define EPSILON_R {{ solver.epsilon_r | is_required }}
 // **** End of Solver ****

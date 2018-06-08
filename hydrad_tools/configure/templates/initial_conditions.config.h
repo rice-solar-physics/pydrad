@@ -22,12 +22,12 @@
 {%- endif %}
 
 // **** Solver ****
-#define EPSILON {{ solver.epsilon }}
+#define EPSILON {{ solver.epsilon | is_required }}
 
 // **** Grid ****
 {% if grid.adapt -%}#define ADAPT{%- endif %}
-#define MIN_CELLS {{ grid.minimum_cells }}
-#define MAX_CELLS {{ grid.maximum_cells }}
-#define MAX_REFINEMENT_LEVEL {{ grid.maximum_refinement_level }}
-#define MIN_DS {{ grid.minimum_delta_s | units_filter('cm') }}
-#define MAX_VARIATION {{ grid.maximum_variation + 1.0}}
+#define MIN_CELLS {{ grid.minimum_cells | is_required }}
+#define MAX_CELLS {{ grid.maximum_cells | is_required }}
+#define MAX_REFINEMENT_LEVEL {{ grid.maximum_refinement_level | is_required }}
+#define MIN_DS {{ grid.minimum_delta_s | is_required | units_filter('cm') }}
+#define MAX_VARIATION {{ grid.maximum_variation | is_required + 1.0}}

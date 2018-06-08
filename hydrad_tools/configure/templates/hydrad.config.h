@@ -14,14 +14,14 @@
 {% if general.write_file_hydrogen_level_populations %}#define WRITE_FILE_HSTATE{% endif %}
 {% if general.write_file_timescales %}#define WRITE_FILE_SCALES{% endif %}
 {% if general.write_file_equation_terms %}#define WRITE_FILE_TERMS{% endif %}
-#define OUTPUT_EVERY_N_TIME_STEPS {{ general.logging_frequency }}
+#define OUTPUT_EVERY_N_TIME_STEPS {{ general.logging_frequency | is_required }}
 // **** End of Output ****
 
 // **** Physics ****
 #include "../../Heating_Model/source/config.h"
 #include "../../Radiation_Model/source/config.h"
-#define HEAT_FLUX_LIMITING_COEFFICIENT {{ general.heat_flux_limiting_coefficient }}
-#define TIME_STEP_LIMIT {{ general.heat_flux_timestep_limit | units_filter('s') }}
+#define HEAT_FLUX_LIMITING_COEFFICIENT {{ general.heat_flux_limiting_coefficient | is_required }}
+#define TIME_STEP_LIMIT {{ general.heat_flux_timestep_limit | is_required | units_filter('s') }}
 {% if general.use_kinetic_model %}#define USE_KINETIC_MODEL{% endif %}
 #include "collisions.h"
 {% if general.tabulated_gravity_file -%}
@@ -35,30 +35,30 @@
 // **** End of Physics ****
 
 // **** Solver ****
-#define SAFETY_RADIATION {{ solver.safety_radiation }}
-#define SAFETY_CONDUCTION {{ solver.safety_conduction }}
-#define SAFETY_ADVECTION {{ solver.safety_advection }}
-#define SAFETY_VISCOSITY {{ solver.safety_viscosity }}
-#define TIME_STEP_INCREASE_LIMIT {{ solver.timestep_increase_limit + 1.0 }}
+#define SAFETY_RADIATION {{ solver.safety_radiation | is_required}}
+#define SAFETY_CONDUCTION {{ solver.safety_conduction | is_required}}
+#define SAFETY_ADVECTION {{ solver.safety_advection | is_required}}
+#define SAFETY_VISCOSITY {{ solver.safety_viscosity | is_required}}
+#define TIME_STEP_INCREASE_LIMIT {{ solver.timestep_increase_limit | is_required + 1.0 }}
 {% if solver.relative_viscous_timescale -%}
 #define NUMERICAL_VISCOSITY
 #define RELATIVE_VISCOUS_TIME_SCALE {{ solver.relative_viscous_timescale }}
 {%- endif %}
-#define MINIMUM_RADIATION_TEMPERATURE {{ solver.minimum_radiation_temperature | units_filter('K') }}
-#define ZERO_OVER_TEMPERATURE_INTERVAL {{ solver.zero_over_temperature_interval | units_filter('K') }}
-#define MINIMUM_TEMPERATURE {{ solver.minimum_temperature | units_filter('K') }}
+#define MINIMUM_RADIATION_TEMPERATURE {{ solver.minimum_radiation_temperature | is_required | units_filter('K') }}
+#define ZERO_OVER_TEMPERATURE_INTERVAL {{ solver.zero_over_temperature_interval | is_required | units_filter('K') }}
+#define MINIMUM_TEMPERATURE {{ solver.minimum_temperature | is_required | units_filter('K') }}
 // **** End of Solver ****
 
 // **** Grid ****
-#define MAX_REFINEMENT_LEVEL {{ grid.maximum_refinement_level }}
+#define MAX_REFINEMENT_LEVEL {{ grid.maximum_refinement_level | is_required }}
 {% if grid.adapt -%}
 #define ADAPT
-#define ADAPT_EVERY_N_TIME_STEPS {{ grid.adapt_every_n_time_steps }}
+#define ADAPT_EVERY_N_TIME_STEPS {{ grid.adapt_every_n_time_steps | is_required }}
 {% if grid.refine_on_density %}#define REFINE_ON_DENSITY{% endif %}
 {% if grid.refine_on_electron_energy %}#define REFINE_ON_ELECTRON_ENERGY{% endif %}
 {% if grid.refine_on_hydrogen_energy %}#define REFINE_ON_HYDROGEN_ENERGY{% endif %}
-#define MIN_FRAC_DIFF {{ grid.minimum_fractional_difference }}
-#define MAX_FRAC_DIFF {{ grid.maximum_fractional_difference }}
+#define MIN_FRAC_DIFF {{ grid.minimum_fractional_difference | is_required }}
+#define MAX_FRAC_DIFF {{ grid.maximum_fractional_difference | is_required }}
 {% if grid.linear_restriction %}#define LINEAR_RESTRICTION{% endif %}
 {% if grid.enforce_conservation %}#define ENFORCE_CONSERVATION{% endif %}
 {%- endif %}
