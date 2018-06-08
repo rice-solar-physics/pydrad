@@ -5,8 +5,10 @@ import numpy as np
 import astropy.units as u
 import plasmapy.atomic
 
+from .util import MissingParameter
+
 __all__ = ['units_filter', 'log10_filter', 'get_atomic_symbol', 'get_atomic_number',
-           'sort_elements']
+           'sort_elements', 'is_required']
 
 
 def units_filter(quantity, unit):
@@ -36,3 +38,10 @@ def get_atomic_number(element):
 
 def sort_elements(elements):
     return sorted(elements, key=get_atomic_number)
+
+
+def is_required(value):
+    if value is None:
+        raise MissingParameter('Parameter required for configuration')
+    else:
+        return value

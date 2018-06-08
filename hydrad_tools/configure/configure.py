@@ -42,6 +42,7 @@ class Configure(object):
         self.env.filters['get_atomic_symbol'] = filters.get_atomic_symbol
         self.env.filters['get_atomic_number'] = filters.get_atomic_number
         self.env.filters['sort_elements'] = filters.sort_elements
+        self.env.filters['is_required'] = filters.is_required
 
     @staticmethod
     def load_config(filename):
