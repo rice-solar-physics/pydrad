@@ -7,6 +7,8 @@ import glob
 import numpy as np
 import astropy.units as u
 
+from hydrad_tools.visualize import plot_profile, plot_strand, animate_strand
+
 __all__ = ['Strand', 'Profile']
 
 
@@ -48,6 +50,18 @@ class Strand(object):
             return Profile(os.path.join(self.hydrad_root, 'Results'), index)
         else:
             raise IndexError
+
+    def peek(self, start=0, stop=None, step=100, **kwargs):
+        """
+        Take a quick look at all profiles for the run on a single plot
+        """
+        plot_strand(self, start=start, stop=stop, step=step, **kwargs)
+
+    def animate(self, start=0, stop=None, step=100, **kwargs):
+        """
+        Simple animation of time-dependent loop profiles
+        """
+        return animate_strand(self, start=start, stop=step, step=step, **kwargs)
 
 
 class Profile(object):
@@ -117,3 +131,9 @@ class Profile(object):
         Velocity $v$ as a function of $s$
         """
         return self.results[:, 1] * u.cm / u.s
+
+    def peek(self, **kwargs):
+        """
+        Quick look at profiles at at given timestep
+        """
+        plot_profile(self, **kwargs)
