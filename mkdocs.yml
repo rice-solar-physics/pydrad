@@ -17,7 +17,7 @@ pages:
 - API:
   - hydrad_tools.configure: api/configure.md
   - hydrad_tools.parse: api/parse.md
-  - hydrad_tools.plot: api/plot.md
+  - hydrad_tools.visualize: api/visualize.md
 
 # Appearance
 theme:

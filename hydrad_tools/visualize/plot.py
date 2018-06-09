@@ -6,19 +6,36 @@ import astropy.units as u
 import matplotlib.pyplot as plt
 import matplotlib.colors
 
-__all__ = ['plot_profile', 'plot_strand']
+__all__ = ['plot_strand']
 
 
-def plot_profile(profile, **kwargs):
+def plot_strand(strand, start=0, stop=None, step=1, **kwargs):
     """
-    Plot hydrodynamic quantities at a single timestep
+    Plot hydrodynamic quantities at multiple timesteps
+
+    # Parameters
+    strand (#hydrad_tools.parse.Strand): Loop strand object
+    start (`int`): Starting time index, optional
+    stop (`int`): Final time index, optional
+    step (`int`): Number of steps between successive timesteps
+    limits (`dict`): Set axes limits for hydrodynamic quantities, optional
+    plot_kwargs (`dict`): Any keyword arguments used matplotlib.plot, optional
+    figsize (`tuple`): Width and height of figure, optional
     """
+    if stop is None:
+        stop = strand.time.shape[0] + 1
+    time = strand.time[start:stop:step]
     limits = kwargs.get('limits', {})
     if 'limits' in kwargs:
         del kwargs['limits']
     plot_kwargs = kwargs.get('plot_kwargs', {})
-    fig, axes = _setup_figure(profile, limits, **kwargs)
-    _ = _plot_profile(profile, axes, **plot_kwargs)
+    fig, axes = _setup_figure(strand[0], limits, **kwargs)
+    colors = matplotlib.colors.LinearSegmentedColormap.from_list(
+        '', plt.get_cmap(kwargs.get('cmap', 'viridis')).colors, N=time.shape[0])
+    # NOTE: once strand indexing is fixed, we can index it directly
+    for i, _ in enumerate(time):
+        plot_kwargs['color'] = colors(i)
+        _ = _plot_profile(strand[i], axes, **plot_kwargs)
     plt.show()
 
 
@@ -57,24 +74,3 @@ def _plot_profile(profile, axes, **kwargs):
     line3b, = axes[1, 0].plot(profile.coordinate.to(u.cm), profile.ion_pressure, **kwargs, ls='--')
     line4, = axes[1, 1].plot(profile.coordinate.to(u.cm), profile.velocity, **kwargs)
     return line1a, line1b, line2a, line2b, line3a, line3b, line4
-
-
-def plot_strand(strand, start=0, stop=None, step=1, **kwargs):
-    """
-    Plot hydrodynamic quantities at multiple timesteps
-    """
-    if stop is None:
-        stop = strand.time.shape[0] + 1
-    time = strand.time[start:stop:step]
-    limits = kwargs.get('limits', {})
-    if 'limits' in kwargs:
-        del kwargs['limits']
-    plot_kwargs = kwargs.get('plot_kwargs', {})
-    fig, axes = _setup_figure(strand[0], limits, **kwargs)
-    colors = matplotlib.colors.LinearSegmentedColormap.from_list(
-        '', plt.get_cmap(kwargs.get('cmap', 'viridis')).colors, N=time.shape[0])
-    # NOTE: once strand indexing is fixed, we can index it directly
-    for i, _ in enumerate(time):
-        plot_kwargs['color'] = colors(i)
-        _ = _plot_profile(strand[i], axes, **plot_kwargs)
-    plt.show()

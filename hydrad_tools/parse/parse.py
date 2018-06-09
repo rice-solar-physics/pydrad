@@ -7,7 +7,7 @@ import glob
 import numpy as np
 import astropy.units as u
 
-from hydrad_tools.visualize import plot_profile, plot_strand, animate_strand
+from hydrad_tools.visualize import plot_strand, animate_strand
 
 __all__ = ['Strand', 'Profile']
 
@@ -53,13 +53,15 @@ class Strand(object):
 
     def peek(self, start=0, stop=None, step=100, **kwargs):
         """
-        Take a quick look at all profiles for the run on a single plot
+        Take a quick look at all profiles for the run on a single plot. Takes
+        the same keyword arguments as #hydrad_tools.visualize.plot_strand
         """
         plot_strand(self, start=start, stop=stop, step=step, **kwargs)
 
     def animate(self, start=0, stop=None, step=100, **kwargs):
         """
-        Simple animation of time-dependent loop profiles
+        Simple animation of time-dependent loop profiles. Takes the same keyword 
+        arguments as #hydrad_tools.visualize.animate_strand
         """
         return animate_strand(self, start=start, stop=step, step=step, **kwargs)
 
@@ -74,6 +76,7 @@ class Profile(object):
     """
 
     def __init__(self, results_dir, index):
+        self._index = index
         self.results = np.loadtxt(os.path.join(results_dir, f'profile{index:d}.phy'))
 
     @property
@@ -134,6 +137,6 @@ class Profile(object):
 
     def peek(self, **kwargs):
         """
-        Quick look at profiles at at given timestep
+        Quick look at profiles at at given timestep.
         """
-        plot_profile(self, **kwargs)
+        plot_strand(self, start=self.index, stop=self.index+1, step=1, **kwargs)
