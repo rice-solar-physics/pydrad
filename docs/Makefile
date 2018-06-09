@@ -9,8 +9,7 @@ parse: api_dir
 	pydocmd simple hydrad_tools.parse++ hydrad_tools.parse.Strand++ hydrad_tools.parse.Profile++ > $(API_DIR)/parse.md
 
 plot: api_dir
-	echo "TODO: plot docs"
-	touch $(API_DIR)/plot.md
+	pydocmd simple hydrad_tools.visualize+ hydrad_tools.visualize.plot_strand hydrad_tools.visualize.animate_strand > $(API_DIR)/visualize.md
 
 api_dir:
 	mkdir -p $(API_DIR)
