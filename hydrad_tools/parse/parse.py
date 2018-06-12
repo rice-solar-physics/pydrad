@@ -23,18 +23,22 @@ class Strand(object):
     def __init__(self, hydrad_root, **kwargs):
         self.hydrad_root = hydrad_root
         self._profile_kwargs = kwargs
+        self._time = self._read_time()
 
-    @property
-    def time(self):
-        """
-        Simulation time
-        """
+    def _read_time(self):
         amr_files = glob.glob(os.path.join(self.hydrad_root, 'Results/profile*.amr'))
         time = []
         for af in amr_files:
             with open(af, 'r') as f:
                 time.append(float(f.readline()))
         return sorted(time) * u.s
+
+    @property
+    def time(self):
+        """
+        Simulation time
+        """
+        return self._time
 
     @property
     def loop_length(self):
