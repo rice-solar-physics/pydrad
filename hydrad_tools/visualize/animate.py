@@ -24,10 +24,10 @@ def animate_strand(strand, start=0, stop=None, step=1, **kwargs):
     if 'limits' in kwargs:
         del kwargs['limits']
     # Initialize figure
-    fig, axes = _setup_figure(strand[0], limits, **kwargs)
+    fig, axes = _setup_figure(strand[start], limits, **kwargs)
     if 'color' not in plot_kwargs:
         plot_kwargs['color'] = 'C0'
-    l1a, l1b, l2a, l2b, l3a, l3b, l4 = _plot_profile(strand[0], axes, **plot_kwargs)
+    l1a, l1b, l2a, l2b, l3a, l3b, l4 = _plot_profile(strand[start], axes, **plot_kwargs)
     # Define updater
     def update_plot(i):
         profile = strand[i]
