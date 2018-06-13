@@ -10,14 +10,20 @@ jobs:
       - python setup.py install
   - stage: test
     script:
+    - git clone --depth 1 git://github.com/astropy/ci-helpers.git
+    - source ci-helpers/travis/setup_conda.sh
     - python setup.py install
     - pytest
   - script:
+    - git clone --depth 1 git://github.com/astropy/ci-helpers.git
+    - source ci-helpers/travis/setup_conda.sh
     - python setup.py install
     - cd docs && make && cd ..
     - mkdocs build -d site
   - stage: deploy
     script:
+    - git clone --depth 1 git://github.com/astropy/ci-helpers.git
+    - source ci-helpers/travis/setup_conda.sh
     - python setup.py install
     - cd docs && make && cd ..
     - set -e 
@@ -28,11 +34,7 @@ stages:
 - install
 - test
 - deploy
-  #if: type != pull_request
-
-install:
-- git clone --depth 1 git://github.com/astropy/ci-helpers.git
-- source ci-helpers/travis/setup_conda.sh
+  if: type NOT pull_request
 
 env:
   global:
