@@ -21,6 +21,7 @@ jobs:
     - cd docs && make && cd ..
     - mkdocs build -d site
   - stage: deploy
+    if: type NOT pull_request
     script:
     - git clone --depth 1 git://github.com/astropy/ci-helpers.git
     - source ci-helpers/travis/setup_conda.sh
@@ -34,7 +35,6 @@ stages:
 - install
 - test
 - deploy
-  if: type NOT pull_request
 
 env:
   global:
