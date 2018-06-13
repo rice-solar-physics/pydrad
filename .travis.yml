@@ -28,7 +28,7 @@ stages:
 - install
 - test
 - deploy
-  if: type != pull_request
+  #if: type != pull_request
 
 install:
 - git clone --depth 1 git://github.com/astropy/ci-helpers.git
