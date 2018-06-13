@@ -5,27 +5,15 @@ sudo: false
 
 jobs:
   include:
-  - stage: install
-    script:
-      - python setup.py install
   - stage: test
     script:
-    - git clone --depth 1 git://github.com/astropy/ci-helpers.git
-    - source ci-helpers/travis/setup_conda.sh
-    - python setup.py install
     - pytest
   - script:
-    - git clone --depth 1 git://github.com/astropy/ci-helpers.git
-    - source ci-helpers/travis/setup_conda.sh
-    - python setup.py install
     - cd docs && make && cd ..
     - mkdocs build -d site
   - stage: deploy
     if: type NOT pull_request
     script:
-    - git clone --depth 1 git://github.com/astropy/ci-helpers.git
-    - source ci-helpers/travis/setup_conda.sh
-    - python setup.py install
     - cd docs && make && cd ..
     - set -e 
     - mkdocs build -d site
@@ -35,6 +23,11 @@ stages:
 - install
 - test
 - deploy
+
+install:
+- git clone --depth 1 git://github.com/astropy/ci-helpers.git
+- source ci-helpers/travis/setup_conda.sh
+- python setup.py install
 
 env:
   global:
