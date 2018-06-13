@@ -12,7 +12,7 @@ jobs:
     - cd docs && make && cd ..
     - mkdocs build -d site
   - stage: deploy
-    if: type NOT pull_request
+    env: EVENT_TYPE='push cron'
     script:
     - cd docs && make && cd ..
     - set -e 
@@ -20,9 +20,9 @@ jobs:
     - doctr deploy . --built-docs site/
 
 stages:
-- install
-- test
-- deploy
+- name: install
+- name: test
+- name: deploy
 
 install:
 - git clone --depth 1 git://github.com/astropy/ci-helpers.git
