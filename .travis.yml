@@ -9,7 +9,7 @@ env:
     - NUMPY_VERSION=stable
     - ASTROPY_VERSION=stable
     - PIP_DEPENDENCIES='plasmapy asdf mkdocs mkdocs-material doctr pydoc-markdown==2.0.2'
-    - CONDA_DEPENDENCIES='scipy matplotlib Jinja2'
+    - CONDA_DEPENDENCIES='scipy matplotlib Jinja2 pytest'
     - EVENT_TYPE='pull_request push'
     - secure: "TxaoghfKEwqAL5s2XhWXhPj9lrVptH5Z89okaUqVlsnCCKP65RcJA0WnklRNKdRHL/imo9Ch9BUVySIbeBdnBvpq0zctWFkwLBMOm16nPK/v93C5CnJm/lUkeHF6ymhIB9A3zPLNCvElEQUGBOMaJGVQpyCvIBj4kGpI1wliQTwvn6ieCVeVxa6xbswZYxixGw3TL4Fk+/ZoGoXnMkp4OfHhttfmLRZ5lsVrOJO9DJvf/OWhvkxdHnDDZyo3ZbdyacdpLztgwRtsiteGUR0UOq5qTyH7D92GTYwPVLk0WTJpJUsnxp0LypwD4OywUAmM2f7PkDl2GmcGD1wcxxvyb1xeKT+wfh61Z92bRlkpJ7t4XVqUUhncJRSDa6XM2AQLwKP9XyTNvcl+r2onuD7oFNadPdSjeTfTqOVZPVLDyjIogK6Co6oe6Xg27qzvp93Caz+RLzXHVgeaavzIDXtJj14xVZhZh4vXQi6EigSZZL3A1VTXy+gpI0lTvt5/iHBmxs9B2t0uBdUZfiqQxvjXzZ6oVl8NJ/Uen1B8O8SzVjyvE2Ubxd//NJY0vPKoYOps/NYtL2vMCTsya/MrOtUrJVwJRIMPAr1fzrpx9d38a/mlcbx0WKZcst6ClLziQHauAaNKpbYOW9gjV/7Iherj8BWJfAV5v834zSRVcCWC+wk="
 
@@ -17,11 +17,29 @@ install:
 - git clone --depth 1 git://github.com/astropy/ci-helpers.git
 - source ci-helpers/travis/setup_conda.sh
 
-before_script:
-- python setup.py install
-- cd docs && make && cd ..
+jobs:
+  include:
+    - stage: install
+      script:
+        - python setup.py install
+    - stage: test
+      script:
+        - python setup.py install
+        - pytest
+    - script:
+        - python setup.py install
+        - cd docs && make && cd ..
+        - mkdocs build -d site
+    - stage: deploy
+      script:
+        - python setup.py install
+        - cd docs && make && cd ..
+        - set -e 
+        - mkdocs build -d site
+        - doctr deploy . --built-docs site/
 
-script:
-- set -e 
-- mkdocs build -d site
-- 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then doctr deploy . --built-docs site/; fi'
+stages:
+  - install
+  - test
+  - deploy
+    if: type != pull_request
