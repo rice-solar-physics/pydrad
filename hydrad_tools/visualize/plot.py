@@ -24,18 +24,19 @@ def plot_strand(strand, start=0, stop=None, step=1, **kwargs):
     """
     if stop is None:
         stop = strand.time.shape[0] + 1
-    time = strand.time[start:stop:step]
     limits = kwargs.get('limits', {})
     if 'limits' in kwargs:
         del kwargs['limits']
     plot_kwargs = kwargs.get('plot_kwargs', {})
     fig, axes = _setup_figure(strand[0], limits, **kwargs)
     colors = matplotlib.colors.LinearSegmentedColormap.from_list(
-        '', plt.get_cmap(kwargs.get('cmap', 'viridis')).colors, N=time.shape[0])
+        '', plt.get_cmap(kwargs.get('cmap', 'viridis')).colors,
+        N=strand.time[start:stop:step].shape[0])
     # NOTE: once strand indexing is fixed, we can index it directly
-    for i, _ in enumerate(time):
+    for i, t in enumerate(strand.time[start:stop:step]):
+        j = np.where(t == strand.time)[0][0]
         plot_kwargs['color'] = colors(i)
-        _ = _plot_profile(strand[i], axes, **plot_kwargs)
+        _ = _plot_profile(strand[j], axes, **plot_kwargs)
     plt.show()
 
 
