@@ -7,7 +7,7 @@ jobs:
   include:
   - stage: test
     script:
-    - pytest --cov=hydrad_tools --cov_report=html
+    - pytest --cov=hydrad_tools --cov-report=html
     - coveralls
   - script:
     - cd docs && make && cd ..
