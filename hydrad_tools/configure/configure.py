@@ -34,7 +34,7 @@ class Configure(object):
     config (`dict`): All input parameters for configuring simulation
     """
 
-    def __init__(self, config):
+    def __init__(self, config, **kwargs):
         self.config = copy.deepcopy(config)
         self.env = Environment(loader=PackageLoader('hydrad_tools', 'configure/templates'))
         self.env.filters['units_filter'] = filters.units_filter
@@ -43,6 +43,10 @@ class Configure(object):
         self.env.filters['get_atomic_number'] = filters.get_atomic_number
         self.env.filters['sort_elements'] = filters.sort_elements
         self.env.filters['is_required'] = filters.is_required
+        # Freeze the date at instantiation; testing purposes only
+        if kwargs.get('freeze_date', False):
+            self._date = self.date
+            self._freeze_date = True
 
     @staticmethod
     def load_config(filename):
@@ -185,7 +189,11 @@ class Configure(object):
         """
         Return the current date
         """
-        return datetime.datetime.now().strftime('%Y-%m-%d_%H.%M.%S')
+        # NOTE: freeze date at instantiation for testing purposes
+        if hasattr(self, '_freeze_date') and self._freeze_date:
+            return self._date
+        else:
+            return datetime.datetime.now().strftime('%Y-%m-%d_%H.%M.%S')
 
     @property
     def intial_conditions_cfg(self):
