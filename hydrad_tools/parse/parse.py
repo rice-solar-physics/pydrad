@@ -33,6 +33,14 @@ class Strand(object):
                 time.append(float(f.readline()))
         return sorted(time) * u.s
 
+    def __repr__(self):
+        return f"""HYDrodynamics and RADiation (HYDRAD) Code
+-----------------------------------------
+Results path: {self.hydrad_root}
+Time interval: [{self.time[0]}, {self.time[-1]}]
+Number of profiles: {len(self.time)}
+Loop length: {self.loop_length.to(u.Mm):.3f}"""
+
     @property
     def time(self):
         """
@@ -88,6 +96,12 @@ class Profile(object):
         self._read_phy()
         if kwargs.get('read_amr', True):
             self._read_amr()
+
+    def __repr__(self):
+        return f"""HYDRAD Timestep Profile
+--------------
+Filename: {self._fname.format(index=self._index,ext='phy')}
+Timestep #: {self._index}"""
 
     def _read_phy(self):
         """
