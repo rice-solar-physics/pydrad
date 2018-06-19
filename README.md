@@ -1,5 +1,6 @@
 # hydrad_tools
 [![Build Status](https://travis-ci.org/rice-solar-physics/hydrad_tools.svg?branch=master)](https://travis-ci.org/rice-solar-physics/hydrad_tools)
+[![Coverage Status](https://coveralls.io/repos/github/rice-solar-physics/hydrad_tools/badge.svg?branch=master)](https://coveralls.io/github/rice-solar-physics/hydrad_tools?branch=master)
 
 Some Python tools to help configure and parse the HYDRAD code for coronal loop dynamics.
 
