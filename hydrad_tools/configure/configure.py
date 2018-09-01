@@ -12,7 +12,7 @@ from distutils.dir_util import copy_tree
 
 import numpy as np
 import astropy.units as u
-from jinja2 import Environment, PackageLoader
+from jinja2 import Environment, PackageLoader, ChoiceLoader, DictLoader
 import asdf
 try:
     import git
@@ -32,11 +32,16 @@ class Configure(object):
 
     # Parameters
     config (`dict`): All input parameters for configuring simulation
+    templates (`dict`): Templates to override defaults, optional
     """
 
     def __init__(self, config, **kwargs):
         self.config = copy.deepcopy(config)
-        self.env = Environment(loader=PackageLoader('hydrad_tools', 'configure/templates'))
+        loader = ChoiceLoader([
+            DictLoader(kwargs.get('templates', {})),
+            PackageLoader('hydrad_tools', 'configure/templates')
+        ])
+        self.env = Environment(loader=loader)
         self.env.filters['units_filter'] = filters.units_filter
         self.env.filters['log10_filter'] = filters.log10_filter
         self.env.filters['get_atomic_symbol'] = filters.get_atomic_symbol
@@ -51,7 +56,7 @@ class Configure(object):
     @staticmethod
     def load_config(filename):
         """
-        Load a base configuration from as an ASDF file
+        Load a base configuration from an ASDF file
 
         # Parameters
         filename (`str`): Path to ASDF configuration file
@@ -194,6 +199,20 @@ class Configure(object):
             return self._date
         else:
             return datetime.datetime.now().strftime('%Y-%m-%d_%H.%M.%S')
+
+    @property
+    def templates(self,):
+        """
+        List of available templates
+        """
+        return self.env.list_templates()
+
+    def get_raw_template(self, name):
+        """
+        Return the unrendered template.
+        """
+        with open(self.env.get_template(name).filename, 'r') as f:
+            return f.read()
 
     @property
     def intial_conditions_cfg(self):

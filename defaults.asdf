@@ -15,6 +15,7 @@ history:
     software: {name: astropy, version: 3.0.1}
 general:
   footpoint_height: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm', value: 500000000.0}
+  loop_inclination: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'deg', value: 0.0}
   force_single_fluid: false
   heat_flux_timestep_limit: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's', value: 1.0e-10}
   logging_frequency: 1000
