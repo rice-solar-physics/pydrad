@@ -422,6 +422,7 @@ The tables below give an exhaustive list of all of the different HYDRAD configur
 | tabulated_gravity_profile | Coefficients (in order of increasing exponent) for 6th order polynomial fit to the field-aligned gravitational acceleration | array-like | |
 | tabulated_cross_section_profile | Coefficients (in order of increasing exponent) for 6th order polynomial fit to the field-aligned gravitational acceleration | array-like | |
 | logging_frequency | Frequency (in number of timesteps) that progress is printed to the screen | `int` | |
+| initial_amr_file | Adaptive mesh file to initialize loop from; if not given, uses the result from the initial conditions code | `str` | |
 | write_file_physical | Toggle writing `.phy` solutions file | `bool` | |
 | write_file_ion_populations | Toggle writing `.ine` file | `bool` | |
 | write_file_hydrogen_level_populations | Toggle writing `.Hstate` file | `bool` | |
@@ -441,12 +442,12 @@ The tables below give an exhaustive list of all of the different HYDRAD configur
 |:----:|:------------|:----:|:-----|
 | use_tabulated_gravity | If true, read gravitational profile from file | `bool` | |
 | footpoint_temperature | Temperature at the loop footpoint | `float` | K
-| footpoint_density | Density at the loop footpoint | `float` | cm<sup>-3</sup>|
+| footpoint_density | Density at the loop footpoint | `float` | cm$^{-3}$|
 | heating_location | Loop coordinate where equilibrium heat is injected | `float` | cm |
 | heating_scale_height | Spatial scale of the injected equilibrium heating | `float` | cm |
 | isothermal | If true, inital temperature profile is uniform | `bool` | |
-| heating_range_lower_bound | Lower bound on rate search range| `float` |$\mathrm{erg}\,\mathrm{cm}^{-3}\,\mathrm{s}^{-1}$ |
-| heating_range_upper_bound | Upper bound on rate search range| `float` |$\mathrm{erg}\,\mathrm{cm}^{-3}\,\mathrm{s}^{-1}$  |
+| heating_range_lower_bound | Lower bound on rate search range| `float` | $\mathrm{erg}\,\mathrm{cm}^{-3}\,\mathrm{s}^{-1}$  |
+| heating_range_upper_bound | Upper bound on rate search range| `float` | $\mathrm{erg}\,\mathrm{cm}^{-3}\,\mathrm{s}^{-1}$  |
 | heating_range_step_size | Resolution of heating search range | `float` | |
 | heating_range_fine_tuning | | `float` | |
 
