@@ -74,7 +74,8 @@ class Configure(object):
         """
         asdf.AsdfFile(self.config).write_to(filename)
     
-    def setup_simulation(self, output_path, base_path=None, name=None, verbose=True):
+    def setup_simulation(self, output_path, base_path=None, name=None, verbose=True,
+                         run_initial_conditions=True):
         """
         Setup a HYDRAD simulation with desired outputs from a clean copy
 
@@ -84,13 +85,15 @@ class Configure(object):
         (appropriate permissions required)
         name (`str`): Name of the output directory. If None (default), use timestamp
         verbose (`bool`):
+        run_initial_conditions (`bool`): If True, compile and run the initial conditions code
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             if base_path is None:
                 git.Repo.clone_from(REMOTE_REPO, tmpdir)
             else:
                 copy_tree(base_path, tmpdir)
-            self.setup_initial_conditions(tmpdir, execute=True, verbose=verbose)
+            if run_initial_conditions:
+                self.setup_initial_conditions(tmpdir, execute=True, verbose=verbose)
             self.setup_hydrad(tmpdir, verbose=verbose)
             self.save_config(os.path.join(tmpdir, 'hydrad_tools_config.asdf'))
             if name is None:
@@ -161,6 +164,9 @@ class Configure(object):
         verbose (`bool`):
         """
         files = [
+            ('Radiation_Model/source/config.h', self.radiation_header),
+            ('Radiation_Model/config/elements_eq.cfg', self.radiation_equilibrium_cfg),
+            ('Radiation_Model/config/elements_neq.cfg', self.radiation_nonequilibrium_cfg),
             ('Heating_Model/source/config.h', self.heating_header),
             ('Heating_Model/config/heating_model.cfg', self.heating_cfg),
             ('HYDRAD/source/config.h', self.hydrad_header),
