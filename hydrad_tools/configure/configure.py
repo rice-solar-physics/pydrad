@@ -62,7 +62,7 @@ class Configure(object):
         filename (`str`): Path to ASDF configuration file
         """
         with asdf.open(filename) as af:
-            config = af.tree
+            config = copy.deepcopy(dict(af.tree))
         return config
 
     def save_config(self, filename):
