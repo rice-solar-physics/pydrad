@@ -110,16 +110,17 @@ class Configure(object):
         execute (`bool`): If True (default), run the initial conditions code after compiling
         verbose (`bool`):
         """
-        files = [
+        files = []
+        if self.config['initial_conditions']['use_tabulated_gravity']:
+            self.config['general']['tabulated_gravity_file'] = 'tabulated.gravity'
+            files += [('tabulated.gravity', self.tabulated_gravity)]
+        files += [
             ('Initial_Conditions/source/config.h', self.initial_conditions_header),
             ('Initial_Conditions/config/initial_conditions.cfg', self.intial_conditions_cfg),
             ('Radiation_Model/source/config.h', self.radiation_header),
             ('Radiation_Model/config/elements_eq.cfg', self.radiation_equilibrium_cfg),
             ('Radiation_Model/config/elements_neq.cfg', self.radiation_nonequilibrium_cfg),
         ]
-        if self.config['initial_conditions']['use_tabulated_gravity']:
-            self.config['general']['tabulated_gravity_file'] = 'tabulated.gravity'
-            files += [('tabulated.gravity', self.tabulated_gravity)]
         for filename, filestring in files:
             with open(os.path.join(root_dir, filename), 'w') as f:
                 f.write(filestring)
@@ -163,7 +164,14 @@ class Configure(object):
         root_dir (`str`):
         verbose (`bool`):
         """
-        files = [
+        files = []
+        if 'tabulated_gravity_profile' in self.config['general']:
+            self.config['general']['tabulated_gravity_file'] = 'tabulated.gravity'
+            files += [('tabulated.gravity', self.tabulated_gravity)]
+        if 'tabulated_cross_section_profile' in self.config['general']:
+            self.config['general']['tabulated_cross_section_file'] = 'tabulated.cross_section'
+            files += [('tabulated.cross_section', self.tabulated_cross_section)]
+        files += [
             ('Radiation_Model/source/config.h', self.radiation_header),
             ('Radiation_Model/config/elements_eq.cfg', self.radiation_equilibrium_cfg),
             ('Radiation_Model/config/elements_neq.cfg', self.radiation_nonequilibrium_cfg),
@@ -173,12 +181,6 @@ class Configure(object):
             ('HYDRAD/source/collisions.h', self.collisions_header),
             ('HYDRAD/config/HYDRAD.cfg', self.hydrad_cfg),
         ]
-        if 'tabulated_gravity_profile' in self.config['general']:
-            self.config['general']['tabulated_gravity_file'] = 'tabulated.gravity'
-            files += [('tabulated.gravity', self.tabulated_gravity)]
-        if 'tabulated_cross_section_profile' in self.config['general']:
-            self.config['general']['tabulated_cross_section_file'] = 'tabulated.cross_section'
-            files += [('tabulated.cross_section', self.tabulated_cross_section)]
         for filename, filestring in files:
             with open(os.path.join(root_dir, filename), 'w') as f:
                 f.write(filestring)
@@ -194,7 +196,7 @@ class Configure(object):
             print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
         if not os.path.exists(os.path.join(root_dir, 'Results')):
             os.mkdir(os.path.join(root_dir, 'Results'))
-    
+
     @property
     def date(self):
         """
