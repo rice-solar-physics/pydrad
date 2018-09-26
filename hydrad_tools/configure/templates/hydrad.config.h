@@ -25,10 +25,15 @@
 {% if general.use_kinetic_model %}#define USE_KINETIC_MODEL{% endif %}
 #include "collisions.h"
 {% if general.tabulated_gravity_file -%}
+// NOTE: These variables are unused in the current version of the code
+// but maybe necessary for running older versions 
 #define USE_TABULATED_GRAVITY
 #define TABULATED_GRAVITY_FILE {{ general.tabulated_gravity_file }}
 {%- endif %}
 {% if general.tabulated_cross_section_file -%}
+#define USE_POLY_FIT_TO_MAGNETIC_FIELD
+// NOTE: These variables are unused in the current version of the code
+// but maybe necessary for running older versions 
 #define USE_TABULATED_CROSS_SECTION
 #define TABULATED_CROSS_SECTION_FILE {{ general.tabulated_cross_section_file }}
 {%- endif %}
