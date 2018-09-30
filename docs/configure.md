@@ -419,8 +419,8 @@ The tables below give an exhaustive list of all of the different HYDRAD configur
 | loop_length | Footpoint-to-footpoint distance of the coronal loop | `float` | cm |
 | loop_inclination | Angle between loop and surface normal | `float` | degree |
 | footpoint_height | Length of the chromosphere | `float` | cm |
-| tabulated_gravity_profile | Coefficients (in order of increasing exponent) for 6th order polynomial fit to the field-aligned gravitational acceleration | array-like | |
-| tabulated_cross_section_profile | Coefficients (in order of increasing exponent) for 6th order polynomial fit to the field-aligned gravitational acceleration | array-like | |
+| poly_fit_gravity | Coefficients (in order of increasing exponent) for 6th order polynomial fit to the field-aligned gravitational acceleration | array-like | |
+| poly_fit_magnetic_field | Coefficients (in order of increasing exponent) for 6th order polynomial fit to the field-aligned gravitational acceleration | array-like | |
 | logging_frequency | Frequency (in number of timesteps) that progress is printed to the screen | `int` | |
 | initial_amr_file | Adaptive mesh file to initialize loop from; if not given, uses the result from the initial conditions code | `str` | |
 | write_file_physical | Toggle writing `.phy` solutions file | `bool` | |
@@ -440,7 +440,7 @@ The tables below give an exhaustive list of all of the different HYDRAD configur
 
 | Name | Description | Type | Units |
 |:----:|:------------|:----:|:-----|
-| use_tabulated_gravity | If true, read gravitational profile from file | `bool` | |
+| use_poly_fit_gravity | If true, read gravitational profile from file | `bool` | |
 | footpoint_temperature | Temperature at the loop footpoint | `float` | K
 | footpoint_density | Density at the loop footpoint | `float` | cm$^{-3}$|
 | heating_location | Loop coordinate where equilibrium heat is injected | `float` | cm |

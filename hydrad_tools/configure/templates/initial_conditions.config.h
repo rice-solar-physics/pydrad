@@ -16,9 +16,9 @@
 {% if initial_conditions.isothermal -%}
 #define ISOTHERMAL
 {%- endif %}
-{% if initial_conditions.use_tabulated_gravity -%}
-#define USE_TABULATED_GRAVITY
-#define TABULATED_GRAVITY_FILE {{ general.tabulated_gravity_file }}
+{% if initial_conditions.use_poly_fit_gravity and general.poly_fit_gravity -%}
+#define USE_POLY_FIT_TO_GRAVITY
+#define POLY_FIT_TO_GRAVITY_FILE "poly_fit.gravity"
 {%- endif %}
 
 // **** Solver ****
