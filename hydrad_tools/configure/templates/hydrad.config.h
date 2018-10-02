@@ -24,7 +24,7 @@
 #define TIME_STEP_LIMIT {{ general.heat_flux_timestep_limit | is_required | units_filter('s') }}
 {% if general.use_kinetic_model %}#define USE_KINETIC_MODEL{% endif %}
 #include "collisions.h"
-{% if general.poly_fit_magnetic_field -%}
+{% if general.poly_fit_magnetic_field is defined -%}
 #define USE_POLY_FIT_TO_MAGNETIC_FIELD
 {%- endif %}
 // **** End of Physics ****
