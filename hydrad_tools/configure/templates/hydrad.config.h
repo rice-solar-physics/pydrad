@@ -30,6 +30,7 @@
 // **** End of Physics ****
 
 // **** Solver ****
+{% if general.use_openmp %}#define OPENMP{% endif %}
 #define SAFETY_RADIATION {{ solver.safety_radiation | is_required}}
 #define SAFETY_CONDUCTION {{ solver.safety_conduction | is_required}}
 #define SAFETY_ADVECTION {{ solver.safety_advection | is_required}}
@@ -42,6 +43,10 @@
 #define MINIMUM_RADIATION_TEMPERATURE {{ solver.minimum_radiation_temperature | is_required | units_filter('K') }}
 #define ZERO_OVER_TEMPERATURE_INTERVAL {{ solver.zero_over_temperature_interval | is_required | units_filter('K') }}
 #define MINIMUM_TEMPERATURE {{ solver.minimum_temperature | is_required | units_filter('K') }}
+{% if solver.cutoff_temperature_fraction is defined -%}
+#define USE_JB
+#define JB_TEMPERATURE_FRACTION {{ solver.cutoff_temperature_fraction }}
+{%- endif %}
 // **** End of Solver ****
 
 // **** Grid ****
