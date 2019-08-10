@@ -211,15 +211,20 @@ class Configure(object):
         for filename, filestring in files:
             with open(os.path.join(root_dir, filename), 'w') as f:
                 f.write(filestring)
+        # NOTE: using OpenMP requires an alternate compile script
+        if self.config['general'].get('use_openmp', False):
+            build_script = 'build_HYDRAD_OPENMP.bat'
+        else:
+            build_script = 'build_HYDRAD.bat'
         # NOTE: make sure we have needed permissions to run compile script
         self._run_shell_command(
-            ['chmod', 'u+x', 'build_HYDRAD.bat'],
+            ['chmod', 'u+x', build_script],
             os.path.join(root_dir, 'HYDRAD/build_scripts'),
             shell=False,
             verbose=verbose,
         )
         self._run_shell_command(
-            ['./build_HYDRAD.bat'],
+            [f'./{build_script}'],
             os.path.join(root_dir, 'HYDRAD/build_scripts'),
             verbose=verbose,
         )
