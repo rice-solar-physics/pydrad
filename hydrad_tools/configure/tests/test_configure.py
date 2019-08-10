@@ -264,6 +264,7 @@ def test_hydrad_header(configuration):
 // **** End of Physics ****
 
 // **** Solver ****
+
 #define SAFETY_RADIATION 0.1
 #define SAFETY_CONDUCTION 1.0
 #define SAFETY_ADVECTION 1.0
@@ -273,6 +274,7 @@ def test_hydrad_header(configuration):
 #define MINIMUM_RADIATION_TEMPERATURE 20000.0
 #define ZERO_OVER_TEMPERATURE_INTERVAL 500.0
 #define MINIMUM_TEMPERATURE 10000.0
+
 // **** End of Solver ****
 
 // **** Grid ****
@@ -319,6 +321,7 @@ def test_hydrad_header(configuration):
 // **** End of Physics ****
 
 // **** Solver ****
+
 #define SAFETY_RADIATION 0.1
 #define SAFETY_CONDUCTION 1.0
 #define SAFETY_ADVECTION 1.0
@@ -328,6 +331,7 @@ def test_hydrad_header(configuration):
 #define MINIMUM_RADIATION_TEMPERATURE 20000.0
 #define ZERO_OVER_TEMPERATURE_INTERVAL 500.0
 #define MINIMUM_TEMPERATURE 10000.0
+
 // **** End of Solver ****
 
 // **** Grid ****
@@ -427,7 +431,6 @@ def test_initial_conditions_header(configuration):
 #define MAX_VARIATION 1.1"""
     assert c.initial_conditions_header == header
     c.config['initial_conditions']['isothermal'] = True
-    c.config['initial_conditions']['use_poly_fit_gravity'] = True
     c.config['general']['poly_fit_gravity'] = np.array([1, 2, 3])
     header = f"""// ****
 // *

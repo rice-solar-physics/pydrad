@@ -433,14 +433,14 @@ The tables below give an exhaustive list of all of the different HYDRAD configur
 | use_kinetic_model | Toggle using kinetic model for heat flux | `bool` | |
 | minimum_collisional_coupling_timescale |  | `float` | s |
 | force_single_fluid | If true, force electron and ion quantities to be equal | `bool` | |
+| use_openmp | If true, parallelize over threads with [OpenMP](https://www.openmp.org/). This option is most useful when including a NLTE chromosphere. | `bool` | |
 
-[BC13]: http://adsabs.harvard.edu/abs/2013ApJ...770...12B
+[BC13]: https://doi.org/10.1088/0004-637X/770/1/12
 
 ### Initial Conditions
 
 | Name | Description | Type | Units |
 |:----:|:------------|:----:|:-----|
-| use_poly_fit_gravity | If true, read gravitational profile from file | `bool` | |
 | footpoint_temperature | Temperature at the loop footpoint | `float` | K
 | footpoint_density | Density at the loop footpoint | `float` | cm$^{-3}$|
 | heating_location | Loop coordinate where equilibrium heat is injected | `float` | cm |
@@ -513,8 +513,10 @@ elements = ['hydrogen', 'He', 'c', 26]
 | zero_over_temperature_interval | Temperature interval over which the chromospheric radiative losses are set to zero | `float` | K |
 | minimum_temperature | | `float` | K |
 | maximum_optically_thin_density | | `float` | $\mathrm{cm}^{-3}$ |
+| cutoff_temperature_fraction | Ratio between cutoff temperature and peak temperature. If set, use the method of [JB19] to model the transition region. | `float` | |
 
-[B09]: http://adsabs.harvard.edu/abs/2009A%26A...502..409B
+[B09]: http://doi.org/10.1051/0004-6361/200810735
+[JB19]: https://doi.org/10.3847/2041-8213/ab0c1f
 
 ### Grid
 
