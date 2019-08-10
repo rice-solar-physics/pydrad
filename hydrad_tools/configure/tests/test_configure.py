@@ -427,7 +427,6 @@ def test_initial_conditions_header(configuration):
 #define MAX_VARIATION 1.1"""
     assert c.initial_conditions_header == header
     c.config['initial_conditions']['isothermal'] = True
-    c.config['initial_conditions']['use_poly_fit_gravity'] = True
     c.config['general']['poly_fit_gravity'] = np.array([1, 2, 3])
     header = f"""// ****
 // *

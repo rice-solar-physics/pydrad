@@ -16,7 +16,7 @@
 {% if initial_conditions.isothermal -%}
 #define ISOTHERMAL
 {%- endif %}
-{% if initial_conditions.use_poly_fit_gravity and general.poly_fit_gravity is defined -%}
+{% if general.poly_fit_gravity is defined -%}
 #define USE_POLY_FIT_TO_GRAVITY
 #define POLY_FIT_TO_GRAVITY_FILE "poly_fit.gravity"
 {%- endif %}
