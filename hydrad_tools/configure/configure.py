@@ -136,8 +136,17 @@ class Configure(object):
             ('Radiation_Model/config/elements_neq.cfg',
              self.radiation_nonequilibrium_cfg),
         ]
-        if 'poly_fit_gravity' in self.config['general']:
+        # NOTE: there are two options here so that the gravitational and
+        # magnetic field polynomial fits can be applied just to the
+        # hydrodynamic step and not to the initial conditions. Sometimes an
+        # initial condition cannot be found if the gravitational and/or magnetic
+        # field profile is a bit strange.
+        if (self.config['initial_conditions']['use_poly_fit_gravity']
+                and 'poly_fit_gravity' in self.config['general']):
             files += [('poly_fit.gravity', self.poly_fit_gravity)]
+        if (self.config['initial_conditions']['use_poly_fit_magnetic_field']
+                and 'poly_fit_magnetic_field' in self.config['general']):
+            files += [('poly_fit.magnetic_field', self.poly_fit_magnetic_field)]
         for filename, filestring in files:
             with open(os.path.join(root_dir, filename), 'w') as f:
                 f.write(filestring)
