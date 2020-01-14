@@ -60,7 +60,8 @@ initial_conditions:
   heating_range_upper_bound: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm-3 erg
       s-1', value: 100.0}
   isothermal: false
-  use_tabulated_gravity: false
+  use_poly_fit_gravity: false
+  use_poly_fit_magnetic_field: false
 radiation:
   abundance_dataset: asplund
   decouple_ionization_state_solver: false

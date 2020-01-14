@@ -16,10 +16,15 @@
 {% if initial_conditions.isothermal -%}
 #define ISOTHERMAL
 {%- endif %}
-{% if general.poly_fit_gravity is defined -%}
+{% if initial_conditions.use_poly_fit_gravity and general.poly_fit_gravity is defined -%}
 #define USE_POLY_FIT_TO_GRAVITY
 #define POLY_FIT_TO_GRAVITY_FILE "poly_fit.gravity"
 {%- endif %}
+{% if initial_conditions.use_poly_fit_magnetic_field and general.poly_fit_magnetic_field is defined -%}
+#define USE_POLY_FIT_TO_MAGNETIC_FIELD
+#define POLY_FIT_TO_MAGNETIC_FIELD_FILE "poly_fit.gravity"
+{%- endif %}
+
 
 // **** Solver ****
 #define EPSILON {{ solver.epsilon | is_required }}
