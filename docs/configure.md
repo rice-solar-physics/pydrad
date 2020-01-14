@@ -420,7 +420,7 @@ The tables below give an exhaustive list of all of the different HYDRAD configur
 | loop_inclination | Angle between loop and surface normal | `float` | degree |
 | footpoint_height | Length of the chromosphere | `float` | cm |
 | poly_fit_gravity | Coefficients (in order of increasing exponent) for 6th order polynomial fit to the field-aligned gravitational acceleration | array-like | |
-| poly_fit_magnetic_field | Coefficients (in order of increasing exponent) for 6th order polynomial fit to the field-aligned gravitational acceleration | array-like | |
+| poly_fit_magnetic_field | Coefficients (in order of increasing exponent) for 6th order polynomial fit to the magnetic field strength along the loop | array-like | |
 | logging_frequency | Frequency (in number of timesteps) that progress is printed to the screen | `int` | |
 | initial_amr_file | Adaptive mesh file to initialize loop from; if not given, uses the result from the initial conditions code | `str` | |
 | write_file_physical | Toggle writing `.phy` solutions file | `bool` | |
@@ -450,6 +450,8 @@ The tables below give an exhaustive list of all of the different HYDRAD configur
 | heating_range_upper_bound | Upper bound on rate search range| `float` | $\mathrm{erg}\,\mathrm{cm}^{-3}\,\mathrm{s}^{-1}$  |
 | heating_range_step_size | Resolution of heating search range | `float` | |
 | heating_range_fine_tuning | | `float` | |
+| use_poly_fit_gravity | If True, use polynomial fit to gravitational profile | `bool` | |
+| use_poly_fit_magnetic_field | If True, use polynomial fit to magnetic field strength | `bool` | |
 
 ### Heating
 
