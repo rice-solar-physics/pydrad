@@ -7,6 +7,8 @@ import astropy.units as u
 
 from hydrad_tools.configure import Configure
 
+from . import assert_ignore_blanks
+
 
 @pytest.fixture
 def configuration():
@@ -105,7 +107,7 @@ def test_collisions_header(configuration):
 #define MINIMUM_COLLISIONAL_COUPLING_TIME_SCALE 0.01
 
 // **** End of Physics ****"""
-    assert c.collisions_header == collisions_header
+    assert_ignore_blanks(c.collisions_header, collisions_header)
     c.config['general']['force_single_fluid'] = True
     collisions_header = f"""// ****
 // *
@@ -121,8 +123,8 @@ def test_collisions_header(configuration):
 #define MINIMUM_COLLISIONAL_COUPLING_TIME_SCALE 0.01
 #define FORCE_SINGLE_FLUID
 // **** End of Physics ****"""
-    assert c.collisions_header == collisions_header
-
+    assert_ignore_blanks(c.collisions_header, collisions_header
+)
 
 def test_heating_config(configuration):
     # TODO: test background heating
@@ -167,7 +169,7 @@ def test_heating_header(configuration):
 
 
 #include "../../Radiation_Model/source/config.h"'''
-    assert c.heating_header == header
+    assert_ignore_blanks(c.heating_header, header)
     # Ion Heating
     c.config['heating']['heat_electrons'] = False
     header = f'''// ****
@@ -183,7 +185,7 @@ def test_heating_header(configuration):
 
 
 #include "../../Radiation_Model/source/config.h"'''
-    assert c.heating_header == header
+    assert_ignore_blanks(c.heating_header, header)
     # Other Heating Models
     c.config['heating']['alfven_wave_heating'] = True
     c.config['heating']['beam_heating'] = True
@@ -200,7 +202,7 @@ def test_heating_header(configuration):
 #define BEAM_HEATING
 #define ALFVEN_WAVE_HEATING
 #include "../../Radiation_Model/source/config.h"'''
-    assert c.heating_header == header
+    assert_ignore_blanks(c.heating_header, header)
 
 
 def test_hydrad_config(configuration):
@@ -289,7 +291,7 @@ def test_hydrad_header(configuration):
 #define LINEAR_RESTRICTION
 #define ENFORCE_CONSERVATION
 // **** End of Grid ****"""
-    assert c.hydrad_header == header
+    assert_ignore_blanks(c.hydrad_header, header)
     c.config['general']['poly_fit_magnetic_field'] = np.array([1, 2, 3])
     header = f"""// ****
 // *
@@ -346,7 +348,7 @@ def test_hydrad_header(configuration):
 #define LINEAR_RESTRICTION
 #define ENFORCE_CONSERVATION
 // **** End of Grid ****"""
-    assert c.hydrad_header == header
+    assert_ignore_blanks(c.hydrad_header,header)
 
 
 def test_initial_conditions_config(configuration):
@@ -417,8 +419,6 @@ def test_initial_conditions_header(configuration):
 // **** Physics ****
 #include "../../Radiation_Model/source/config.h"
 
-
-
 // **** Solver ****
 #define EPSILON 0.01
 
@@ -429,9 +429,10 @@ def test_initial_conditions_header(configuration):
 #define MAX_REFINEMENT_LEVEL 12
 #define MIN_DS 1.0
 #define MAX_VARIATION 1.1"""
-    assert c.initial_conditions_header == header
+    assert_ignore_blanks(c.initial_conditions_header, header)
     c.config['initial_conditions']['isothermal'] = True
     c.config['general']['poly_fit_gravity'] = np.array([1, 2, 3])
+    c.config['initial_conditions']['use_poly_fit_gravity'] = True
     header = f"""// ****
 // *
 // * #defines for configuring the hydrostatic model
@@ -461,7 +462,7 @@ def test_initial_conditions_header(configuration):
 #define MAX_REFINEMENT_LEVEL 12
 #define MIN_DS 1.0
 #define MAX_VARIATION 1.1"""
-    assert c.initial_conditions_header == header
+    assert_ignore_blanks(c.initial_conditions_header, header)
 
 
 def test_radiation_header(configuration):
@@ -491,7 +492,7 @@ def test_radiation_header(configuration):
 #define EPSILON_D 0.1
 #define EPSILON_R 1.8649415311920072
 // **** End of Solver ****"""
-    assert c.radiation_header == header
+    assert_ignore_blanks(c.radiation_header, header)
     c.config['radiation']['use_power_law_radiative_losses'] = False
     c.config['radiation']['density_dependent_rates'] = False
     c.config['radiation']['optically_thick_radiation'] = False
@@ -524,7 +525,7 @@ def test_radiation_header(configuration):
 #define EPSILON_D 0.1
 #define EPSILON_R 1.8649415311920072
 // **** End of Solver ****"""
-    assert c.radiation_header == header
+    assert_ignore_blanks(c.radiation_header, header)
 
 
 def test_radiation_config(configuration):
