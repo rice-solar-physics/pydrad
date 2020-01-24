@@ -6,6 +6,7 @@ import numpy as np
 import astropy.units as u
 
 from hydrad_tools.configure import Configure
+from hydrad_tools.configure.util import MissingParameter
 
 from . import assert_ignore_blanks
 
@@ -76,6 +77,7 @@ def configuration():
             'density_dependent_rates': True,
             'optically_thick_radiation': True,
             'nlte_chromosphere': True,
+            'minimum_density_limit': 1e12/(u.cm**3),
             'elements_nonequilibrium': ['iron'],
             'elements_equilibrium': ['iron', 'He', 1],
             'ranges_dataset': 'ranges',
@@ -374,7 +376,7 @@ def test_hydrad_header(configuration):
 #define LINEAR_RESTRICTION
 #define ENFORCE_CONSERVATION
 // **** End of Grid ****"""
-    assert_ignore_blanks(c.hydrad_header,header)
+    assert_ignore_blanks(c.hydrad_header, header)
 
 
 def test_initial_conditions_config(configuration):
@@ -493,6 +495,7 @@ def test_initial_conditions_header(configuration):
 
 def test_radiation_header(configuration):
     c = Configure(configuration, freeze_date=True)
+    # Test all true
     header = f"""// ****
 // *
 // * #defines for configuring the radiation model
@@ -508,6 +511,7 @@ def test_radiation_header(configuration):
 #define DENSITY_DEPENDENT_RATES
 #define OPTICALLY_THICK_RADIATION
 #define NLTE_CHROMOSPHERE
+#define MIN_DENSITY_LIMIT 1000000000000.0
 #include "../../HYDRAD/source/collisions.h"
 // **** End of Physics ****
 
@@ -519,6 +523,11 @@ def test_radiation_header(configuration):
 #define EPSILON_R 1.8649415311920072
 // **** End of Solver ****"""
     assert_ignore_blanks(c.radiation_header, header)
+    # Test missing minimum density limit raises error
+    del c.config['radiation']['minimum_density_limit']
+    with pytest.raises(MissingParameter):
+        c.radiation_header
+    # Test all false
     c.config['radiation']['use_power_law_radiative_losses'] = False
     c.config['radiation']['density_dependent_rates'] = False
     c.config['radiation']['optically_thick_radiation'] = False
