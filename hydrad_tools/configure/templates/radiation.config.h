@@ -24,7 +24,7 @@
 #define OPTICALLY_THICK_RADIATION
 {% if radiation.nlte_chromosphere -%}
 #define NLTE_CHROMOSPHERE
-#define MIN_DENSITY_LIMIT {{ radiation.minimum_density_limit | is_required }}
+#define MIN_DENSITY_LIMIT {{ radiation.minimum_density_limit | is_required | units_filter('cm^-3') }}
 {%- endif %}
 {%- endif %}
 
