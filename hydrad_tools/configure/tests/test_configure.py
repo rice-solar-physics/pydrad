@@ -213,8 +213,8 @@ def test_heating_header(configuration):
 #include "../../Radiation_Model/source/config.h"'''
     assert_ignore_blanks(c.heating_header, header)
     # Other Heating Models
-    c.config['heating']['alfven_wave_heating'] = True
-    c.config['heating']['beam_heating'] = True
+    c.config['heating']['alfven_wave'] = True
+    c.config['heating']['beam'] = True
     header = f'''// ****
 // *
 // * #defines for configuring the heating model
