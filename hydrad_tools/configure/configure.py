@@ -129,7 +129,7 @@ class Configure(object):
             ('Initial_Conditions/source/config.h',
              self.initial_conditions_header),
             ('Initial_Conditions/config/initial_conditions.cfg',
-             self.intial_conditions_cfg),
+             self.initial_conditions_cfg),
             ('Radiation_Model/source/config.h',
              self.radiation_header),
             ('Radiation_Model/config/elements_eq.cfg',
@@ -267,7 +267,7 @@ class Configure(object):
             return f.read()
 
     @property
-    def intial_conditions_cfg(self):
+    def initial_conditions_cfg(self):
         """
         Initial conditions configuration file,
         `Initial_Conditions/config/initial_conditions.cfg`
