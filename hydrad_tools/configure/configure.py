@@ -433,7 +433,7 @@ class Configure(object):
             raise u.UnitConversionError(
                 f'''Maximum cell width must be able to be converted to 
                 {self.config['general']['loop_length'].unit}''')
-        return int(np.floor(n_min.decompose()))
+        return int(np.ceil(n_min.decompose()))
 
     @property
     def maximum_cells(self):
@@ -448,5 +448,5 @@ class Configure(object):
             raise u.UnitConversionError(
                 f'''Maximum cell width must be able to be converted to
                 {self.config['general']['loop_length'].unit}''')
-        return int(np.ceil(
-            2**self.config['grid']['maximum_refinement_level'] / n_min))
+        return int(np.floor(
+            2**self.config['grid']['maximum_refinement_level'] * n_min))
