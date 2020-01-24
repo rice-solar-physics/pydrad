@@ -24,7 +24,9 @@
 #define USE_POLY_FIT_TO_MAGNETIC_FIELD
 #define POLY_FIT_TO_MAGNETIC_FIELD_FILE "poly_fit.gravity"
 {%- endif %}
-
+{% if general.open_field -%}
+#define OPEN_FIELD
+{%- endif %}
 
 // **** Solver ****
 #define EPSILON {{ solver.epsilon | is_required }}

@@ -27,6 +27,12 @@
 {% if general.poly_fit_magnetic_field is defined -%}
 #define USE_POLY_FIT_TO_MAGNETIC_FIELD
 {%- endif %}
+{% if general.open_field -%}
+#define OPEN_FIELD
+{% if general.force_symmetry -%}
+#define FORCE_SYMMETRY
+{%- endif %}
+{%- endif %}
 // **** End of Physics ****
 
 // **** Solver ****
