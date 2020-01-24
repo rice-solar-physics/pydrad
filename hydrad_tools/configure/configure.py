@@ -10,6 +10,7 @@ import shutil
 import subprocess
 from distutils.dir_util import copy_tree
 
+import numpy as np
 import astropy.units as u
 from jinja2 import Environment, PackageLoader, ChoiceLoader, DictLoader
 import asdf
@@ -283,6 +284,8 @@ class Configure(object):
         """
         return self.env.get_template('initial_conditions.config.h').render(
             date=self.date,
+            maximum_cells=self.maximum_cells,
+            minimum_cells=self.minimum_cells,
             **self.config
         )
 
@@ -325,9 +328,9 @@ class Configure(object):
             elif all((k in bg for k in ('rate', 'location', 'scale_height'))):
                 background = self.config['heating']['background']
             else:
-                raise ValueError('Set use_initial_conditions to True or set '
-                                 'parameters explicitly in order to use '
-                                 'background heating.')
+                raise ValueError(
+                    '''Set use_initial_conditions to True or set parameters
+                    explicitly in order to use background heating.''')
         else:
             background = {
                 'rate': 0*u.erg/(u.cm**3 * u.s),
@@ -417,3 +420,33 @@ class Configure(object):
             date=self.date,
             coefficients=self.config['general']['poly_fit_gravity']
         )
+
+    @property
+    def minimum_cells(self):
+        """
+        Minimum allowed number of grid cells,
+        $n_{min}=\lfloor L/\Delta s_{max}\\rfloor$, where $L$ is the loop
+        length and $\Delta s_{max}$ is the maximum allowed grid cell width.
+        """
+        n_min = self.config['general']['loop_length'] / self.config['grid']['maximum_cell_width']
+        if n_min.decompose().unit != u.dimensionless_unscaled:
+            raise u.UnitConversionError(
+                f'''Maximum cell width must be able to be converted to 
+                {self.config['general']['loop_length'].unit}''')
+        return int(np.floor(n_min.decompose()))
+
+    @property
+    def maximum_cells(self):
+        """
+        Maximum allowed number of grid cells,
+        $n_{max}=\lceil 2^{L_R}/n_{min}\\rceil$, wher $L_R$ is the maximum
+        refinement level and $n_{min}$ is the minimum allowed number of
+        grid cells.
+        """
+        n_min = self.config['general']['loop_length'] / self.config['grid']['maximum_cell_width']
+        if n_min.decompose().unit != u.dimensionless_unscaled:
+            raise u.UnitConversionError(
+                f'''Maximum cell width must be able to be converted to
+                {self.config['general']['loop_length'].unit}''')
+        return int(np.ceil(
+            2**self.config['grid']['maximum_refinement_level'] / n_min))
