@@ -171,7 +171,7 @@ class Configure(object):
                 root_dir,
                 verbose=verbose,
             )
-            if self.config['heating']['background_heating']:
+            if self.config['heating']['background'].get('use_initial_conditions', False):
                 self.equilibrium_heating_rate = self.get_equilibrium_heating_rate(root_dir)
 
     def get_equilibrium_heating_rate(self, root_dir):
@@ -310,18 +310,33 @@ class Configure(object):
     def heating_cfg(self):
         """
         Heating model configuration file, `Heating_Model/config/heating.cfg`.
-        If background heating is enabled, you must run the initial conditions
-        and set the `equilibrium_heating_rate` attribute first.
+        If background heating is enabled and you want to use the equilibrium
+        values, you must run the initial conditions and set the
+        `equilibrium_heating_rate` attribute first.
         """
-        if self.config['heating']['background_heating']:
-            if not hasattr(self, 'equilibrium_heating_rate'):
-                raise AttributeError('No background heating found')
-            background_heating_rate = self.equilibrium_heating_rate
+        if self.config['heating']['background']:
+            bg = self.config['heating']['background']
+            if bg.get('use_initial_conditions', False):
+                background = {
+                    'rate': self.equilibrium_heating_rate,
+                    'location': self.config['initial_conditions']['heating_location'],
+                    'scale_height': self.config['initial_conditions']['heating_scale_height'],
+                }
+            elif all((k in bg for k in ('rate', 'location', 'scale_height'))):
+                background = self.config['heating']['background']
+            else:
+                raise ValueError('Set use_initial_conditions to True or set '
+                                 'parameters explicitly in order to use '
+                                 'background heating.')
         else:
-            background_heating_rate = None
+            background = {
+                'rate': 0*u.erg/(u.cm**3 * u.s),
+                'location': 0*u.cm,
+                'scale_height': 0*u.cm
+            }
         return self.env.get_template('heating.cfg').render(
             date=self.date,
-            background_heating_rate=background_heating_rate,
+            background=background,
             **self.config
         )
 
