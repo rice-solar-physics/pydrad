@@ -250,7 +250,7 @@ class Configure(object):
         if hasattr(self, '_freeze_date') and self._freeze_date:
             return self._date
         else:
-            return datetime.datetime.now().strftime('%Y-%m-%d_%H.%M.%S')
+            return datetime.datetime.utcnow().strftime('%Y-%m-%d_%H.%M.%S UTC')
 
     @property
     def templates(self,):
@@ -317,7 +317,7 @@ class Configure(object):
         values, you must run the initial conditions and set the
         `equilibrium_heating_rate` attribute first.
         """
-        if self.config['heating']['background']:
+        if self.config['heating'].get('background', False):
             bg = self.config['heating']['background']
             if bg.get('use_initial_conditions', False):
                 background = {
@@ -329,8 +329,8 @@ class Configure(object):
                 background = self.config['heating']['background']
             else:
                 raise ValueError(
-                    '''Set use_initial_conditions to True or set parameters
-                    explicitly in order to use background heating.''')
+                    'Set use_initial_conditions to True or set parameters '
+                    'explicitly in order to use background heating.')
         else:
             background = {
                 'rate': 0*u.erg/(u.cm**3 * u.s),
