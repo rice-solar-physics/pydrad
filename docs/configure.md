@@ -25,7 +25,6 @@ Rather than editing each configuration file individually, an entire simulation c
         },
         'heating': {
             'heat_electrons': True,
-            'background_heating': True,
             'events': [
                 {'time_start': 0.*u.s, 'rise_duration': 100*u.s,
                 'decay_duration': 100*u.s, 'total_duration': 200*u.s,
@@ -181,117 +180,7 @@ This will create all of the needed input files from the options in `config`, com
 
 ## Setting a Default Configuration
 
-HYDRAD requires a lot of configuration options and it can be annoying to have put them all in a configuration file. To avoid this, you can load a default configuration from an [ASDF file](https://asdf.readthedocs.io), a human-readable, structured plain text file in the YAML format.
-
-These ASDF files are structured just like the config directory and can be easily read and written. As an example, a configuration file might look like, 
-
-```YAML
-#ASDF 1.0.0
-#ASDF_STANDARD 1.2.0
-%YAML 1.1
-%TAG ! tag:stsci.edu:asdf/
---- !core/asdf-1.1.0
-asdf_library: !core/software-1.0.0 {author: Space Telescope Science Institute, homepage: 'http://github.com/spacetelescope/asdf',
-  name: asdf, version: 2.0.1}
-history:
-  extensions:
-  - !core/extension_metadata-1.0.0
-    extension_class: asdf.extension.BuiltinExtension
-    software: {name: asdf, version: 2.0.1}
-  - !core/extension_metadata-1.0.0
-    extension_class: astropy.io.misc.asdf.extension.AstropyAsdfExtension
-    software: {name: astropy, version: 3.0.1}
-general:
-  footpoint_height: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm', value: 500000000.0}
-  force_single_fluid: false
-  heat_flux_limiting_coefficient: 0.16666666666666666
-  heat_flux_timestep_limit: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's', value: 1.0e-10}
-  logging_frequency: 1000
-  loop_inclination: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'deg', value: 0.0}
-  loop_length: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'Mm', value: 80.0}
-  minimum_collisional_coupling_timescale: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's',
-    value: 0.01}
-  output_interval: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's', value: 5.0}
-  total_time: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's', value: 50000.0}
-  use_kinetic_model: false
-  write_file_equation_terms: false
-  write_file_hydrogen_level_populations: false
-  write_file_ion_populations: false
-  write_file_physical: true
-  write_file_timescales: false
-grid:
-  adapt: true
-  adapt_every_n_time_steps: 10
-  enforce_conservation: false
-  linear_restriction: true
-  maximum_cells: 30000
-  maximum_fractional_difference: 0.2
-  maximum_refinement_level: 12
-  maximum_variation: 0.1
-  minimum_cells: 150
-  minimum_delta_s: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm', value: 1.0}
-  minimum_fractional_difference: 0.1
-  refine_on_density: true
-  refine_on_electron_energy: true
-  refine_on_hydrogen_energy: false
-heating:
-  alfven_wave_heating: false
-  background_heating: false
-  beam_heating: false
-  events:
-  - decay_duration: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's', value: 100.0}
-    location: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm', value: 4000000000.0}
-    rate: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm-3 erg s-1', value: 0.1}
-    rise_duration: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's', value: 100.0}
-    scale_height: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm', value: 1.0e+300}
-    time_start: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's', value: 0.0}
-    total_duration: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 's', value: 200.0}
-  heat_electrons: true
-initial_conditions:
-  footpoint_density: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm-3', value: 100000000000.0}
-  footpoint_temperature: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'K', value: 20000.0}
-  heating_location: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'Mm', value: 40.0}
-  heating_range_fine_tuning: 10000.0
-  heating_range_lower_bound: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm-3 erg
-      s-1', value: 1.0e-08}
-  heating_range_step_size: 0.01
-  heating_range_upper_bound: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm-3 erg
-      s-1', value: 100.0}
-  heating_scale_height: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm', value: 1.0e+300}
-  isothermal: false
-  use_tabulated_gravity: false
-radiation:
-  abundance_dataset: asplund
-  decouple_ionization_state_solver: false
-  density_dependent_rates: false
-  elements_equilibrium: [Fe]
-  elements_nonequilibrium: []
-  emissivity_dataset: chianti_v7
-  nlte_chromosphere: false
-  optically_thick_radiation: false
-  ranges_dataset: ranges
-  rates_dataset: chianti_v7
-  use_power_law_radiative_losses: true
-solver:
-  cutoff_ion_fraction: 1.0e-06
-  epsilon: 0.01
-  epsilon_d: 0.1
-  epsilon_r: 1.8649415311920072
-  maximum_optically_thin_density: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm-3',
-    value: 1000000000000.0}
-  minimum_radiation_temperature: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'K',
-    value: 20000.0}
-  minimum_temperature: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'K', value: 10000.0}
-  safety_advection: 1.0
-  safety_atomic: 1.0
-  safety_conduction: 1.0
-  safety_radiation: 0.1
-  safety_viscosity: 1.0
-  timestep_increase_limit: 0.05
-  zero_over_temperature_interval: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'K',
-    value: 500.0}
-...
-```
+HYDRAD requires a lot of configuration options and it can be annoying to have put them all in a configuration file. To avoid this, you can load a default configuration from an [ASDF file](https://asdf.readthedocs.io), a human-readable, structured plain text file in the YAML format. These ASDF files are structured just like the config directory and can be easily read and written. 
 
 To load a configuration from a file,
 
@@ -434,6 +323,8 @@ The tables below give an exhaustive list of all of the different HYDRAD configur
 | minimum_collisional_coupling_timescale |  | `float` | s |
 | force_single_fluid | If true, force electron and ion quantities to be equal | `bool` | |
 | use_openmp | If true, parallelize over threads with [OpenMP](https://www.openmp.org/). This option is most useful when including a NLTE chromosphere. | `bool` | |
+| open_field | If true, one footpoint is assumed to not connect to the surface | `bool` | |
+| force_symmetry | | `bool` |
 
 [BC13]: https://doi.org/10.1088/0004-637X/770/1/12
 
@@ -458,10 +349,19 @@ The tables below give an exhaustive list of all of the different HYDRAD configur
 | Name | Description | Type | Units |
 |:----:|:------------|:----:|:-----:|
 | heat_electrons | If false, only ions are heated | `bool` | |
-| beam_heating | Toggle beam heating model | `bool` | |
-| alfven_wave_heating | Toggle Alfvén wave heating model | `bool` | |
-| background_heating | If true, use equilibrium heating from initial conditions as steady background heating | `bool` | |
+| beam | Toggle beam heating model | `bool` | |
+| alfven_wave | Toggle Alfvén wave heating model | `bool` | |
+| background | Parameters for configuring background heating profile | `dict` | |
 | events | List of heating event properties | `list` | |
+
+The `background` dict can have the following keys. If it is not included at all, no background heating is applied.
+
+| Name | Description | Type| Units |
+|:----:|:-----------:|:---:|:-----:|
+| use_initial_conditions | If true, use the heating parameters from the initial conditions and the computed equilibrium heating rate. If present, all other keys are ignored. | `bool` | |
+| location | Location of the energy deposition | `float` | cm |
+| scale_height | Spatial scale of the energy deposition | `float` | cm |
+| rate | Maximum heating rate | `float` |$\mathrm{erg}\,\mathrm{cm}^{-3}\,\mathrm{s}^{-1}$ |
 
 Each entry in the `events` list should be a dictionary with the following seven keys (and appropriate units) corresponding to each heating event,
 
@@ -483,7 +383,8 @@ Each entry in the `events` list should be a dictionary with the following seven 
 | decouple_ionization_state_solver | | `bool` | |
 | density_dependent_rates | | `bool` | |
 | optically_thick_radiation | If true, include optically thick lines in radiative losses | `bool` | |
-| nlte_chromosphere | | `bool` | |
+| nlte_chromosphere | Treat the chromosphere as being in non-local thermal equilibrium. **NOTE: This may significantly increase the computation time.** | `bool` | |
+| minimum_density_limit | Density floor of the corona. This option is required if nlte_chromosphere is true | `float` | cm$^{-3}$ |
 | ranges_dataset | Temperature and density ranges dataset | `str` | |
 | emissivity_dataset | Name of emissivity dataset | `str` | |
 | abundance_dataset | Name of abundance dataset | `str` | |
@@ -526,9 +427,8 @@ elements = ['hydrogen', 'He', 'c', 26]
 |:----:|:------------|:----:|:-----:|
 | adapt | Toggle using adaptive mesh refinement | `bool` | |
 | adapt_every_n_time_steps | How often to adapt on time step | `int` | |
-| minimum_cells | | `int` | |
-| maximum_cells | | `int` | |
-| maximum_refinement_level | How much to refine adaptive grid; see [BC13] | `int` | |
+| maximum_cell_width | The maximum allowed width of any grid cell | `float` | cm |
+| maximum_refinement_level | The maximum number of times a grid cell can be split; see [BC13] | `int` | |
 | minimum_delta_s | Smallest allowed grid cell width in the initial setup | `float` | cm |
 | maximum_variation | | `float` | |
 | refine_on_density | | `bool` | |

@@ -7,8 +7,8 @@ import plasmapy.atomic
 
 from .util import MissingParameter
 
-__all__ = ['units_filter', 'log10_filter', 'get_atomic_symbol', 'get_atomic_number',
-           'sort_elements', 'is_required']
+__all__ = ['units_filter', 'log10_filter', 'get_atomic_symbol',
+           'get_atomic_number', 'sort_elements', 'is_required']
 
 
 def units_filter(quantity, unit):
@@ -16,7 +16,8 @@ def units_filter(quantity, unit):
     Convert quantity to given units and extract value
     """
     if not isinstance(quantity, u.Quantity):
-        raise u.UnitsError(f'Value must be a quantity with units compatible with {unit}')
+        raise u.UnitsError(
+            f'Value must be a quantity with units compatible with {unit}')
     return quantity.to(unit).value
 
 

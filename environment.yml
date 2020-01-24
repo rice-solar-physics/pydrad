@@ -2,13 +2,14 @@ name: hydrad_tools
 channels:
 - defaults
 dependencies:
-- python=3.6
+- python
+- pip
 - numpy
 - scipy
 - matplotlib
 - astropy
 - Jinja2
 - pip:
-  - plasmapy
   - asdf
+  - git+git://github.com/plasmapy/plasmapy.git  # dont use master once a new release is pushed
   

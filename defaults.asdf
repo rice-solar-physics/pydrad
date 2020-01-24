@@ -34,20 +34,20 @@ grid:
   adapt_every_n_time_steps: 10
   enforce_conservation: true
   linear_restriction: false
-  maximum_cells: 30000
+  maximum_cell_width: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'Mm', value: 1.0} 
   maximum_fractional_difference: 0.1
   maximum_refinement_level: 12
   maximum_variation: 0.1
-  minimum_cells: 150
   minimum_delta_s: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm', value: 1.0}
   minimum_fractional_difference: 0.05
   refine_on_density: true
   refine_on_electron_energy: true
   refine_on_hydrogen_energy: false
 heating:
-  alfven_wave_heating: false
-  background_heating: true
-  beam_heating: false
+  alfven_wave: false
+  background:
+    use_initial_conditions: true
+  beam: false
   events: []
   heat_electrons: true
 initial_conditions:

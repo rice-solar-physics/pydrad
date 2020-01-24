@@ -10,6 +10,7 @@ import shutil
 import subprocess
 from distutils.dir_util import copy_tree
 
+import numpy as np
 import astropy.units as u
 from jinja2 import Environment, PackageLoader, ChoiceLoader, DictLoader
 import asdf
@@ -128,7 +129,7 @@ class Configure(object):
             ('Initial_Conditions/source/config.h',
              self.initial_conditions_header),
             ('Initial_Conditions/config/initial_conditions.cfg',
-             self.intial_conditions_cfg),
+             self.initial_conditions_cfg),
             ('Radiation_Model/source/config.h',
              self.radiation_header),
             ('Radiation_Model/config/elements_eq.cfg',
@@ -171,7 +172,7 @@ class Configure(object):
                 root_dir,
                 verbose=verbose,
             )
-            if self.config['heating']['background_heating']:
+            if self.config['heating']['background'].get('use_initial_conditions', False):
                 self.equilibrium_heating_rate = self.get_equilibrium_heating_rate(root_dir)
 
     def get_equilibrium_heating_rate(self, root_dir):
@@ -249,7 +250,7 @@ class Configure(object):
         if hasattr(self, '_freeze_date') and self._freeze_date:
             return self._date
         else:
-            return datetime.datetime.now().strftime('%Y-%m-%d_%H.%M.%S')
+            return datetime.datetime.utcnow().strftime('%Y-%m-%d_%H.%M.%S UTC')
 
     @property
     def templates(self,):
@@ -266,7 +267,7 @@ class Configure(object):
             return f.read()
 
     @property
-    def intial_conditions_cfg(self):
+    def initial_conditions_cfg(self):
         """
         Initial conditions configuration file,
         `Initial_Conditions/config/initial_conditions.cfg`
@@ -283,6 +284,8 @@ class Configure(object):
         """
         return self.env.get_template('initial_conditions.config.h').render(
             date=self.date,
+            maximum_cells=self.maximum_cells,
+            minimum_cells=self.minimum_cells,
             **self.config
         )
 
@@ -310,18 +313,33 @@ class Configure(object):
     def heating_cfg(self):
         """
         Heating model configuration file, `Heating_Model/config/heating.cfg`.
-        If background heating is enabled, you must run the initial conditions
-        and set the `equilibrium_heating_rate` attribute first.
+        If background heating is enabled and you want to use the equilibrium
+        values, you must run the initial conditions and set the
+        `equilibrium_heating_rate` attribute first.
         """
-        if self.config['heating']['background_heating']:
-            if not hasattr(self, 'equilibrium_heating_rate'):
-                raise AttributeError('No background heating found')
-            background_heating_rate = self.equilibrium_heating_rate
+        if self.config['heating'].get('background', False):
+            bg = self.config['heating']['background']
+            if bg.get('use_initial_conditions', False):
+                background = {
+                    'rate': self.equilibrium_heating_rate,
+                    'location': self.config['initial_conditions']['heating_location'],
+                    'scale_height': self.config['initial_conditions']['heating_scale_height'],
+                }
+            elif all((k in bg for k in ('rate', 'location', 'scale_height'))):
+                background = self.config['heating']['background']
+            else:
+                raise ValueError(
+                    'Set use_initial_conditions to True or set parameters '
+                    'explicitly in order to use background heating.')
         else:
-            background_heating_rate = None
+            background = {
+                'rate': 0*u.erg/(u.cm**3 * u.s),
+                'location': 0*u.cm,
+                'scale_height': 0*u.cm
+            }
         return self.env.get_template('heating.cfg').render(
             date=self.date,
-            background_heating_rate=background_heating_rate,
+            background=background,
             **self.config
         )
 
@@ -402,3 +420,33 @@ class Configure(object):
             date=self.date,
             coefficients=self.config['general']['poly_fit_gravity']
         )
+
+    @property
+    def minimum_cells(self):
+        """
+        Minimum allowed number of grid cells,
+        $n_{min}=\lceil L/\Delta s_{max}\\rceil$, where $L$ is the loop
+        length and $\Delta s_{max}$ is the maximum allowed grid cell width.
+        """
+        n_min = self.config['general']['loop_length'] / self.config['grid']['maximum_cell_width']
+        if n_min.decompose().unit != u.dimensionless_unscaled:
+            raise u.UnitConversionError(
+                f'''Maximum cell width must be able to be converted to 
+                {self.config['general']['loop_length'].unit}''')
+        return int(np.ceil(n_min.decompose()))
+
+    @property
+    def maximum_cells(self):
+        """
+        Maximum allowed number of grid cells,
+        $n_{max}=\lfloor 2^{L_R}/n_{min}\\rfloor$, where $L_R$ is the maximum
+        refinement level and $n_{min}$ is the minimum allowed number of
+        grid cells.
+        """
+        n_min = self.config['general']['loop_length'] / self.config['grid']['maximum_cell_width']
+        if n_min.decompose().unit != u.dimensionless_unscaled:
+            raise u.UnitConversionError(
+                f'''Maximum cell width must be able to be converted to
+                {self.config['general']['loop_length'].unit}''')
+        return int(np.floor(
+            2**self.config['grid']['maximum_refinement_level'] * n_min))

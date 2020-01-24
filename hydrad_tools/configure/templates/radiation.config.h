@@ -20,8 +20,14 @@
 {%- endif %}
 {% endif %}
 {% if radiation.density_dependent_rates -%}#define DENSITY_DEPENDENT_RATES{%- endif %}
-{% if radiation.optically_thick_radiation -%}#define OPTICALLY_THICK_RADIATION{%- endif %}
-{% if radiation.nlte_chromosphere -%}#define NLTE_CHROMOSPHERE{%- endif %}
+{% if radiation.optically_thick_radiation -%}
+#define OPTICALLY_THICK_RADIATION
+{% if radiation.nlte_chromosphere -%}
+#define NLTE_CHROMOSPHERE
+#define MIN_DENSITY_LIMIT {{ radiation.minimum_density_limit | is_required | units_filter('cm^-3') }}
+{%- endif %}
+{%- endif %}
+
 #include "../../HYDRAD/source/collisions.h"
 // **** End of Physics ****
 
