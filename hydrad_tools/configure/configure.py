@@ -425,7 +425,7 @@ class Configure(object):
     def minimum_cells(self):
         """
         Minimum allowed number of grid cells,
-        $n_{min}=\lfloor L/\Delta s_{max}\\rfloor$, where $L$ is the loop
+        $n_{min}=\lceil L/\Delta s_{max}\\rceil$, where $L$ is the loop
         length and $\Delta s_{max}$ is the maximum allowed grid cell width.
         """
         n_min = self.config['general']['loop_length'] / self.config['grid']['maximum_cell_width']
@@ -439,7 +439,7 @@ class Configure(object):
     def maximum_cells(self):
         """
         Maximum allowed number of grid cells,
-        $n_{max}=\lceil 2^{L_R}/n_{min}\\rceil$, wher $L_R$ is the maximum
+        $n_{max}=\lfloor 2^{L_R}/n_{min}\\rfloor$, where $L_R$ is the maximum
         refinement level and $n_{min}$ is the minimum allowed number of
         grid cells.
         """
