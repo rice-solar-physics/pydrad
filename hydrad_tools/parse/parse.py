@@ -31,8 +31,17 @@ class Strand(object):
 
     def __init__(self, hydrad_root, **kwargs):
         self.hydrad_root = hydrad_root
-        # NOTE: time is really only specified when slicing a Strand
-        self._time = kwargs.pop('time', get_master_time(self.hydrad_root))
+        # NOTE: time is only specified when slicing a Strand. When not
+        # slicing, it should be read from the results.
+        self._time = kwargs.pop('time', None)
+        if self._time is None:
+            self._time = get_master_time(self.hydrad_root)
+        # This is different than time depending on the slicing. We allow this
+        # to be passed as a kwarg to avoid repeatedly reading multiple files
+        # when slicing.
+        self._master_time = kwargs.pop('master_time', None)
+        if self._master_time is None:
+            self._master_time = get_master_time(self.hydrad_root)
         self._profile_kwargs = kwargs
 
     def __repr__(self):
@@ -64,10 +73,14 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         # NOTE: This will throw an index error to stop iteration
         _ = self.time[index]
         if self.time[index].shape:  # empty if time[index] is a scalar
-            return Strand(self.hydrad_root, time=self.time[index],
+            return Strand(self.hydrad_root,
+                          time=self.time[index],
+                          master_time=self._master_time,
                           **self._profile_kwargs)
         else:
-            return Profile(self.hydrad_root, self.time[index],
+            return Profile(self.hydrad_root,
+                           self.time[index],
+                           master_time=self._master_time,
                            **self._profile_kwargs)
 
     def peek(self, start=0, stop=None, step=100, **kwargs):
@@ -101,6 +114,9 @@ class Profile(object):
         if time.shape:
             raise ValueError('time must be a scalar')
         self.time = time
+        self._master_time = kwargs.get('master_time')
+        if self._master_time is None:
+            self._master_time = get_master_time(self.hydrad_root)
         self._fname = os.path.join(
             hydrad_root, 'Results/profile{index:d}.{ext}')
         # Read results files
@@ -110,7 +126,7 @@ class Profile(object):
 
     @property
     def _index(self):
-        return np.where(self.time == get_master_time(self.hydrad_root))[0][0]
+        return np.where(self.time == self._master_time)[0][0]
 
     def __repr__(self):
         return f"""HYDRAD Timestep Profile
