@@ -5,6 +5,7 @@ import os
 import glob
 
 import numpy as np
+from scipy.interpolate import splev, splrep
 import astropy.units as u
 
 from hydrad_tools.visualize import plot_strand, animate_strand
@@ -96,6 +97,24 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         keyword arguments as #hydrad_tools.visualize.animate_strand
         """
         return animate_strand(self, start=start, stop=step, step=step, **kwargs)
+
+    def to_uniform_grid(self, name, delta_s: u.cm):
+        """
+        Calculate a given quantity on a uniform spatial grid at every time step
+
+        # Parameters
+        name (`str`): Name of quantity
+        delta_s (`astropy.units.Quantity`): Spatial resolution of uniform grid
+        """
+        s_uniform = np.arange(0, self.loop_length.to(u.cm).value, delta_s.to(u.cm).value)*u.cm
+        q_uniform = np.zeros(self.time.shape+s_uniform.shape)
+        # Interpolate each quantity at each timestep
+        for i, p in enumerate(self):
+            q = getattr(p, name)
+            tsk = splrep(p.coordinate.to(u.cm).value, q.value,)
+            q_uniform[i, :] = splev(s_uniform.value, tsk, ext=0)
+
+        return s_uniform, q_uniform * q.unit
 
 
 class Profile(object):
