@@ -5,11 +5,21 @@ import os
 import glob
 
 import numpy as np
+from scipy.interpolate import splev, splrep
 import astropy.units as u
 
 from hydrad_tools.visualize import plot_strand, animate_strand
 
 __all__ = ['Strand', 'Profile']
+
+
+def get_master_time(hydrad_root):
+    amr_files = glob.glob(os.path.join(hydrad_root, 'Results/profile*.amr'))
+    time = []
+    for af in amr_files:
+        with open(af, 'r') as f:
+            time.append(float(f.readline()))
+    return sorted(time) * u.s
 
 
 class Strand(object):
@@ -22,16 +32,18 @@ class Strand(object):
 
     def __init__(self, hydrad_root, **kwargs):
         self.hydrad_root = hydrad_root
+        # NOTE: time is only specified when slicing a Strand. When not
+        # slicing, it should be read from the results.
+        self._time = kwargs.pop('time', None)
+        if self._time is None:
+            self._time = get_master_time(self.hydrad_root)
+        # This is different than time depending on the slicing. We allow this
+        # to be passed as a kwarg to avoid repeatedly reading multiple files
+        # when slicing.
+        self._master_time = kwargs.pop('master_time', None)
+        if self._master_time is None:
+            self._master_time = get_master_time(self.hydrad_root)
         self._profile_kwargs = kwargs
-        self._time = self._read_time()
-
-    def _read_time(self):
-        amr_files = glob.glob(os.path.join(self.hydrad_root, 'Results/profile*.amr'))
-        time = []
-        for af in amr_files:
-            with open(af, 'r') as f:
-                time.append(float(f.readline()))
-        return sorted(time) * u.s
 
     def __repr__(self):
         return f"""HYDrodynamics and RADiation (HYDRAD) Code
@@ -59,10 +71,18 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         return loop_length * u.cm
 
     def __getitem__(self, index):
-        if index < self.time.shape[0]:
-            return Profile(self.hydrad_root, index, **self._profile_kwargs)
+        # NOTE: This will throw an index error to stop iteration
+        _ = self.time[index]
+        if self.time[index].shape:  # empty if time[index] is a scalar
+            return Strand(self.hydrad_root,
+                          time=self.time[index],
+                          master_time=self._master_time,
+                          **self._profile_kwargs)
         else:
-            raise IndexError
+            return Profile(self.hydrad_root,
+                           self.time[index],
+                           master_time=self._master_time,
+                           **self._profile_kwargs)
 
     def peek(self, start=0, stop=None, step=100, **kwargs):
         """
@@ -73,34 +93,64 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
 
     def animate(self, start=0, stop=None, step=100, **kwargs):
         """
-        Simple animation of time-dependent loop profiles. Takes the same keyword
-        arguments as #hydrad_tools.visualize.animate_strand
+        Simple animation of time-dependent loop profiles. Takes the same
+        keyword arguments as #hydrad_tools.visualize.animate_strand
         """
         return animate_strand(self, start=start, stop=step, step=step, **kwargs)
+
+    def to_uniform_grid(self, name, delta_s: u.cm):
+        """
+        Calculate a given quantity on a uniform spatial grid at every time step
+
+        # Parameters
+        name (`str`): Name of quantity
+        delta_s (`astropy.units.Quantity`): Spatial resolution of uniform grid
+        """
+        s_uniform = np.arange(0, self.loop_length.to(u.cm).value, delta_s.to(u.cm).value)*u.cm
+        q_uniform = np.zeros(self.time.shape+s_uniform.shape)
+        # Interpolate each quantity at each timestep
+        for i, p in enumerate(self):
+            q = getattr(p, name)
+            tsk = splrep(p.coordinate.to(u.cm).value, q.value,)
+            q_uniform[i, :] = splev(s_uniform.value, tsk, ext=0)
+
+        return s_uniform, q_uniform * q.unit
 
 
 class Profile(object):
     """
-    Container for HYDRAD results at a given timestep. Typically accessed through #Strand
+    Container for HYDRAD results at a given timestep. Typically accessed
+    through #Strand
 
     # Parameters
     hydrad_root (`str`): Path to HYDRAD directory
-    index (`int`): Timestep index
+    time (`int`): Timestep index
     """
 
-    def __init__(self, hydrad_root, index, **kwargs):
+    @u.quantity_input
+    def __init__(self, hydrad_root, time: u.s, **kwargs):
         self.hydrad_root = hydrad_root
-        self._index = index
-        self._fname = os.path.join(hydrad_root, 'Results/profile{index:d}.{ext}')
+        if time.shape:
+            raise ValueError('time must be a scalar')
+        self.time = time
+        self._master_time = kwargs.get('master_time')
+        if self._master_time is None:
+            self._master_time = get_master_time(self.hydrad_root)
+        self._fname = os.path.join(
+            hydrad_root, 'Results/profile{index:d}.{ext}')
         # Read results files
         self._read_phy()
         if kwargs.get('read_amr', True):
             self._read_amr()
 
+    @property
+    def _index(self):
+        return np.where(self.time == self._master_time)[0][0]
+
     def __repr__(self):
         return f"""HYDRAD Timestep Profile
 --------------
-Filename: {self._fname.format(index=self._index,ext='phy')}
+Filename: {self._fname.format(index=self._index, ext='phy')}
 Timestep #: {self._index}"""
 
     def _read_phy(self):

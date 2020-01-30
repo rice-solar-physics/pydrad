@@ -218,6 +218,9 @@ class Configure(object):
             files += [('poly_fit.gravity', self.poly_fit_gravity)]
         if 'poly_fit_magnetic_field' in self.config['general']:
             files += [('poly_fit.magnetic_field', self.poly_fit_magnetic_field)]
+        if self.config['heating'].get('beam', False):
+            files += [('Heating_Model/config/beam_heating_model.cfg',
+                       self.beam_heating_cfg)]
         for filename, filestring in files:
             with open(os.path.join(root_dir, filename), 'w') as f:
                 f.write(filestring)
@@ -351,6 +354,16 @@ class Configure(object):
         return self.env.get_template('heating.config.h').render(
             date=self.date,
             **self.config
+        )
+
+    @property
+    def beam_heating_cfg(self):
+        """
+        Beam heating model configuration file.
+        """
+        return self.env.get_template('heating.beam.cfg').render(
+            date=self.date,
+            **self.config,
         )
 
     @property

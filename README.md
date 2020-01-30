@@ -12,7 +12,7 @@ To install the package and the needed dependencies with the [Anaconda Python dis
 ```
 $ git clone https://github.com/rice-solar-physics/hydrad_tools.git
 $ cd hydrad_tools
-$ conda env create -f conda_environment.yml
+$ conda env create -f environment.yml
 $ source activate hydrad_tools
 $ python setup.py install
 ```
