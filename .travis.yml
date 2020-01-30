@@ -35,7 +35,7 @@ env:
     - PYTHON_VERSION=3.6
     - NUMPY_VERSION=stable
     - ASTROPY_VERSION=stable
-    - PIP_DEPENDENCIES='plasmapy asdf mkdocs mkdocs-material doctr pydoc-markdown==2.0.2 pytest-cov coveralls'
+    - PIP_DEPENDENCIES='plasmapy[theory] asdf mkdocs mkdocs-material doctr pydoc-markdown==2.0.2 pytest-cov coveralls'
     - CONDA_DEPENDENCIES='scipy matplotlib Jinja2 pytest'
     - EVENT_TYPE='pull_request push cron'
     - secure: "TxaoghfKEwqAL5s2XhWXhPj9lrVptH5Z89okaUqVlsnCCKP65RcJA0WnklRNKdRHL/imo9Ch9BUVySIbeBdnBvpq0zctWFkwLBMOm16nPK/v93C5CnJm/lUkeHF6ymhIB9A3zPLNCvElEQUGBOMaJGVQpyCvIBj4kGpI1wliQTwvn6ieCVeVxa6xbswZYxixGw3TL4Fk+/ZoGoXnMkp4OfHhttfmLRZ5lsVrOJO9DJvf/OWhvkxdHnDDZyo3ZbdyacdpLztgwRtsiteGUR0UOq5qTyH7D92GTYwPVLk0WTJpJUsnxp0LypwD4OywUAmM2f7PkDl2GmcGD1wcxxvyb1xeKT+wfh61Z92bRlkpJ7t4XVqUUhncJRSDa6XM2AQLwKP9XyTNvcl+r2onuD7oFNadPdSjeTfTqOVZPVLDyjIogK6Co6oe6Xg27qzvp93Caz+RLzXHVgeaavzIDXtJj14xVZhZh4vXQi6EigSZZL3A1VTXy+gpI0lTvt5/iHBmxs9B2t0uBdUZfiqQxvjXzZ6oVl8NJ/Uen1B8O8SzVjyvE2Ubxd//NJY0vPKoYOps/NYtL2vMCTsya/MrOtUrJVwJRIMPAr1fzrpx9d38a/mlcbx0WKZcst6ClLziQHauAaNKpbYOW9gjV/7Iherj8BWJfAV5v834zSRVcCWC+wk="

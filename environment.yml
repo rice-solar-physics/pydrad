@@ -11,5 +11,5 @@ dependencies:
 - Jinja2
 - pip:
   - asdf
-  - git+git://github.com/plasmapy/plasmapy.git  # dont use master once a new release is pushed
+  - plasmapy[theory]
   
