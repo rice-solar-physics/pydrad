@@ -9,6 +9,25 @@ import matplotlib.colors
 __all__ = ['plot_strand']
 
 
+def plot_time_distance(strand, name, **kwargs):
+    """
+    Make a time-distance plot for a particular quantity
+
+    # Parameters
+    strand (`#hydrad_tools.parse.Strand`):
+    name (`str`): Name of quantity
+    """
+    ...
+
+
+def _setup_time_distance_figure():
+    ...
+
+
+def _setup_time_distance_axis():
+    ...
+
+
 def plot_strand(strand, start=0, stop=None, step=1, **kwargs):
     """
     Plot hydrodynamic quantities at multiple timesteps
@@ -42,7 +61,8 @@ def plot_strand(strand, start=0, stop=None, step=1, **kwargs):
 
 def _setup_figure(profile, limits, **kwargs):
     # Setup frame
-    fig, axes = plt.subplots(2, 2, figsize=kwargs.get('figsize', (10, 10)), sharex=True)
+    fig, axes = plt.subplots(
+        2, 2, figsize=kwargs.get('figsize', (10, 10)), sharex=True)
     # Limits
     axes[0, 0].set_ylim(limits.get('temperature', (0, 15)))
     axes[0, 1].set_ylim(limits.get('density', (1e8, 1e13)))
@@ -63,15 +83,45 @@ def _setup_figure(profile, limits, **kwargs):
 
 
 def _plot_profile(profile, axes, **kwargs):
-    line1a, = axes[0, 0].plot(profile.coordinate.to(u.cm), profile.electron_temperature.to(u.MK),
-                              **kwargs, ls='-')
-    line1b, = axes[0, 0].plot(profile.coordinate.to(u.cm), profile.ion_temperature.to(u.MK),
-                              **kwargs, ls='--')
-    line2a, = axes[0, 1].plot(profile.coordinate.to(u.cm), profile.electron_density,
-                              **kwargs, ls='-')
-    line2b, = axes[0, 1].plot(profile.coordinate.to(u.cm), profile.ion_density, **kwargs, ls='--')
-    line3a, = axes[1, 0].plot(profile.coordinate.to(u.cm), profile.electron_pressure,
-                              **kwargs, ls='-')
-    line3b, = axes[1, 0].plot(profile.coordinate.to(u.cm), profile.ion_pressure, **kwargs, ls='--')
-    line4, = axes[1, 1].plot(profile.coordinate.to(u.cm), profile.velocity, **kwargs)
+    line1a, = axes[0, 0].plot(
+        profile.coordinate.to(u.cm),
+        profile.electron_temperature.to(u.MK),
+        **kwargs,
+        ls='-'
+    )
+    line1b, = axes[0, 0].plot(
+        profile.coordinate.to(u.cm),
+        profile.ion_temperature.to(u.MK),
+        **kwargs,
+        ls='--'
+    )
+    line2a, = axes[0, 1].plot(
+        profile.coordinate.to(u.cm),
+        profile.electron_density,
+        **kwargs,
+        ls='-'
+    )
+    line2b, = axes[0, 1].plot(
+        profile.coordinate.to(u.cm),
+        profile.ion_density,
+        **kwargs,
+        ls='--'
+    )
+    line3a, = axes[1, 0].plot(
+        profile.coordinate.to(u.cm),
+        profile.electron_pressure,
+        **kwargs,
+        ls='-'
+    )
+    line3b, = axes[1, 0].plot(
+        profile.coordinate.to(u.cm),
+        profile.ion_pressure,
+        **kwargs,
+        ls='--'
+    )
+    line4, = axes[1, 1].plot(
+        profile.coordinate.to(u.cm),
+        profile.velocity,
+        **kwargs
+    )
     return line1a, line1b, line2a, line2b, line3a, line3b, line4
