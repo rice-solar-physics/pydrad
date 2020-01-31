@@ -1,12 +1,12 @@
 # Site Info
-site_name: hydrad_tools
+site_name: pydrad
 site_description: Tools for running and parsing HYDRAD simulations
 site_author: Will Barnes
-site_url: 'https://rice-solar-physics.github.io/hydrad_tools'
+site_url: 'https://rice-solar-physics.github.io/pydrad'
 
 # Repository
-repo_name: rice-solar-physics/hydrad_tools
-repo_url: https://github.com/rice-solar-physics/hydrad_tools
+repo_name: rice-solar-physics/pydrad
+repo_url: https://github.com/rice-solar-physics/pydrad
 
 # Navigation
 nav:
@@ -15,9 +15,9 @@ nav:
 - Parsing the Results: parse.md
 - Plotting: plot.md
 - API:
-  - hydrad_tools.configure: api/configure.md
-  - hydrad_tools.parse: api/parse.md
-  - hydrad_tools.visualize: api/visualize.md
+  - pydrad.configure: api/configure.md
+  - pydrad.parse: api/parse.md
+  - pydrad.visualize: api/visualize.md
 
 # Appearance
 theme:

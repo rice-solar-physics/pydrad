@@ -1,4 +1,4 @@
-# hydrad_tools
+# pydrad
 This package contains various helpers for configuring, parsing, and plotting HYDRAD simulations. The HYDrodynamics and RADiation model is a code for modeling the field-aligned dynamics of coronal loops.
 
 ## Installing this Package
@@ -23,12 +23,12 @@ $ pip install {package_name}
 Alternatively, you can create a conda environment with all of the needed dependencies using the conda environment file in the repository,
 ```shell
 $ conda create -f conda_environment.yml
-$ source activate hydrad_tools
+$ source activate pydrad
 ```
-Finally, install the hydrad_tools package,
+Finally, install the pydrad package,
 ```shell
-$ git clone https://github.com/rice-solar-physics/hydrad_tools.git
-$ cd hydrad_tools
+$ git clone https://github.com/rice-solar-physics/pydrad.git
+$ cd pydrad
 $ python setup.py install
 ```
 

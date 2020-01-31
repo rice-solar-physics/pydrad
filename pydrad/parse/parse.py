@@ -8,7 +8,7 @@ import numpy as np
 from scipy.interpolate import splev, splrep
 import astropy.units as u
 
-from hydrad_tools.visualize import plot_strand, animate_strand
+from pydrad.visualize import plot_strand, animate_strand
 
 __all__ = ['Strand', 'Profile']
 
@@ -87,14 +87,14 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
     def peek(self, start=0, stop=None, step=100, **kwargs):
         """
         Take a quick look at all profiles for the run on a single plot. Takes
-        the same keyword arguments as #hydrad_tools.visualize.plot_strand
+        the same keyword arguments as #pydrad.visualize.plot_strand
         """
         plot_strand(self, start=start, stop=stop, step=step, **kwargs)
 
     def animate(self, start=0, stop=None, step=100, **kwargs):
         """
         Simple animation of time-dependent loop profiles. Takes the same
-        keyword arguments as #hydrad_tools.visualize.animate_strand
+        keyword arguments as #pydrad.visualize.animate_strand
         """
         return animate_strand(self, start=start, stop=step, step=step, **kwargs)
 

@@ -1,15 +1,18 @@
-import os
 from distutils.core import setup
 
 setup(
-    name='hydrad_tools',
+    name='pydrad',
     license='MIT',
     version='0.1',
     author='Will Barnes',
-    url='https://github.com/rice-solar-physics/hydrad_tools',
-    package_data={'hydrad_tools': ['configure/templates/*']},
-    packages=['hydrad_tools', 'hydrad_tools.configure', 'hydrad_tools.parse',
-              'hydrad_tools.visualize'],
+    url='https://github.com/rice-solar-physics/pydrad',
+    package_data={'pydrad': ['configure/templates/*']},
+    packages=[
+        'pydrad',
+        'pydrad.configure',
+        'pydrad.parse',
+        'pydrad.visualize'
+    ],
     author_email='will.t.barnes@gmail.com',
     description='Tools for configuring and parsing HYDRAD simulations'
 )

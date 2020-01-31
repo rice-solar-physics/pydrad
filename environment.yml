@@ -1,4 +1,4 @@
-name: hydrad_tools
+name: pydrad
 channels:
 - defaults
 dependencies:
