@@ -14,7 +14,7 @@ def plot_strand(strand, start=0, stop=None, step=1, **kwargs):
     Plot hydrodynamic quantities at multiple timesteps
 
     # Parameters
-    strand (#hydrad_tools.parse.Strand): Loop strand object
+    strand (#pydrad.parse.Strand): Loop strand object
     start (`int`): Starting time index, optional
     stop (`int`): Final time index, optional
     step (`int`): Number of steps between successive timesteps

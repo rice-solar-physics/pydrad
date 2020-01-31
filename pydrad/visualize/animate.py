@@ -13,7 +13,7 @@ __all__ = ['animate_strand']
 def animate_strand(strand, start=0, stop=None, step=1, **kwargs):
     """
     Return a matplotlib animation of time-dependent hydrodynamic quantities of a
-    strand. Takes the same arguments as #hydrad_tools.visualize.plot_strand(). See the
+    strand. Takes the same arguments as #pydrad.visualize.plot_strand(). See the
     [matplotlib animation docs](https://matplotlib.org/api/animation_api.html) 
     for examples on how to write the movie to a file.
     """

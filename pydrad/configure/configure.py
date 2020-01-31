@@ -39,7 +39,7 @@ class Configure(object):
         self.config = copy.deepcopy(config)
         loader = ChoiceLoader([
             DictLoader(kwargs.get('templates', {})),
-            PackageLoader('hydrad_tools', 'configure/templates')
+            PackageLoader('pydrad', 'configure/templates')
         ])
         self.env = Environment(loader=loader)
         self.env.filters['units_filter'] = filters.units_filter
@@ -110,7 +110,7 @@ class Configure(object):
                 self.setup_initial_conditions(tmpdir, execute=True,
                                               verbose=verbose)
             self.setup_hydrad(tmpdir, verbose=verbose)
-            self.save_config(os.path.join(tmpdir, 'hydrad_tools_config.asdf'))
+            self.save_config(os.path.join(tmpdir, 'pydrad_config.asdf'))
             if name is None:
                 name = f'hydrad_{self.date}'
             output_dir = os.path.join(output_path, name)

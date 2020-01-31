@@ -5,10 +5,10 @@ HYDRAD prints all results to the `Results` directory in the main code directory.
 * `amr` -- data related to the adapative mesh
 * `trm` -- equation terms at each grid cell
 
-Parsing all of these files can be difficult. `hydrad_tools` provides a convenient object, `Strand`, for easily accessing the data associated with a particular HYDRAD run. To create a `Strand` object,
+Parsing all of these files can be difficult. `pydrad` provides a convenient object, `Strand`, for easily accessing the data associated with a particular HYDRAD run. To create a `Strand` object,
 
 ```python
->>> from hydrad_tools.parse import Strand
+>>> from pydrad.parse import Strand
 >>> s = Strand('/path/to/hydrad_dir')
 >>> s.time # simulation time array
 ```
