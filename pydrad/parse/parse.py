@@ -8,7 +8,7 @@ import numpy as np
 from scipy.interpolate import splev, splrep
 import astropy.units as u
 
-from pydrad.visualize import plot_strand, animate_strand
+from pydrad.visualize import plot_strand, plot_profile, animate_strand
 
 __all__ = ['Strand', 'Profile']
 
@@ -83,6 +83,17 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
                            self.time[index],
                            master_time=self._master_time,
                            **self._profile_kwargs)
+    
+    @property
+    def initial_conditions(self):
+        """
+        #Profile for the solutions to the hydrostatic
+        equations used as initial conditions.
+        """
+        return InitialProfile(self.hydrad_root,
+                              0*u.s,
+                              master_time=self._master_time,
+                              **self._profile_kwargs)
 
     def peek(self, start=0, stop=None, step=100, **kwargs):
         """
@@ -136,12 +147,22 @@ class Profile(object):
         self._master_time = kwargs.get('master_time')
         if self._master_time is None:
             self._master_time = get_master_time(self.hydrad_root)
-        self._fname = os.path.join(
-            hydrad_root, 'Results/profile{index:d}.{ext}')
         # Read results files
         self._read_phy()
         if kwargs.get('read_amr', True):
             self._read_amr()
+
+    @property
+    def _amr_filename(self):
+        return os.path.join(
+            self.hydrad_root,
+            f'Results/profile{self._index:d}.amr')
+
+    @property
+    def _phy_filename(self):
+        return os.path.join(
+            self.hydrad_root,
+            f'Results/profile{self._index:d}.phy')
 
     @property
     def _index(self):
@@ -149,22 +170,22 @@ class Profile(object):
 
     def __repr__(self):
         return f"""HYDRAD Timestep Profile
---------------
-Filename: {self._fname.format(index=self._index, ext='phy')}
+-----------------------
+Filename: {self._phy_filename}
 Timestep #: {self._index}"""
 
     def _read_phy(self):
         """
         Parse the hydrodynamics results file
         """
-        self.results = np.loadtxt(self._fname.format(index=self._index, ext='phy'))
+        self.results = np.loadtxt(self._phy_filename)
 
     def _read_amr(self):
         """
         Parse the adaptive mesh grid file
         """
         # TODO: Read other quantities from .amr file
-        with open(self._fname.format(index=self._index, ext='amr')) as f:
+        with open(self._amr_filename) as f:
             lines = f.readlines()
             self._grid_centers = np.zeros((int(lines[3]),))
             self._grid_widths = np.zeros((int(lines[3]),))
@@ -266,4 +287,19 @@ Timestep #: {self._index}"""
         """
         Quick look at profiles at at given timestep.
         """
-        plot_strand(self, start=self._index, stop=self._index+1, step=1, **kwargs)
+        plot_profile(self, **kwargs)
+
+
+class InitialProfile(Profile):
+
+    @property
+    def _amr_filename(self):
+        return os.path.join(
+            self.hydrad_root,
+            'Initial_Conditions/profiles/initial.amr')
+
+    @property
+    def _phy_filename(self):
+        return os.path.join(
+            self.hydrad_root,
+            'Initial_Conditions/profiles/initial.amr.phy')
