@@ -50,8 +50,11 @@ class Strand(object):
 -----------------------------------------
 Results path: {self.hydrad_root}
 Time interval: [{self.time[0]}, {self.time[-1]}]
-Number of profiles: {len(self.time)}
+Number of profiles: {len(self)}
 Loop length: {self.loop_length.to(u.Mm):.3f}"""
+
+    def __len__(self):
+        return self.time.shape[0]
 
     @property
     def time(self):
@@ -83,7 +86,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
                            self.time[index],
                            master_time=self._master_time,
                            **self._profile_kwargs)
-    
+
     @property
     def initial_conditions(self):
         """
@@ -95,19 +98,19 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
                               master_time=self._master_time,
                               **self._profile_kwargs)
 
-    def peek(self, start=0, stop=None, step=100, **kwargs):
+    def peek(self, **kwargs):
         """
         Take a quick look at all profiles for the run on a single plot. Takes
         the same keyword arguments as #pydrad.visualize.plot_strand
         """
-        plot_strand(self, start=start, stop=stop, step=step, **kwargs)
+        plot_strand(self, **kwargs)
 
-    def animate(self, start=0, stop=None, step=100, **kwargs):
+    def animate(self, **kwargs):
         """
         Simple animation of time-dependent loop profiles. Takes the same
         keyword arguments as #pydrad.visualize.animate_strand
         """
-        return animate_strand(self, start=start, stop=stop, step=step, **kwargs)
+        return animate_strand(self, **kwargs)
 
     def to_uniform_grid(self, name, delta_s: u.cm):
         """

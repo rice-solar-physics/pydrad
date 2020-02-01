@@ -1,7 +1,6 @@
 """
 Plotting methods to easily visualize HYDRAD results
 """
-import numpy as np
 import astropy.units as u
 import matplotlib.pyplot as plt
 import matplotlib.colors
@@ -28,34 +27,25 @@ def _setup_time_distance_axis():
     ...
 
 
-def plot_strand(strand, start=0, stop=None, step=1, **kwargs):
+def plot_strand(strand, limits=None, cmap='viridis', **kwargs):
     """
     Plot hydrodynamic quantities at multiple timesteps
 
     # Parameters
     strand (#pydrad.parse.Strand): Loop strand object
-    start (`int`): Starting time index, optional
-    stop (`int`): Final time index, optional
-    step (`int`): Number of steps between successive timesteps
     limits (`dict`): Set axes limits for hydrodynamic quantities, optional
     plot_kwargs (`dict`): Any keyword arguments used matplotlib.plot, optional
     figsize (`tuple`): Width and height of figure, optional
     """
-    if stop is None:
-        stop = strand.time.shape[0] + 1
-    limits = kwargs.get('limits', {})
-    if 'limits' in kwargs:
-        del kwargs['limits']
+    limits = {} if limits is None else limits
     plot_kwargs = kwargs.get('plot_kwargs', {})
     fig, axes = _setup_figure(strand[0], limits, **kwargs)
     colors = matplotlib.colors.LinearSegmentedColormap.from_list(
-        '', plt.get_cmap(kwargs.get('cmap', 'viridis')).colors,
-        N=strand.time[start:stop:step].shape[0])
+        '', plt.get_cmap(cmap).colors, N=len(strand))
     # NOTE: once strand indexing is fixed, we can index it directly
-    for i, t in enumerate(strand.time[start:stop:step]):
-        j = np.where(t == strand.time)[0][0]
+    for i, p in enumerate(strand):
         plot_kwargs['color'] = colors(i)
-        _ = _plot_profile(strand[j], axes, **plot_kwargs)
+        _ = _plot_profile(p, axes, **plot_kwargs)
     plt.show()
 
 
