@@ -6,7 +6,7 @@ import astropy.units as u
 import matplotlib.pyplot as plt
 import matplotlib.colors
 
-__all__ = ['plot_strand']
+__all__ = ['plot_strand', 'plot_profile']
 
 
 def plot_time_distance(strand, name, **kwargs):
@@ -56,6 +56,16 @@ def plot_strand(strand, start=0, stop=None, step=1, **kwargs):
         j = np.where(t == strand.time)[0][0]
         plot_kwargs['color'] = colors(i)
         _ = _plot_profile(strand[j], axes, **plot_kwargs)
+    plt.show()
+
+
+def plot_profile(profile, **kwargs):
+    limits = kwargs.get('limits', {})
+    if 'limits' in kwargs:
+        del kwargs['limits']
+    plot_kwargs = kwargs.get('plot_kwargs', {})
+    fig, axes = _setup_figure(profile, limits, **kwargs)
+    _plot_profile(profile, axes, **plot_kwargs)
     plt.show()
 
 
