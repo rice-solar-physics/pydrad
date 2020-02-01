@@ -107,7 +107,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         Simple animation of time-dependent loop profiles. Takes the same
         keyword arguments as #pydrad.visualize.animate_strand
         """
-        return animate_strand(self, start=start, stop=step, step=step, **kwargs)
+        return animate_strand(self, start=start, stop=stop, step=step, **kwargs)
 
     def to_uniform_grid(self, name, delta_s: u.cm):
         """
