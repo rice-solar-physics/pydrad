@@ -86,13 +86,13 @@ class Configure(object):
         """
         asdf.AsdfFile(self.config).write_to(filename)
 
-    def setup_simulation(self, output_path, base_path=None, name=None,
+    def setup_simulation(self, output_path, base_path=None,
                          verbose=True, run_initial_conditions=True):
         """
         Setup a HYDRAD simulation with desired outputs from a clean copy
 
         # Parameters
-        output_path (`str`): Directory in which to put new copy of HYDRAD
+        output_path (`str`): Path to new copy of HYDRAD
         base_path (`str`): Path to existing HYDRAD. If None (default), clone a
         new copy from GitHub (appropriate permissions required)
         name (`str`): Name of the output directory. If None (default), use
@@ -102,6 +102,8 @@ class Configure(object):
         conditions code
         """
         with tempfile.TemporaryDirectory() as tmpdir:
+            # NOTE: this is all done in a temp directory and then copied over
+            # so that if something fails, all the files are cleaned up
             if base_path is None:
                 git.Repo.clone_from(REMOTE_REPO, tmpdir)
             else:
@@ -111,10 +113,7 @@ class Configure(object):
                                               verbose=verbose)
             self.setup_hydrad(tmpdir, verbose=verbose)
             self.save_config(os.path.join(tmpdir, 'pydrad_config.asdf'))
-            if name is None:
-                name = f'hydrad_{self.date}'
-            output_dir = os.path.join(output_path, name)
-            shutil.copytree(tmpdir, output_dir)
+            shutil.copytree(tmpdir, output_path)
 
     def setup_initial_conditions(self, root_dir, execute=True, verbose=True):
         """
