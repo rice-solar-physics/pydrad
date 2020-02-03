@@ -56,6 +56,20 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
     def __len__(self):
         return self.time.shape[0]
 
+    def __getitem__(self, index):
+        # NOTE: This will throw an index error to stop iteration
+        _ = self.time[index]
+        if self.time[index].shape:  # empty if time[index] is a scalar
+            return Strand(self.hydrad_root,
+                          time=self.time[index],
+                          master_time=self._master_time,
+                          **self._profile_kwargs)
+        else:
+            return Profile(self.hydrad_root,
+                           self.time[index],
+                           master_time=self._master_time,
+                           **self._profile_kwargs)
+
     @property
     def time(self):
         """
@@ -72,20 +86,6 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
             tmp = f.readlines()
             loop_length = float(tmp[2])
         return loop_length * u.cm
-
-    def __getitem__(self, index):
-        # NOTE: This will throw an index error to stop iteration
-        _ = self.time[index]
-        if self.time[index].shape:  # empty if time[index] is a scalar
-            return Strand(self.hydrad_root,
-                          time=self.time[index],
-                          master_time=self._master_time,
-                          **self._profile_kwargs)
-        else:
-            return Profile(self.hydrad_root,
-                           self.time[index],
-                           master_time=self._master_time,
-                           **self._profile_kwargs)
 
     @property
     def initial_conditions(self):
@@ -112,23 +112,37 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         """
         return animate_strand(self, **kwargs)
 
-    def to_uniform_grid(self, name, delta_s: u.cm):
+    @u.quantity_input
+    def get_uniform_grid(self, delta_s: u.cm):
         """
-        Calculate a given quantity on a uniform spatial grid at every time step
+        Create a spatial grid with uniform spacing `delta_s`.
+        
+        # Parameters:
+        delta_s (`astropy.units.Quantity`): Spacing between each grid point
+        """
+        return np.arange(
+            0, self.loop_length.to(u.cm).value, delta_s.to(u.cm).value)*u.cm
+
+    def get_unique_grid():
+        all_coordinates = [p.coordinate.to(u.cm).value for p in self]
+        return np.unique(np.concatenate(all_coordinates).ravel()) * u.cm
+
+    def to_constant_grid(self, name, grid):
+        """
+        Interpolate a given quantity onto a spatial grid that is the same at
+        each time step.
 
         # Parameters
         name (`str`): Name of quantity
-        delta_s (`astropy.units.Quantity`): Spatial resolution of uniform grid
+        grid (`astropy.units.Quantity`): Spatial grid to interpolate onto
         """
-        s_uniform = np.arange(0, self.loop_length.to(u.cm).value, delta_s.to(u.cm).value)*u.cm
-        q_uniform = np.zeros(self.time.shape+s_uniform.shape)
-        # Interpolate each quantity at each timestep
+        q_uniform = np.zeros(self.time.shape+grid.shape)
         for i, p in enumerate(self):
             q = getattr(p, name)
             tsk = splrep(p.coordinate.to(u.cm).value, q.value,)
-            q_uniform[i, :] = splev(s_uniform.value, tsk, ext=0)
+            q_uniform[i, :] = splev(grid.to(u.cm).value, tsk, ext=0)
 
-        return s_uniform, q_uniform * q.unit
+        return q_uniform * q.unit
 
 
 class Profile(object):
@@ -288,7 +302,7 @@ Timestep #: {self._index}"""
 
     def peek(self, **kwargs):
         """
-        Quick look at profiles at at given timestep.
+        Quick look at profiles at a given timestep.
         """
         plot_profile(self, **kwargs)
 
