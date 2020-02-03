@@ -1,30 +1,51 @@
 """
 Plotting methods to easily visualize HYDRAD results
 """
+import numpy as np
 import astropy.units as u
 import matplotlib.pyplot as plt
 import matplotlib.colors
 
-__all__ = ['plot_strand', 'plot_profile']
+__all__ = ['plot_strand', 'plot_profile', 'plot_time_distance']
 
 
-def plot_time_distance(strand, name, **kwargs):
+@u.quantity_input
+def plot_time_distance(strand, quantities, delta_s: u.cm, **kwargs):
     """
-    Make a time-distance plot for a particular quantity
+    Make a time-distance plot for a particular quantity or
+    quantities on a uniform grid.
 
     # Parameters
     strand (`#hydrad_tools.parse.Strand`):
-    name (`str`): Name of quantity
+    quantities (`str`, `list`): Name of quantity or quantities to plot
     """
-    ...
-
-
-def _setup_time_distance_figure():
-    ...
-
-
-def _setup_time_distance_axis():
-    ...
+    grid = strand.get_uniform_grid(delta_s)
+    s_mesh, t_mesh = np.meshgrid(grid.value, strand.time.value,)
+    t_mesh = (t_mesh*strand.time.unit).to(kwargs.get('time_unit', 's'))
+    s_mesh = (s_mesh*grid.unit).to(kwargs.get('space_unit', 'cm'))
+    if type(quantities) is str:
+        quantities = [quantities]
+    fig, ax = plt.subplots(
+        len(quantities), 1,
+        figsize=kwargs.get('figsize', (10, 2.5*len(quantities))),
+        sharex=True,
+        sharey=True,
+    )
+    if len(quantities) == 1:
+        ax = [ax]
+    for i, q in enumerate(quantities):
+        q_uni = strand.to_constant_grid(q, grid)
+        im = ax[i].pcolormesh(
+            t_mesh.value,
+            s_mesh.value,
+            q_uni.value,
+            cmap=kwargs.get('cmap', 'plasma'),
+            norm=kwargs.get('norm', {}).get(q, None),
+        )
+        cbar = fig.colorbar(im, ax=ax[i])
+        cbar.ax.set_ylabel(f'{q} [{q_uni.unit}]')
+    ax[i].set_xlabel(f'$t$ [{t_mesh.unit}]')
+    ax[i].set_ylabel(f'$s$ [{s_mesh.unit}]')
 
 
 def plot_strand(strand, limits=None, cmap='viridis', **kwargs):

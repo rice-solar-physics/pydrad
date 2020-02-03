@@ -105,6 +105,9 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         """
         plot_strand(self, **kwargs)
 
+    def peek_time_distance(self, **kwargs):
+        ...
+
     def animate(self, **kwargs):
         """
         Simple animation of time-dependent loop profiles. Takes the same
@@ -127,7 +130,8 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         all_coordinates = [p.coordinate.to(u.cm).value for p in self]
         return np.unique(np.concatenate(all_coordinates).ravel()) * u.cm
 
-    def to_constant_grid(self, name, grid):
+    @u.quantity_input
+    def to_constant_grid(self, name, grid: u.cm):
         """
         Interpolate a given quantity onto a spatial grid that is the same at
         each time step.
@@ -137,10 +141,11 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         grid (`astropy.units.Quantity`): Spatial grid to interpolate onto
         """
         q_uniform = np.zeros(self.time.shape+grid.shape)
+        grid_cm = grid.to(u.cm).value
         for i, p in enumerate(self):
             q = getattr(p, name)
             tsk = splrep(p.coordinate.to(u.cm).value, q.value,)
-            q_uniform[i, :] = splev(grid.to(u.cm).value, tsk, ext=0)
+            q_uniform[i, :] = splev(grid_cm, tsk, ext=0)
 
         return q_uniform * q.unit
 
