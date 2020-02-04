@@ -13,7 +13,7 @@ To install the package and the needed dependencies with the [Anaconda Python dis
 $ git clone https://github.com/rice-solar-physics/pydrad.git
 $ cd pydrad
 $ conda env create -f environment.yml
-$ source activate pydrad
+$ conda activate pydrad
 $ python setup.py install
 ```
 
@@ -22,7 +22,7 @@ To run the tests and confirm that everything is working alright,
 $ pytest
 ``` 
 
-See the [docs](https://rice-solar-physics.github.io/pydrad/) for more info. Additionally, you will need access to the HYDRAD source code.
+See the [docs](https://rice-solar-physics.github.io/pydrad/) for more info. Additionally, **you will need access to the HYDRAD source code.**
 
 ## Help
 Create an issue if you run into any problems. Submit a PR if you would like to add any functionality.

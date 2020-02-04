@@ -8,7 +8,10 @@ import numpy as np
 from scipy.interpolate import splev, splrep
 import astropy.units as u
 
-from pydrad.visualize import plot_strand, animate_strand
+from pydrad.visualize import (plot_strand,
+                              plot_profile,
+                              animate_strand,
+                              plot_time_distance)
 
 __all__ = ['Strand', 'Profile']
 
@@ -50,8 +53,25 @@ class Strand(object):
 -----------------------------------------
 Results path: {self.hydrad_root}
 Time interval: [{self.time[0]}, {self.time[-1]}]
-Number of profiles: {len(self.time)}
+Number of profiles: {len(self)}
 Loop length: {self.loop_length.to(u.Mm):.3f}"""
+
+    def __len__(self):
+        return self.time.shape[0]
+
+    def __getitem__(self, index):
+        # NOTE: This will throw an index error to stop iteration
+        _ = self.time[index]
+        if self.time[index].shape:  # empty if time[index] is a scalar
+            return Strand(self.hydrad_root,
+                          time=self.time[index],
+                          master_time=self._master_time,
+                          **self._profile_kwargs)
+        else:
+            return Profile(self.hydrad_root,
+                           self.time[index],
+                           master_time=self._master_time,
+                           **self._profile_kwargs)
 
     @property
     def time(self):
@@ -70,51 +90,72 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
             loop_length = float(tmp[2])
         return loop_length * u.cm
 
-    def __getitem__(self, index):
-        # NOTE: This will throw an index error to stop iteration
-        _ = self.time[index]
-        if self.time[index].shape:  # empty if time[index] is a scalar
-            return Strand(self.hydrad_root,
-                          time=self.time[index],
-                          master_time=self._master_time,
-                          **self._profile_kwargs)
-        else:
-            return Profile(self.hydrad_root,
-                           self.time[index],
-                           master_time=self._master_time,
-                           **self._profile_kwargs)
-
-    def peek(self, start=0, stop=None, step=100, **kwargs):
+    @property
+    def initial_conditions(self):
         """
-        Take a quick look at all profiles for the run on a single plot. Takes
+        #Profile for the solutions to the hydrostatic
+        equations used as initial conditions.
+        """
+        return InitialProfile(self.hydrad_root,
+                              0*u.s,
+                              master_time=self._master_time,
+                              **self._profile_kwargs)
+
+    def peek(self, **kwargs):
+        """
+        Quick look at all profiles for the run on a single plot. Takes
         the same keyword arguments as #pydrad.visualize.plot_strand
         """
-        plot_strand(self, start=start, stop=stop, step=step, **kwargs)
+        plot_strand(self, **kwargs)
 
-    def animate(self, start=0, stop=None, step=100, **kwargs):
+    @u.quantity_input
+    def peek_time_distance(self, quantities, delta_s: u.cm, **kwargs):
+        """
+        Quick look at time-distance plots of various quantities. Takes
+        the same keyword arguments as #pydrad.visualize.plot_time_distance
+        """
+        plot_time_distance(self, quantities, delta_s, **kwargs)
+
+    def animate(self, **kwargs):
         """
         Simple animation of time-dependent loop profiles. Takes the same
         keyword arguments as #pydrad.visualize.animate_strand
         """
-        return animate_strand(self, start=start, stop=step, step=step, **kwargs)
+        return animate_strand(self, **kwargs)
 
-    def to_uniform_grid(self, name, delta_s: u.cm):
+    @u.quantity_input
+    def get_uniform_grid(self, delta_s: u.cm):
         """
-        Calculate a given quantity on a uniform spatial grid at every time step
+        Create a spatial grid with uniform spacing `delta_s`.
+        
+        # Parameters:
+        delta_s (`astropy.units.Quantity`): Spacing between each grid point
+        """
+        return np.arange(
+            0, self.loop_length.to(u.cm).value, delta_s.to(u.cm).value)*u.cm
+
+    def get_unique_grid():
+        all_coordinates = [p.coordinate.to(u.cm).value for p in self]
+        return np.unique(np.concatenate(all_coordinates).ravel()) * u.cm
+
+    @u.quantity_input
+    def to_constant_grid(self, name, grid: u.cm):
+        """
+        Interpolate a given quantity onto a spatial grid that is the same at
+        each time step.
 
         # Parameters
         name (`str`): Name of quantity
-        delta_s (`astropy.units.Quantity`): Spatial resolution of uniform grid
+        grid (`astropy.units.Quantity`): Spatial grid to interpolate onto
         """
-        s_uniform = np.arange(0, self.loop_length.to(u.cm).value, delta_s.to(u.cm).value)*u.cm
-        q_uniform = np.zeros(self.time.shape+s_uniform.shape)
-        # Interpolate each quantity at each timestep
+        q_uniform = np.zeros(self.time.shape+grid.shape)
+        grid_cm = grid.to(u.cm).value
         for i, p in enumerate(self):
             q = getattr(p, name)
             tsk = splrep(p.coordinate.to(u.cm).value, q.value,)
-            q_uniform[i, :] = splev(s_uniform.value, tsk, ext=0)
+            q_uniform[i, :] = splev(grid_cm, tsk, ext=0)
 
-        return s_uniform, q_uniform * q.unit
+        return q_uniform * q.unit
 
 
 class Profile(object):
@@ -136,12 +177,22 @@ class Profile(object):
         self._master_time = kwargs.get('master_time')
         if self._master_time is None:
             self._master_time = get_master_time(self.hydrad_root)
-        self._fname = os.path.join(
-            hydrad_root, 'Results/profile{index:d}.{ext}')
         # Read results files
         self._read_phy()
         if kwargs.get('read_amr', True):
             self._read_amr()
+
+    @property
+    def _amr_filename(self):
+        return os.path.join(
+            self.hydrad_root,
+            f'Results/profile{self._index:d}.amr')
+
+    @property
+    def _phy_filename(self):
+        return os.path.join(
+            self.hydrad_root,
+            f'Results/profile{self._index:d}.phy')
 
     @property
     def _index(self):
@@ -149,22 +200,22 @@ class Profile(object):
 
     def __repr__(self):
         return f"""HYDRAD Timestep Profile
---------------
-Filename: {self._fname.format(index=self._index, ext='phy')}
+-----------------------
+Filename: {self._phy_filename}
 Timestep #: {self._index}"""
 
     def _read_phy(self):
         """
         Parse the hydrodynamics results file
         """
-        self.results = np.loadtxt(self._fname.format(index=self._index, ext='phy'))
+        self.results = np.loadtxt(self._phy_filename)
 
     def _read_amr(self):
         """
         Parse the adaptive mesh grid file
         """
         # TODO: Read other quantities from .amr file
-        with open(self._fname.format(index=self._index, ext='amr')) as f:
+        with open(self._amr_filename) as f:
             lines = f.readlines()
             self._grid_centers = np.zeros((int(lines[3]),))
             self._grid_widths = np.zeros((int(lines[3]),))
@@ -264,6 +315,21 @@ Timestep #: {self._index}"""
 
     def peek(self, **kwargs):
         """
-        Quick look at profiles at at given timestep.
+        Quick look at profiles at a given timestep.
         """
-        plot_strand(self, start=self._index, stop=self._index+1, step=1, **kwargs)
+        plot_profile(self, **kwargs)
+
+
+class InitialProfile(Profile):
+
+    @property
+    def _amr_filename(self):
+        return os.path.join(
+            self.hydrad_root,
+            'Initial_Conditions/profiles/initial.amr')
+
+    @property
+    def _phy_filename(self):
+        return os.path.join(
+            self.hydrad_root,
+            'Initial_Conditions/profiles/initial.amr.phy')

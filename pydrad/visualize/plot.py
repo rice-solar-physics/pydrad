@@ -6,43 +6,89 @@ import astropy.units as u
 import matplotlib.pyplot as plt
 import matplotlib.colors
 
-__all__ = ['plot_strand']
+__all__ = ['plot_strand', 'plot_profile', 'plot_time_distance']
 
 
-def plot_strand(strand, start=0, stop=None, step=1, **kwargs):
+@u.quantity_input
+def plot_time_distance(strand, quantities, delta_s: u.cm, **kwargs):
+    """
+    Make a time-distance plot for a particular quantity or
+    quantities on a uniform grid.
+
+    # Parameters
+    strand (`#hydrad_tools.parse.Strand`):
+    quantities (`str`, `list`): Name of quantity or quantities to plot
+    norm (`dict`, optional): Dictionary of colormap normalizations; one per
+    quantity.
+    """
+    grid = strand.get_uniform_grid(delta_s)
+    s_mesh, t_mesh = np.meshgrid(grid.value, strand.time.value,)
+    t_mesh = (t_mesh*strand.time.unit).to(kwargs.pop('time_unit', 's'))
+    s_mesh = (s_mesh*grid.unit).to(kwargs.pop('space_unit', 'cm'))
+    if type(quantities) is str:
+        quantities = [quantities]
+    fig, ax = plt.subplots(
+        len(quantities), 1,
+        figsize=kwargs.pop('figsize', (10, 2.5*len(quantities))),
+        sharex=True,
+        sharey=True,
+    )
+    if len(quantities) == 1:
+        ax = [ax]
+    norm = kwargs.pop('norm', {})
+    cmap = kwargs.pop('cmap', None)
+    for i, q in enumerate(quantities):
+        q_uni = strand.to_constant_grid(q, grid)
+        im = ax[i].pcolormesh(
+            t_mesh.value,
+            s_mesh.value,
+            q_uni.value,
+            cmap='RdBu_r' if q == 'velocity' else cmap,
+            norm=norm.get(q, None),
+            **kwargs,
+        )
+        cbar = fig.colorbar(im, ax=ax[i])
+        cbar.ax.set_ylabel(f'{q} [{q_uni.unit}]')
+    ax[i].set_xlabel(f'$t$ [{t_mesh.unit}]')
+    ax[i].set_ylabel(f'$s$ [{s_mesh.unit}]')
+
+
+def plot_strand(strand, limits=None, cmap='viridis', **kwargs):
     """
     Plot hydrodynamic quantities at multiple timesteps
 
     # Parameters
     strand (#pydrad.parse.Strand): Loop strand object
-    start (`int`): Starting time index, optional
-    stop (`int`): Final time index, optional
-    step (`int`): Number of steps between successive timesteps
     limits (`dict`): Set axes limits for hydrodynamic quantities, optional
     plot_kwargs (`dict`): Any keyword arguments used matplotlib.plot, optional
     figsize (`tuple`): Width and height of figure, optional
     """
-    if stop is None:
-        stop = strand.time.shape[0] + 1
+    limits = {} if limits is None else limits
+    plot_kwargs = kwargs.get('plot_kwargs', {})
+    fig, axes = _setup_figure(strand[0], limits, **kwargs)
+    colors = matplotlib.colors.LinearSegmentedColormap.from_list(
+        '', plt.get_cmap(cmap).colors, N=len(strand))
+    # NOTE: once strand indexing is fixed, we can index it directly
+    for i, p in enumerate(strand):
+        plot_kwargs['color'] = colors(i)
+        _ = _plot_profile(p, axes, **plot_kwargs)
+    plt.show()
+
+
+def plot_profile(profile, **kwargs):
     limits = kwargs.get('limits', {})
     if 'limits' in kwargs:
         del kwargs['limits']
     plot_kwargs = kwargs.get('plot_kwargs', {})
-    fig, axes = _setup_figure(strand[0], limits, **kwargs)
-    colors = matplotlib.colors.LinearSegmentedColormap.from_list(
-        '', plt.get_cmap(kwargs.get('cmap', 'viridis')).colors,
-        N=strand.time[start:stop:step].shape[0])
-    # NOTE: once strand indexing is fixed, we can index it directly
-    for i, t in enumerate(strand.time[start:stop:step]):
-        j = np.where(t == strand.time)[0][0]
-        plot_kwargs['color'] = colors(i)
-        _ = _plot_profile(strand[j], axes, **plot_kwargs)
+    fig, axes = _setup_figure(profile, limits, **kwargs)
+    _plot_profile(profile, axes, **plot_kwargs)
     plt.show()
 
 
 def _setup_figure(profile, limits, **kwargs):
     # Setup frame
-    fig, axes = plt.subplots(2, 2, figsize=kwargs.get('figsize', (10, 10)), sharex=True)
+    fig, axes = plt.subplots(
+        2, 2, figsize=kwargs.get('figsize', (10, 10)), sharex=True)
     # Limits
     axes[0, 0].set_ylim(limits.get('temperature', (0, 15)))
     axes[0, 1].set_ylim(limits.get('density', (1e8, 1e13)))
@@ -63,15 +109,45 @@ def _setup_figure(profile, limits, **kwargs):
 
 
 def _plot_profile(profile, axes, **kwargs):
-    line1a, = axes[0, 0].plot(profile.coordinate.to(u.cm), profile.electron_temperature.to(u.MK),
-                              **kwargs, ls='-')
-    line1b, = axes[0, 0].plot(profile.coordinate.to(u.cm), profile.ion_temperature.to(u.MK),
-                              **kwargs, ls='--')
-    line2a, = axes[0, 1].plot(profile.coordinate.to(u.cm), profile.electron_density,
-                              **kwargs, ls='-')
-    line2b, = axes[0, 1].plot(profile.coordinate.to(u.cm), profile.ion_density, **kwargs, ls='--')
-    line3a, = axes[1, 0].plot(profile.coordinate.to(u.cm), profile.electron_pressure,
-                              **kwargs, ls='-')
-    line3b, = axes[1, 0].plot(profile.coordinate.to(u.cm), profile.ion_pressure, **kwargs, ls='--')
-    line4, = axes[1, 1].plot(profile.coordinate.to(u.cm), profile.velocity, **kwargs)
+    line1a, = axes[0, 0].plot(
+        profile.coordinate.to(u.cm),
+        profile.electron_temperature.to(u.MK),
+        **kwargs,
+        ls='-'
+    )
+    line1b, = axes[0, 0].plot(
+        profile.coordinate.to(u.cm),
+        profile.ion_temperature.to(u.MK),
+        **kwargs,
+        ls='--'
+    )
+    line2a, = axes[0, 1].plot(
+        profile.coordinate.to(u.cm),
+        profile.electron_density,
+        **kwargs,
+        ls='-'
+    )
+    line2b, = axes[0, 1].plot(
+        profile.coordinate.to(u.cm),
+        profile.ion_density,
+        **kwargs,
+        ls='--'
+    )
+    line3a, = axes[1, 0].plot(
+        profile.coordinate.to(u.cm),
+        profile.electron_pressure,
+        **kwargs,
+        ls='-'
+    )
+    line3b, = axes[1, 0].plot(
+        profile.coordinate.to(u.cm),
+        profile.ion_pressure,
+        **kwargs,
+        ls='--'
+    )
+    line4, = axes[1, 1].plot(
+        profile.coordinate.to(u.cm),
+        profile.velocity,
+        **kwargs
+    )
     return line1a, line1b, line2a, line2b, line3a, line3b, line4
