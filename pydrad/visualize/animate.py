@@ -1,7 +1,6 @@
 """
 Animate evolution of hydrodynamic quantities
 """
-import numpy as np
 from matplotlib.animation import FuncAnimation
 import astropy.units as u
 
@@ -28,7 +27,7 @@ def animate_strand(strand, **kwargs):
     l1a, l1b, l2a, l2b, l3a, l3b, l4 = _plot_profile(strand[0],
                                                      axes,
                                                      **plot_kwargs)
-    # Define updater
+    # Update function
     def update_plot(i):
         profile = strand[i]
         l1a.set_data(profile.coordinate.to(u.cm), profile.electron_temperature.to(u.MK))
