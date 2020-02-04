@@ -8,7 +8,10 @@ import numpy as np
 from scipy.interpolate import splev, splrep
 import astropy.units as u
 
-from pydrad.visualize import plot_strand, plot_profile, animate_strand
+from pydrad.visualize import (plot_strand,
+                              plot_profile,
+                              animate_strand,
+                              plot_time_distance)
 
 __all__ = ['Strand', 'Profile']
 
@@ -100,13 +103,18 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
 
     def peek(self, **kwargs):
         """
-        Take a quick look at all profiles for the run on a single plot. Takes
+        Quick look at all profiles for the run on a single plot. Takes
         the same keyword arguments as #pydrad.visualize.plot_strand
         """
         plot_strand(self, **kwargs)
 
-    def peek_time_distance(self, **kwargs):
-        ...
+    @u.quantity_input
+    def peek_time_distance(self, quantities, delta_s: u.cm, **kwargs):
+        """
+        Quick look at time-distance plots of various quantities. Takes
+        the same keyword arguments as #pydrad.visualize.plot_time_distance
+        """
+        plot_time_distance(self, quantities, delta_s, **kwargs)
 
     def animate(self, **kwargs):
         """

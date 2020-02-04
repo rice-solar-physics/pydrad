@@ -18,29 +18,34 @@ def plot_time_distance(strand, quantities, delta_s: u.cm, **kwargs):
     # Parameters
     strand (`#hydrad_tools.parse.Strand`):
     quantities (`str`, `list`): Name of quantity or quantities to plot
+    norm (`dict`, optional): Dictionary of colormap normalizations; one per
+    quantity.
     """
     grid = strand.get_uniform_grid(delta_s)
     s_mesh, t_mesh = np.meshgrid(grid.value, strand.time.value,)
-    t_mesh = (t_mesh*strand.time.unit).to(kwargs.get('time_unit', 's'))
-    s_mesh = (s_mesh*grid.unit).to(kwargs.get('space_unit', 'cm'))
+    t_mesh = (t_mesh*strand.time.unit).to(kwargs.pop('time_unit', 's'))
+    s_mesh = (s_mesh*grid.unit).to(kwargs.pop('space_unit', 'cm'))
     if type(quantities) is str:
         quantities = [quantities]
     fig, ax = plt.subplots(
         len(quantities), 1,
-        figsize=kwargs.get('figsize', (10, 2.5*len(quantities))),
+        figsize=kwargs.pop('figsize', (10, 2.5*len(quantities))),
         sharex=True,
         sharey=True,
     )
     if len(quantities) == 1:
         ax = [ax]
+    norm = kwargs.pop('norm', {})
+    cmap = kwargs.pop('cmap', None)
     for i, q in enumerate(quantities):
         q_uni = strand.to_constant_grid(q, grid)
         im = ax[i].pcolormesh(
             t_mesh.value,
             s_mesh.value,
             q_uni.value,
-            cmap=kwargs.get('cmap', 'plasma'),
-            norm=kwargs.get('norm', {}).get(q, None),
+            cmap='RdBu_r' if q == 'velocity' else cmap,
+            norm=norm.get(q, None),
+            **kwargs,
         )
         cbar = fig.colorbar(im, ax=ax[i])
         cbar.ax.set_ylabel(f'{q} [{q_uni.unit}]')
