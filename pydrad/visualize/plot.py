@@ -102,13 +102,13 @@ def _setup_figure(profile, limits, **kwargs):
     axes[0, 1].set_yscale('log')
     axes[1, 0].set_ylim(limits.get('pressure', (0.1, 1e2)))
     axes[1, 0].set_yscale('log')
-    axes[1, 1].set_ylim(limits.get('velocity', (-5e7, 5e7)))
+    axes[1, 1].set_ylim(limits.get('velocity', (-1e2, 1e2)))
     axes[1, 1].set_xlim(profile.coordinate[[0, -1]].to(u.Mm).value)
     # Labels
     axes[0, 0].set_ylabel(r'$T$ [MK]')
     axes[0, 1].set_ylabel(r'$n$ [cm$^{-3}$]')
     axes[1, 0].set_ylabel(r'$P$ [dyne cm$^{-2}$ s$^{-1}$]')
-    axes[1, 1].set_ylabel(r'$v$ [cm s$^{-1}$]')
+    axes[1, 1].set_ylabel(r'$v$ [km s$^{-1}$]')
     axes[1, 0].set_xlabel(r'$s$ [Mm]')
     axes[1, 1].set_xlabel(r'$s$ [Mm]')
 
@@ -142,13 +142,13 @@ def _plot_profile(profile, axes, **kwargs):
     )
     line3a, = axes[1, 0].plot(
         profile.coordinate.to(u.Mm),
-        profile.electron_pressure.to(u.dyne / (u.cm**2 * u.s)),
+        profile.electron_pressure.to(u.dyne / (u.cm**2)),
         **kwargs,
         ls='-'
     )
     line3b, = axes[1, 0].plot(
         profile.coordinate.to(u.Mm),
-        profile.ion_pressure.to(u.dyne / (u.cm**2 * u.s)),
+        profile.ion_pressure.to(u.dyne / (u.cm**2)),
         **kwargs,
         ls='--'
     )
