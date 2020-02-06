@@ -60,6 +60,7 @@ def plot_strand(strand, limits=None, cmap='viridis', **kwargs):
     # Parameters
     strand (#pydrad.parse.Strand): Loop strand object
     limits (`dict`): Set axes limits for hydrodynamic quantities, optional
+    cmap (`str`): The colormap to map the timestep index to
     plot_kwargs (`dict`): Any keyword arguments used matplotlib.plot, optional
     figsize (`tuple`): Width and height of figure, optional
     """
@@ -68,7 +69,6 @@ def plot_strand(strand, limits=None, cmap='viridis', **kwargs):
     fig, axes = _setup_figure(strand[0], limits, **kwargs)
     colors = matplotlib.colors.LinearSegmentedColormap.from_list(
         '', plt.get_cmap(cmap).colors, N=len(strand))
-    # NOTE: once strand indexing is fixed, we can index it directly
     for i, p in enumerate(strand):
         plot_kwargs['color'] = colors(i)
         _ = _plot_profile(p, axes, **plot_kwargs)
@@ -76,9 +76,16 @@ def plot_strand(strand, limits=None, cmap='viridis', **kwargs):
 
 
 def plot_profile(profile, **kwargs):
-    limits = kwargs.get('limits', {})
-    if 'limits' in kwargs:
-        del kwargs['limits']
+    """
+    Plot hydrodynamic quantites at a single timestep
+
+    # Parameters
+    profile (#pydrad.parse.Strand): Loop profile object
+    limits (`dict`): Set axes limits for hydrodynamic quantities, optional
+    plot_kwargs (`dict`): Any keyword arguments used matplotlib.plot, optional
+    figsize (`tuple`): Width and height of figure, optional
+    """
+    limits = kwargs.pop('limits', {})
     plot_kwargs = kwargs.get('plot_kwargs', {})
     fig, axes = _setup_figure(profile, limits, **kwargs)
     _plot_profile(profile, axes, **plot_kwargs)
@@ -95,13 +102,13 @@ def _setup_figure(profile, limits, **kwargs):
     axes[0, 1].set_yscale('log')
     axes[1, 0].set_ylim(limits.get('pressure', (0.1, 1e2)))
     axes[1, 0].set_yscale('log')
-    axes[1, 1].set_ylim(limits.get('velocity', (-5e7, 5e7)))
-    axes[1, 1].set_xlim(0, profile.coordinate[-1].to(u.cm).value)
+    axes[1, 1].set_ylim(limits.get('velocity', (-1e2, 1e2)))
+    axes[1, 1].set_xlim(profile.coordinate[[0, -1]].to(u.Mm).value)
     # Labels
     axes[0, 0].set_ylabel(r'$T$ [MK]')
     axes[0, 1].set_ylabel(r'$n$ [cm$^{-3}$]')
     axes[1, 0].set_ylabel(r'$P$ [dyne cm$^{-2}$ s$^{-1}$]')
-    axes[1, 1].set_ylabel(r'$v$ [cm s$^{-1}$]')
+    axes[1, 1].set_ylabel(r'$v$ [km s$^{-1}$]')
     axes[1, 0].set_xlabel(r'$s$ [Mm]')
     axes[1, 1].set_xlabel(r'$s$ [Mm]')
 
@@ -110,44 +117,44 @@ def _setup_figure(profile, limits, **kwargs):
 
 def _plot_profile(profile, axes, **kwargs):
     line1a, = axes[0, 0].plot(
-        profile.coordinate.to(u.cm),
+        profile.coordinate.to(u.Mm),
         profile.electron_temperature.to(u.MK),
         **kwargs,
         ls='-'
     )
     line1b, = axes[0, 0].plot(
-        profile.coordinate.to(u.cm),
+        profile.coordinate.to(u.Mm),
         profile.ion_temperature.to(u.MK),
         **kwargs,
         ls='--'
     )
     line2a, = axes[0, 1].plot(
-        profile.coordinate.to(u.cm),
-        profile.electron_density,
+        profile.coordinate.to(u.Mm),
+        profile.electron_density.to(u.cm**(-3)),
         **kwargs,
         ls='-'
     )
     line2b, = axes[0, 1].plot(
-        profile.coordinate.to(u.cm),
-        profile.ion_density,
+        profile.coordinate.to(u.Mm),
+        profile.ion_density.to(u.cm**(-3)),
         **kwargs,
         ls='--'
     )
     line3a, = axes[1, 0].plot(
-        profile.coordinate.to(u.cm),
-        profile.electron_pressure,
+        profile.coordinate.to(u.Mm),
+        profile.electron_pressure.to(u.dyne / (u.cm**2)),
         **kwargs,
         ls='-'
     )
     line3b, = axes[1, 0].plot(
-        profile.coordinate.to(u.cm),
-        profile.ion_pressure,
+        profile.coordinate.to(u.Mm),
+        profile.ion_pressure.to(u.dyne / (u.cm**2)),
         **kwargs,
         ls='--'
     )
     line4, = axes[1, 1].plot(
-        profile.coordinate.to(u.cm),
-        profile.velocity,
+        profile.coordinate.to(u.Mm),
+        profile.velocity.to(u.km/u.s),
         **kwargs
     )
     return line1a, line1b, line2a, line2b, line3a, line3b, line4

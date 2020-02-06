@@ -20,26 +20,27 @@ def animate_strand(strand, **kwargs):
     limits = kwargs.get('limits', {})
     if 'limits' in kwargs:
         del kwargs['limits']
-    # Initialize figure
     fig, axes = _setup_figure(strand[0], limits, **kwargs)
+    # Make sure the lines stay the same color
     if 'color' not in plot_kwargs:
         plot_kwargs['color'] = 'C0'
     l1a, l1b, l2a, l2b, l3a, l3b, l4 = _plot_profile(strand[0],
                                                      axes,
                                                      **plot_kwargs)
-    # Update function
+
     def update_plot(i):
-        profile = strand[i]
-        l1a.set_data(profile.coordinate.to(u.cm), profile.electron_temperature.to(u.MK))
-        l1b.set_data(profile.coordinate.to(u.cm), profile.ion_temperature.to(u.MK))
-        l2a.set_data(profile.coordinate.to(u.cm), profile.electron_density)
-        l2b.set_data(profile.coordinate.to(u.cm), profile.ion_density)
-        l3a.set_data(profile.coordinate.to(u.cm), profile.electron_pressure)
-        l3b.set_data(profile.coordinate.to(u.cm), profile.ion_pressure)
-        l4.set_data(profile.coordinate.to(u.cm), profile.velocity)
-        fig.suptitle(r'$t={:4.0f}$ {}'.format(
+        p = strand[i]
+        l1a.set_data(p.coordinate.to(u.Mm), p.electron_temperature.to(u.MK))
+        l1b.set_data(p.coordinate.to(u.Mm), p.ion_temperature.to(u.MK))
+        l2a.set_data(p.coordinate.to(u.Mm), p.electron_density.to(u.cm**(-3)))
+        l2b.set_data(p.coordinate.to(u.Mm), p.ion_density.to(u.cm**(-3)))
+        l3a.set_data(p.coordinate.to(u.Mm), p.electron_pressure.to(u.dyne/(u.cm**2)))
+        l3b.set_data(p.coordinate.to(u.Mm), p.ion_pressure.to(u.dyne/(u.cm**2)))
+        l4.set_data(p.coordinate.to(u.Mm), p.velocity.to(u.km/u.s))
+        fig.suptitle(r'$t={:.0f}$ {}'.format(
             strand.time[i].value, strand.time[i].unit), y=0.905)
         return l1a, l1b, l2a, l2b, l3a, l3b, l4
+    
     return FuncAnimation(
         fig, update_plot, blit=kwargs.get('blit', True), frames=len(strand),
         interval=kwargs.get('interval', 10), repeat=kwargs.get('repeat', True))
