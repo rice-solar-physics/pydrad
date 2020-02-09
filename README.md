@@ -7,18 +7,17 @@ Some Python tools to help configure and parse the HYDRAD code for coronal loop d
 
 ## Install
 
-To install the package and the needed dependencies with the [Anaconda Python distribution](https://www.anaconda.com/download/),
-
-```
+To install the package and the needed dependencies,
+```shell
 $ git clone https://github.com/rice-solar-physics/pydrad.git
 $ cd pydrad
-$ conda env create -f environment.yml
-$ conda activate pydrad
+$ pip install requirements/requirements.txt
 $ python setup.py install
 ```
 
-To run the tests and confirm that everything is working alright,
-```
+If you'd like to run the tests and confirm that everything is working alright,
+```shell
+$ pip install requirements/requirements-dev.txt
 $ pytest
 ``` 
 
