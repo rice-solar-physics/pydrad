@@ -1,24 +1,25 @@
-language: c
-os:
-  - linux
-sudo: false
+language: python
+python: 3.7
 
 jobs:
   include:
   - stage: test
-    script:
+    python: 3.6
+  - python: 3.7
+  - python: 3.8
+  - script:
     - pytest --cov=pydrad --cov-report=html
     - coveralls
-  - script:
-    - cd docs && make && cd ..
-    - mkdocs build -d site
-  - stage: deploy
-    env: EVENT_TYPE='push cron'
+  - stage: docs
     script:
     - cd docs && make && cd ..
-    - set -e 
     - mkdocs build -d site
-    - doctr deploy . --built-docs site/
+    deploy:
+      provider: pages
+      skip_cleanup: true
+      github_token: "$GH_TOKEN"
+      local_dir: site
+      target_branch: gh-pages
 
 stages:
 - name: install
@@ -26,17 +27,10 @@ stages:
 - name: deploy
 
 install:
-- git clone --depth 1 git://github.com/astropy/ci-helpers.git
-- source ci-helpers/travis/setup_conda.sh
+- pip install requirements/requirements-dev.txt
 - python setup.py install
+script: pytest
 
 env:
   global:
-    - PYTHON_VERSION=3.6
-    - NUMPY_VERSION=stable
-    - ASTROPY_VERSION=stable
-    - PIP_DEPENDENCIES='plasmapy[theory] asdf mkdocs mkdocs-material doctr pydoc-markdown==2.0.2 pytest-cov coveralls'
-    - CONDA_DEPENDENCIES='scipy matplotlib Jinja2 pytest'
-    - EVENT_TYPE='pull_request push cron'
-    - secure: "vC0YWMk1eIYqblncebSH1u7/+b65LSJehYPLiBBhr3FvYjf7Um1OD6kOOYR0fNRfPM4lQuAPLsdEckXwAN/vxOxiAARxdCv5SVRQlRO41wZGVIWcJMcRRDzdXa8eUFDB41nqADMJ8mt4eH/REcC4JTnuSloiI0TSPYIKM/KrOurW7x4HX7wNkEIURdAxFNICsiiIijGKSD5CyaiXGDrHVwlo9Q5UpKkaB/ltdR1sZ36K32W/QmUDgtYN99ZRxSS/HFC3o1eileNzL+dYlyLcYNeHuI2c1wPkRvLiPLgFz2k+hMRPcAxZ3PU2XYK1o6Ts+5w87Of/43d/JS4I9cOdO21ZlXbA6Q1o1vtPzB4OijVafymHlHrtHPjrtlLceHpbriE5iLoBeWxb6RTeMKlLDFi6qrcOCIVrke4+BmN+LQAzaLZAIfyaYc8LjNvQ0XyCXJ4LPMDpAEVRFDe+ahbQ8hPoWRyin7qV391m+iCavjtdkaxz1Ur42MaLimHpCehxzRHO8UgOZiHVQe2TJPqu9mdRqLuX72hxi0oiXFZyI53mHOZFaBDmZdwdMox8xA/Zpr6Z4YMvWVFXUz2Q/USSgiM0o7vDbMkb1nlMmkRxsCnxiLzMFY7X8lwR+QyS6fSqdo9OOGmqgOk4F+FRxiZHybsXhHVuINBpdrrrFj5x93Q="
-
+    secure: UAJNM5iGgPmU6wlGLc2krhe8njsIRnWnssCl8we9y/C6VXDaYZBqOEsfsHDOKFPk1ocWLBYDFgatCVGamlVxNkLH54zz4Dd9nAtzY2iZe5kS/uq+N4eN7xTvDdFLG3NbleDH+G1NzNTqwm7Czc0T0issuVU5D2qyYfURdStHhIpCJt60lUe5WJDGrdWewKTtQCY8gNO66I9M6ZFM+1qhplXcSA9oOGiaM6lniI8FL6YPC6n778uWcSAfV9e2r70rR7QfitcQqCVJ+Iv6KqrVyhmJiHU8OITGvcGsVxSXwH04lBqc6tZpf3sadtrx4jsrqgpgfgmMBopDshQBGTeZMZVPI0wh2PFjON444LtrqpMW+o4h8Zewiv3MObETVCth4/TYV1J5cskGU/nk2ARZwpFRJa5foo3BBPqPpyTUt+2L0Ar1lc0xwfOq5tnPWSU5XKmot2tjgsv1idx3G0U4/oc+SVd+S4BUjh1iohGNp+8MY40l5uHTja6f/NAj3ZH9fi9pD559Zmz8Im5/+9ckeaCnys/O5vPoHcuGBDtPo11X70/d+SbrkhD6gpgLqdp4TTVaYAkFwWcJ4QNIZ4QaWeS2c5yLLiX7nHsqA9xPXdYm6rvKjXNvAdAd9xfSh7sPTn2a2u4mm6w6TAk0gqoYCixxIEGDfzUjdZ9vT899Jf8=
