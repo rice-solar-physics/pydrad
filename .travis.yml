@@ -16,7 +16,7 @@ jobs:
     deploy:
       provider: pages
       skip_cleanup: true
-      github_token: $GH_TOKEN
+      github_token: "$GH_TOKEN"
       local_dir: site
       target_branch: gh-pages
 stages:
@@ -30,4 +30,4 @@ install:
 script: pytest
 env:
   global:
-    secure: Seol4toIXfvZEa5IMUbaxcqQvkZi2Nr8ND4ysACLrHs6c01/L3mD8DUytfAofqpR97pJ39MJ5MT89HevV+NY4/R1x6sCOFEILxqtRE1ffNqtF6vhzmKjHhsFCoDFHELmKpjGkmnGIb52Ypl5VoOYtNO9CooNwvHnldU4aIx78MiET8IGZ3Ofz8g593hTRvNVAiYisXvWsfGfxLCW8ryATNfM0J057LiLJ7ZXeHKfb7dnbmWSOMXOlK2BGHegLUf+N88z8shnxojy1PaHTAgxnexx1K6Bmo9weWhLBPFCamhRCCAe0JyvWPZsgpmd7A1FnOJ22w9avkOWchE9nGuOxk+tCtdWuKVGuK0MYOIMgzjevnU3S1s75kYQQVI0Ep5IiudWwgZn4DY/ROpdBs6O8fTJldOZYpC7OG4LFhvvQX2OlZ7boNtPGBDM0yPTsvXYC7OuSHNBTqXVG58b4FfGGwU9AIi/QJAVARwDiNPvo9xZcnAh/MubNjmWIxaBsedDjH2QaivopqSGwSRVvZvKY8C3DdvEvFX4b9MLah0Uu71Plt31pfq3vZbDIY3qvQ/YRfRr2J6DJAKo0p2lPSoknN6ksjWIjnC3j1N5qwMrGIpSvYxJ0DWlgSix84gq3nWlakkZP3ll4e/n9oPft7vv6bRjF/5yEoADvCHt0PFzbms=
+    - secure: "izAUaqDXefWLyOvg6uiMc/DaMtIdrB3SdAEHJaSM3kjk3JqsIXYtpxFEVIr5l7p90sSfFmUo4SUFO4IxewYVK9l9ipA02MryyPf7JHCes6zuuhmuB3T88E85TjJb2UQ+/OTeQN/P2X4EeBo4pmNzOjqgIq6hHF56Koxh1Ox7NsYWif64kjxaGbjvuTObctZfcIbSwtFpqBBF3Mw8Ok3F5etFU/vo1YDeKjBiNaOQVZnbrRQDL5Ll6q9ntAN8l9NZSrKSVV8dyAW/qp0LYB6Aqh9T6Ild/4OUgI97qnJRKqsdlCQt0N/aGhcs3nmT3ZR+kSTS5R9aUopMd+lHuMgPjLt/XLAYg9Z0YfLm/BZohIQRP/A9wLQh8Qt5d53ZYd5kQnxLazua8oz8QJwi9aWlhR86prqFl3qFjKfe398vGXYYsR/bHARIvVhMEtL8dWDImxlANlwgTQ7w8pUWo5XKdQ4PzT5+v4+Ke1ffOpBxnbYYLxJv2RY1jpW7Mu/suWTpVwJGHIXLyYqvFycignXeuKvW6TqS+HSuEYR8tOyowIrwWUukOtNIkj9wwL0iyJ1l2D/6EUWmBzzbuPC5ShRM7/hFUtsvDROHbiEaN4FMFyy2gWNmrLd8dhz52PZOriqhO2EL/y/P8eFzsJ/ytcvqxKurrwS5bEryq09fPHCWL4w="
