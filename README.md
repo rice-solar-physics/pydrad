@@ -11,7 +11,7 @@ To install the package and the needed dependencies,
 ```shell
 $ git clone https://github.com/rice-solar-physics/pydrad.git
 $ cd pydrad
-$ pip install requirements/requirements.txt
+$ pip install -r requirements/requirements.txt
 $ python setup.py install
 ```
 
