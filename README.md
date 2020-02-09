@@ -17,7 +17,7 @@ $ python setup.py install
 
 If you'd like to run the tests and confirm that everything is working alright,
 ```shell
-$ pip install requirements/requirements-dev.txt
+$ pip install -r requirements/requirements-dev.txt
 $ pytest
 ``` 
 
