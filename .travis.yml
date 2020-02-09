@@ -16,7 +16,7 @@ jobs:
     deploy:
       provider: pages
       skip_cleanup: true
-      github_token: "$GH_TOKEN"
+      github_token: $GH_TOKEN
       local_dir: site
       target_branch: gh-pages
 stages:
