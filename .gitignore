@@ -1,4 +1,5 @@
-# Ignore auto-generated API docs
+# Ignore auto-generated docs
+site/
 docs/api/*
 
 # Byte-compiled / optimized / DLL files
