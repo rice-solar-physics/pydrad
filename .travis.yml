@@ -27,7 +27,7 @@ stages:
 - name: deploy
 
 install:
-- pip install requirements/requirements-dev.txt
+- pip install -r requirements/requirements-dev.txt
 - python setup.py install
 script: pytest
 
