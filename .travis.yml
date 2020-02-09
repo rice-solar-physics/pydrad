@@ -1,6 +1,5 @@
 language: python
 python: 3.7
-
 jobs:
   include:
   - stage: test
@@ -20,18 +19,15 @@ jobs:
       github_token: "$GH_TOKEN"
       local_dir: site
       target_branch: gh-pages
-
 stages:
 - name: install
 - name: test
 - name: deploy
-
 install:
 - pip install -r requirements/requirements-dev.txt
-- pip install --upgrade numpy>=1.16  # Travis sometimes has an older version
+- pip install --upgrade numpy>=1.16
 - python setup.py install
 script: pytest
-
 env:
   global:
-    secure: UAJNM5iGgPmU6wlGLc2krhe8njsIRnWnssCl8we9y/C6VXDaYZBqOEsfsHDOKFPk1ocWLBYDFgatCVGamlVxNkLH54zz4Dd9nAtzY2iZe5kS/uq+N4eN7xTvDdFLG3NbleDH+G1NzNTqwm7Czc0T0issuVU5D2qyYfURdStHhIpCJt60lUe5WJDGrdWewKTtQCY8gNO66I9M6ZFM+1qhplXcSA9oOGiaM6lniI8FL6YPC6n778uWcSAfV9e2r70rR7QfitcQqCVJ+Iv6KqrVyhmJiHU8OITGvcGsVxSXwH04lBqc6tZpf3sadtrx4jsrqgpgfgmMBopDshQBGTeZMZVPI0wh2PFjON444LtrqpMW+o4h8Zewiv3MObETVCth4/TYV1J5cskGU/nk2ARZwpFRJa5foo3BBPqPpyTUt+2L0Ar1lc0xwfOq5tnPWSU5XKmot2tjgsv1idx3G0U4/oc+SVd+S4BUjh1iohGNp+8MY40l5uHTja6f/NAj3ZH9fi9pD559Zmz8Im5/+9ckeaCnys/O5vPoHcuGBDtPo11X70/d+SbrkhD6gpgLqdp4TTVaYAkFwWcJ4QNIZ4QaWeS2c5yLLiX7nHsqA9xPXdYm6rvKjXNvAdAd9xfSh7sPTn2a2u4mm6w6TAk0gqoYCixxIEGDfzUjdZ9vT899Jf8=
+    secure: Seol4toIXfvZEa5IMUbaxcqQvkZi2Nr8ND4ysACLrHs6c01/L3mD8DUytfAofqpR97pJ39MJ5MT89HevV+NY4/R1x6sCOFEILxqtRE1ffNqtF6vhzmKjHhsFCoDFHELmKpjGkmnGIb52Ypl5VoOYtNO9CooNwvHnldU4aIx78MiET8IGZ3Ofz8g593hTRvNVAiYisXvWsfGfxLCW8ryATNfM0J057LiLJ7ZXeHKfb7dnbmWSOMXOlK2BGHegLUf+N88z8shnxojy1PaHTAgxnexx1K6Bmo9weWhLBPFCamhRCCAe0JyvWPZsgpmd7A1FnOJ22w9avkOWchE9nGuOxk+tCtdWuKVGuK0MYOIMgzjevnU3S1s75kYQQVI0Ep5IiudWwgZn4DY/ROpdBs6O8fTJldOZYpC7OG4LFhvvQX2OlZ7boNtPGBDM0yPTsvXYC7OuSHNBTqXVG58b4FfGGwU9AIi/QJAVARwDiNPvo9xZcnAh/MubNjmWIxaBsedDjH2QaivopqSGwSRVvZvKY8C3DdvEvFX4b9MLah0Uu71Plt31pfq3vZbDIY3qvQ/YRfRr2J6DJAKo0p2lPSoknN6ksjWIjnC3j1N5qwMrGIpSvYxJ0DWlgSix84gq3nWlakkZP3ll4e/n9oPft7vv6bRjF/5yEoADvCHt0PFzbms=
