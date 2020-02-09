@@ -3,22 +3,21 @@
 [![Build Status](https://travis-ci.org/rice-solar-physics/pydrad.svg?branch=master)](https://travis-ci.org/rice-solar-physics/pydrad)
 [![Coverage Status](https://coveralls.io/repos/github/rice-solar-physics/pydrad/badge.svg?branch=master)](https://coveralls.io/github/rice-solar-physics/pydrad?branch=master)
 
-Some Python tools to help configure and parse the HYDRAD code for coronal loop dynamics.
+Some Python tools to configure and parse output from the HYDrodynamics and RADiation (HYDRAD) code for field-aligned coronal loop physics.
 
 ## Install
 
-To install the package and the needed dependencies with the [Anaconda Python distribution](https://www.anaconda.com/download/),
-
-```
+To install the package and the needed dependencies,
+```shell
 $ git clone https://github.com/rice-solar-physics/pydrad.git
 $ cd pydrad
-$ conda env create -f environment.yml
-$ conda activate pydrad
+$ pip install requirements/requirements.txt
 $ python setup.py install
 ```
 
-To run the tests and confirm that everything is working alright,
-```
+If you'd like to run the tests and confirm that everything is working alright,
+```shell
+$ pip install requirements/requirements-dev.txt
 $ pytest
 ``` 
 

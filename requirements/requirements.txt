@@ -1,0 +1,6 @@
+scipy
+matplotlib
+astropy
+Jinja2
+asdf
+plasmapy[theory]
