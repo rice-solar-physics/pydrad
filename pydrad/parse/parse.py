@@ -8,20 +8,22 @@ import numpy as np
 from scipy.interpolate import splev, splrep
 import astropy.units as u
 
+from pydrad import log
 from pydrad.visualize import (plot_strand,
                               plot_profile,
                               animate_strand,
                               plot_time_distance)
 
-__all__ = ['Strand', 'Profile']
+__all__ = ['Strand', 'Profile', 'InitialProfile']
 
 
 def get_master_time(hydrad_root):
+    log.debug('Reading master time array from all AMR files')
     amr_files = glob.glob(os.path.join(hydrad_root, 'Results/profile*.amr'))
-    time = []
-    for af in amr_files:
+    time = np.zeros((len(amr_files),))
+    for i, af in enumerate(amr_files):
         with open(af, 'r') as f:
-            time.append(float(f.readline()))
+            time[i] = f.readline()
     return sorted(time) * u.s
 
 
@@ -35,17 +37,15 @@ class Strand(object):
 
     def __init__(self, hydrad_root, **kwargs):
         self.hydrad_root = hydrad_root
-        # NOTE: time is only specified when slicing a Strand. When not
-        # slicing, it should be read from the results.
-        self._time = kwargs.pop('time', None)
-        if self._time is None:
-            self._time = get_master_time(self.hydrad_root)
         # This is different than time depending on the slicing. We allow this
         # to be passed as a kwarg to avoid repeatedly reading multiple files
         # when slicing.
         self._master_time = kwargs.pop('master_time', None)
         if self._master_time is None:
             self._master_time = get_master_time(self.hydrad_root)
+        # NOTE: time is only specified when slicing a Strand. When not
+        # slicing, it should be read from the results.
+        self._time = kwargs.pop('time', self._master_time)
         self._profile_kwargs = kwargs
 
     def __repr__(self):
@@ -179,20 +179,23 @@ class Profile(object):
             self._master_time = get_master_time(self.hydrad_root)
         # Read results files
         self._read_phy()
-        if kwargs.get('read_amr', True):
-            self._read_amr()
+        self._read_amr()
+        self._read_hstate()
 
     @property
     def _amr_filename(self):
-        return os.path.join(
-            self.hydrad_root,
-            f'Results/profile{self._index:d}.amr')
+        return os.path.join(self.hydrad_root,
+                            f'Results/profile{self._index:d}.amr')
 
     @property
     def _phy_filename(self):
-        return os.path.join(
-            self.hydrad_root,
-            f'Results/profile{self._index:d}.phy')
+        return os.path.join(self.hydrad_root,
+                            f'Results/profile{self._index:d}.phy')
+
+    @property
+    def _hstate_filename(self):
+        return os.path.join(self.hydrad_root,
+                            f'Results/profile{self._index:d}.Hstate')
 
     @property
     def _index(self):
@@ -208,7 +211,7 @@ Timestep #: {self._index}"""
         """
         Parse the hydrodynamics results file
         """
-        self.results = np.loadtxt(self._phy_filename)
+        self._phy_data = np.loadtxt(self._phy_filename)
 
     def _read_amr(self):
         """
@@ -223,6 +226,16 @@ Timestep #: {self._index}"""
                 tmp = np.array(l.split(), dtype=float)
                 self._grid_centers[i] = tmp[0]
                 self._grid_widths[i] = tmp[1]
+
+    def _read_hstate(self):
+        """
+        Parse the hydrogen energy level populations file
+        """
+        try:
+            self._hstate_data = np.loadtxt(self._hstate_filename)
+        except OSError:
+            log.debug(f'{self._hstate_filename} not found')
+            self._hstate_data = None
 
     @property
     def grid_centers(self):
@@ -244,62 +257,6 @@ Timestep #: {self._index}"""
         Spatial location of left edge of each grid cell
         """
         return self.grid_centers - self.grid_widths/2.
-
-    @property
-    def coordinate(self):
-        """
-        Field-aligned loop coordinate $s$
-        """
-        return self.results[:, 0] * u.cm
-
-    @property
-    def electron_temperature(self):
-        """
-        Electron temperature $T_e$ as a function of $s$
-        """
-        return self.results[:, -4] * u.K
-
-    @property
-    def ion_temperature(self):
-        """
-        Ion temperature $T_i$ as a function of $s$
-        """
-        return self.results[:, -3] * u.K
-
-    @property
-    def electron_density(self):
-        """
-        Electron density $n_e$ as a function of $s$
-        """
-        return self.results[:, 3] * u.cm**(-3)
-
-    @property
-    def ion_density(self):
-        """
-        Ion density $n_i$ as a function of $s$
-        """
-        return self.results[:, 4] * u.cm**(-3)
-
-    @property
-    def electron_pressure(self):
-        """
-        Electron pressure $p_e$ as a function of $s$
-        """
-        return self.results[:, 5] * u.dyne * u.cm**(-2)
-
-    @property
-    def ion_pressure(self):
-        """
-        Ion pressure $p_i$ as a function of $s$
-        """
-        return self.results[:, 6] * u.dyne * u.cm**(-2)
-
-    @property
-    def velocity(self):
-        """
-        Velocity $v$ as a function of $s$
-        """
-        return self.results[:, 1] * u.cm / u.s
 
     def spatial_average(self, quantity, bounds=None):
         """
@@ -333,3 +290,50 @@ class InitialProfile(Profile):
         return os.path.join(
             self.hydrad_root,
             'Initial_Conditions/profiles/initial.amr.phy')
+
+
+def add_property(name, doc, filetype, index, unit):
+    """
+    Auto-generate properties for various pieces of data
+    """
+    def property_template(self):
+        data = getattr(self, filetype)
+        if data is None:
+            raise ValueError(f'No data available for {name}')
+        return u.Quantity(data[:, index], unit)
+    property_template.__doc__ = doc
+    property_template.__name__ = name
+    setattr(Profile, property_template.__name__, property(property_template))
+
+
+properties = [
+    ('coordinate',
+     'Field-aligned loop coordinate $s$',
+     '_phy_data', 0, 'cm'),
+    ('electron_temperature',
+     'Electron temperature $T_e$ as a function of $s$',
+     '_phy_data', -4, 'K'),
+    ('ion_temperature',
+     'Ion temperature $T_i$ as a function of $s$',
+     '_phy_data', -3, 'K'),
+    ('electron_density',
+     'Electron density $n_e$ as a function of $s$',
+     '_phy_data', 3, 'cm-3'),
+    ('ion_density',
+     'Ion density $n_i$ as a function of $s$',
+     '_phy_data', 4, 'cm-3'),
+    ('electron_pressure',
+     'Electron pressure $p_e$ as a function of $s$',
+     '_phy_data', 5, 'dyne cm-2'),
+    ('ion_pressure',
+     'Ion pressure $p_i$ as a function of $s$',
+     '_phy_data', 6, 'dyne cm-2'),
+    ('velocity',
+     'Velocity $v$ as a function of $s$',
+     '_phy_data', 1, 'cm / s')
+]
+properties += [(f'hydrogen_level_{i}',
+                f'Hydrogen energy level populations for level {i}',
+                '_hstate_data', i, '') for i in range(1, 7)]
+for p in properties:
+    add_property(*p)
