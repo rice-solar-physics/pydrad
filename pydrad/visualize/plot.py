@@ -48,7 +48,10 @@ def plot_time_distance(strand, quantities, delta_s: u.cm, **kwargs):
             **kwargs,
         )
         cbar = fig.colorbar(im, ax=ax[i])
-        cbar.ax.set_ylabel(f'{q} [{q_uni.unit}]')
+        if q_uni.unit is u.dimensionless_unscaled:
+            cbar.ax.set_ylabel(f'{q}')
+        else:
+            cbar.ax.set_ylabel(f'{q} [{q_uni.unit}]')
     ax[i].set_xlabel(f'$t$ [{t_mesh.unit}]')
     ax[i].set_ylabel(f'$s$ [{s_mesh.unit}]')
 
