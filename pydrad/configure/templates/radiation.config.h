@@ -9,14 +9,17 @@
 // ****
 
 // **** Physics ****
-{% if radiation.use_power_law_radiative_losses -%}
-#define USE_POWER_LAW_RADIATIVE_LOSSES
-{%- else %}
 {% if radiation.elements_nonequilibrium -%}
 #define NON_EQUILIBRIUM_RADIATION
-{%- endif %}
 {% if radiation.decouple_ionization_state_solver -%}
-#define DECOUPLE_IONIZATION_STATE_SOLVER
+#define DECOUPLE_IONISATION_STATE_SOLVER
+{%- endif %}
+{% endif %}
+{% if radiation.use_power_law_radiative_losses -%}
+#define USE_POWER_LAW_RADIATIVE_LOSSES
+{% if radiation.lookup_table %}
+#define USE_RADIATION_LOOKUP_TABLE
+#define RADIATION_LOOKUP_TABLE "{{ radiation.lookup_table }}"
 {%- endif %}
 {% endif %}
 {% if radiation.density_dependent_rates -%}#define DENSITY_DEPENDENT_RATES{%- endif %}
