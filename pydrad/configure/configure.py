@@ -210,7 +210,7 @@ class Configure(object):
              self.hydrad_header),
             ('HYDRAD/source/collisions.h',
              self.collisions_header),
-            ('HYDRAD/config/HYDRAD.cfg',
+            ('HYDRAD/config/hydrad.cfg',
              self.hydrad_cfg),
         ]
         if 'poly_fit_gravity' in self.config['general']:
