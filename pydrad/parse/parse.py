@@ -354,7 +354,7 @@ def add_property(name, attr, index, unit):
         if data is None:
             raise ValueError(f'No data available for {name}')
         return u.Quantity(data[:, index], unit)
-    property_template.__doc__ = f'{" ".join(name.split("_"))} as a function of $s$'
+    property_template.__doc__ = f'{" ".join(name.split("_")).capitalize()} as a function of $s$'
     property_template.__name__ = name
     setattr(Profile, property_template.__name__, property(property_template))
 
