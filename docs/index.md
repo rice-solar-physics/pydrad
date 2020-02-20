@@ -12,25 +12,32 @@ Python 3.6+ and the following dependencies are required to run this package:
 * plasmapy (pip only)
 * GitPython (optional)
 
-The recommended method for installing Python and the associated dependencies is the [Anaconda Python distribution](https://www.anaconda.com/download/). With Anaconda installed, all of the above dependencies can be installed with,
-```shell
-$ conda install {package_name}
-```
-or with pip,
-```shell
-$ pip install {package_name}
-```
-Alternatively, you can create a conda environment with all of the needed dependencies using the conda environment file in the repository,
-```shell
-$ conda create -f conda_environment.yml
-$ source activate pydrad
-```
-Finally, install the pydrad package,
+First, clone the repository,
 ```shell
 $ git clone https://github.com/rice-solar-physics/pydrad.git
 $ cd pydrad
+```
+
+To install all of the needed dependencies,
+```shell
+$ pip install -r requirements/requirements/txt
+```
+
+Finally, install the pydrad package,
+```shell
 $ python setup.py install
 ```
+
+## Testing
+If you'd like to run the tests, you can install the additional development dependencies,
+```shell
+$ pip install -r requirements/requirements-dev.txt
+```
+and run the tests,
+```
+$ pytest
+```
+Note that this step is not necessary to run the code.
 
 ## Additional Resources
 Below are a few papers describing the HYDRAD code,
