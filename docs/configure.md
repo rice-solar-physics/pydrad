@@ -380,7 +380,8 @@ Each entry in the `events` list should be a dictionary with the following seven 
 | Name | Description | Type | Units |
 |:----:|:------------|:----:|:------|
 | use_power_law_radiative_losses | If true, use piecewise power-law to calculate radiative losses | `bool` | |
-| decouple_ionization_state_solver | | `bool` | |
+| lookup_table | Path (relative to the root of the HYDRAD directory) to lookup table for radiative losses. Ignored unless use_power_law_radiative_losses is also set. | `str` | |
+| decouple_ionization_state_solver | If true, the non-equilibrium population fractions are not fed back into the radiative loss calculation. This option will be ignored unless a list of elements is also passed to elements_nonequilibrium. If use_power_law_radiative_losses is false, the equilibrium population fractions will be used to calculate the radiative losses. | `bool` | |
 | density_dependent_rates | | `bool` | |
 | optically_thick_radiation | If true, include optically thick lines in radiative losses | `bool` | |
 | nlte_chromosphere | Treat the chromosphere as being in non-local thermal equilibrium. **NOTE: This may significantly increase the computation time.** | `bool` | |
