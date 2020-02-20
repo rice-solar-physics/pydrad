@@ -7,6 +7,7 @@ import glob
 import numpy as np
 from scipy.interpolate import splev, splrep
 import astropy.units as u
+import plasmapy.atomic
 
 from pydrad import log
 from pydrad.visualize import (plot_strand,
@@ -98,7 +99,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         """
         return InitialProfile(self.hydrad_root,
                               0*u.s,
-                              master_time=self._master_time,
+                              master_time=[0]*u.s,
                               **self._profile_kwargs)
 
     def peek(self, **kwargs):
@@ -180,7 +181,10 @@ class Profile(object):
         # Read results files
         self._read_phy()
         self._read_amr()
-        self._read_hstate()
+        if kwargs.get('read_hstate', True):
+            self._read_hstate()
+        if kwargs.get('read_ine', True):
+            self._read_ine()
 
     @property
     def _amr_filename(self):
@@ -191,6 +195,11 @@ class Profile(object):
     def _phy_filename(self):
         return os.path.join(self.hydrad_root,
                             f'Results/profile{self._index:d}.phy')
+
+    @property
+    def _ine_filename(self):
+        return os.path.join(self.hydrad_root,
+                            f'Results/profile{self._index:d}.ine')
 
     @property
     def _hstate_filename(self):
@@ -226,6 +235,50 @@ Timestep #: {self._index}"""
                 tmp = np.array(l.split(), dtype=float)
                 self._grid_centers[i] = tmp[0]
                 self._grid_widths[i] = tmp[1]
+
+    def _read_ine(self):
+        """
+        Parse non-equilibrium ionization population fraction files
+        and set attributes for relevant quantities
+        """
+        # TODO: clean this up somehow? I've purposefully included
+        # a lot of comments because the format of this file makes
+        # the parsing code quite opaque
+        try:
+            with open(self._ine_filename, 'r') as f:
+                lines = f.readlines()
+        except FileNotFoundError:
+            log.debug(f'{self._ine_filename} not found')
+            return
+        # First parse all of the population fraction arrays
+        n_s = self.coordinate.shape[0]
+        # NOTE: Have to calculate the number of elements we have
+        # computed population fractions for as we do not necessarily
+        # know this ahead of time
+        n_e = int(len(lines)/n_s - 1)
+        # The file is arranged in n_s groups of n_e+1 lines each where the first
+        # line is the coordinate and the subsequent lines are the population fraction
+        # for each element, with each column corresponding to an ion of that element
+        # First, separate by coordinate
+        pop_lists = [lines[i*(n_e+1)+1:(i+1)*(n_e+1)] for i in range(n_s)]
+        # Convert each row of each group into a floating point array
+        pop_lists = [[np.array(l.split(), dtype=float) for l in p] for p in pop_lists]
+        # NOTE: each row has Z+2 entries as the first entry is the atomic number Z
+        # Get these from just the first group as the number of elements is the same
+        # for each
+        Z = np.array([p[0] for p in pop_lists[0]], dtype=int)
+        pop_arrays = [np.zeros((n_s, z+1))for z in Z]
+        for i, p in enumerate(pop_lists):
+            for j, l in enumerate(p):
+                pop_arrays[j][i, :] = l[1:]  # Skip first entry, it is the atomic number
+
+        # Then set attributes for each ion of each element
+        for z, p in zip(Z, pop_arrays):
+            name = plasmapy.atomic.element_name(z)
+            attr = f'_population_fraction_{name}'
+            setattr(self, attr, p)
+            for p in [(f'{attr[1:]}_{i+1}', attr, i, '') for i in range(z+1)]:
+                add_property(*p)
 
     def _read_hstate(self):
         """
@@ -292,48 +345,30 @@ class InitialProfile(Profile):
             'Initial_Conditions/profiles/initial.amr.phy')
 
 
-def add_property(name, doc, filetype, index, unit):
+def add_property(name, attr, index, unit):
     """
     Auto-generate properties for various pieces of data
     """
     def property_template(self):
-        data = getattr(self, filetype)
+        data = getattr(self, attr)
         if data is None:
             raise ValueError(f'No data available for {name}')
         return u.Quantity(data[:, index], unit)
-    property_template.__doc__ = doc
+    property_template.__doc__ = f'{" ".join(name.split("_"))} as a function of $s$'
     property_template.__name__ = name
     setattr(Profile, property_template.__name__, property(property_template))
 
 
 properties = [
-    ('coordinate',
-     'Field-aligned loop coordinate $s$',
-     '_phy_data', 0, 'cm'),
-    ('electron_temperature',
-     'Electron temperature $T_e$ as a function of $s$',
-     '_phy_data', -4, 'K'),
-    ('ion_temperature',
-     'Ion temperature $T_i$ as a function of $s$',
-     '_phy_data', -3, 'K'),
-    ('electron_density',
-     'Electron density $n_e$ as a function of $s$',
-     '_phy_data', 3, 'cm-3'),
-    ('ion_density',
-     'Ion density $n_i$ as a function of $s$',
-     '_phy_data', 4, 'cm-3'),
-    ('electron_pressure',
-     'Electron pressure $p_e$ as a function of $s$',
-     '_phy_data', 5, 'dyne cm-2'),
-    ('ion_pressure',
-     'Ion pressure $p_i$ as a function of $s$',
-     '_phy_data', 6, 'dyne cm-2'),
-    ('velocity',
-     'Velocity $v$ as a function of $s$',
-     '_phy_data', 1, 'cm / s')
+    ('coordinate', '_phy_data', 0, 'cm'),
+    ('electron_temperature', '_phy_data', -4, 'K'),
+    ('ion_temperature', '_phy_data', -3, 'K'),
+    ('electron_density', '_phy_data', 3, 'cm-3'),
+    ('ion_density', '_phy_data', 4, 'cm-3'),
+    ('electron_pressure', '_phy_data', 5, 'dyne cm-2'),
+    ('ion_pressure', '_phy_data', 6, 'dyne cm-2'),
+    ('velocity', '_phy_data', 1, 'cm / s')
 ]
-properties += [(f'hydrogen_level_{i}',
-                f'Hydrogen energy level populations for level {i}',
-                '_hstate_data', i, '') for i in range(1, 7)]
+properties += [(f'level_population_hydrogen_{i}', '_hstate_data', i, '') for i in range(1, 7)]
 for p in properties:
     add_property(*p)
