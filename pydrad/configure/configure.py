@@ -14,14 +14,8 @@ import numpy as np
 import astropy.units as u
 from jinja2 import Environment, PackageLoader, ChoiceLoader, DictLoader
 import asdf
-try:
-    import git
-except ImportError:
-    warnings.warn('GitPython not installed. Cannot clone HYDRAD from GitHub.')
 
 from . import filters
-
-REMOTE_REPO = 'https://github.com/rice-solar-physics/HYDRAD'
 
 __all__ = ['Configure']
 
@@ -86,15 +80,14 @@ class Configure(object):
         """
         asdf.AsdfFile(self.config).write_to(filename)
 
-    def setup_simulation(self, output_path, base_path=None,
+    def setup_simulation(self, output_path, base_path,
                          verbose=True, run_initial_conditions=True):
         """
         Setup a HYDRAD simulation with desired outputs from a clean copy
 
         # Parameters
         output_path (`str`): Path to new copy of HYDRAD
-        base_path (`str`): Path to existing HYDRAD. If None (default), clone a
-        new copy from GitHub (appropriate permissions required)
+        base_path (`str`): Path to existing HYDRAD
         name (`str`): Name of the output directory. If None (default), use
         timestamp
         verbose (`bool`):
@@ -104,10 +97,7 @@ class Configure(object):
         with tempfile.TemporaryDirectory() as tmpdir:
             # NOTE: this is all done in a temp directory and then copied over
             # so that if something fails, all the files are cleaned up
-            if base_path is None:
-                git.Repo.clone_from(REMOTE_REPO, tmpdir)
-            else:
-                copy_tree(base_path, tmpdir)
+            copy_tree(base_path, tmpdir)
             if run_initial_conditions:
                 self.setup_initial_conditions(tmpdir, execute=True,
                                               verbose=verbose)
