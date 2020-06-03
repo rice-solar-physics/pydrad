@@ -3,11 +3,9 @@ Configure HYDRAD simulations
 """
 import os
 import copy
-import warnings
 import datetime
 import tempfile
 import shutil
-import subprocess
 from distutils.dir_util import copy_tree
 
 import numpy as np
@@ -16,6 +14,7 @@ from jinja2 import Environment, PackageLoader, ChoiceLoader, DictLoader
 import asdf
 
 from . import filters
+from .util import run_shell_command
 
 __all__ = ['Configure']
 
@@ -47,17 +46,6 @@ class Configure(object):
         if kwargs.get('freeze_date', False):
             self._date = self.date
             self._freeze_date = True
-
-    def _run_shell_command(self, cmd, cwd, shell=True, verbose=False):
-        cmd = subprocess.run(
-            cmd,
-            cwd=cwd,
-            shell=shell,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        if verbose:
-            print(f"{cmd.stdout.decode('utf-8')}\n{cmd.stderr.decode('utf-8')}")
 
     @staticmethod
     def load_config(filename):
@@ -141,13 +129,13 @@ class Configure(object):
             with open(os.path.join(root_dir, filename), 'w') as f:
                 f.write(filestring)
         # NOTE: make sure we have needed permissions to run compile script
-        self._run_shell_command(
+        run_shell_command(
             ['chmod', 'u+x', 'build_initial_conditions.bat'],
             os.path.join(root_dir, 'Initial_Conditions/build_scripts'),
             shell=False,
             verbose=verbose
         )
-        self._run_shell_command(
+        run_shell_command(
             ['./build_initial_conditions.bat'],
             os.path.join(root_dir, 'Initial_Conditions/build_scripts'),
             verbose=verbose
@@ -156,7 +144,7 @@ class Configure(object):
                                            'Initial_Conditions/profiles')):
             os.mkdir(os.path.join(root_dir, 'Initial_Conditions/profiles'))
         if execute:
-            self._run_shell_command(
+            run_shell_command(
                 ['./Initial_Conditions.exe'],
                 root_dir,
                 verbose=verbose,
@@ -219,13 +207,13 @@ class Configure(object):
         else:
             build_script = 'build_HYDRAD.bat'
         # NOTE: make sure we have needed permissions to run compile script
-        self._run_shell_command(
+        run_shell_command(
             ['chmod', 'u+x', build_script],
             os.path.join(root_dir, 'HYDRAD/build_scripts'),
             shell=False,
             verbose=verbose,
         )
-        self._run_shell_command(
+        run_shell_command(
             [f'./{build_script}'],
             os.path.join(root_dir, 'HYDRAD/build_scripts'),
             verbose=verbose,
