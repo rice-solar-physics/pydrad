@@ -20,7 +20,7 @@ class HYDRADError(Exception):
     pass
 
 
-def run_shell_command(cmd, cwd, shell=True, verbose=False):
+def run_shell_command(cmd, cwd, shell=True):
     cmd = subprocess.run(
         cmd,
         cwd=cwd,
