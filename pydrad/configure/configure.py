@@ -69,7 +69,7 @@ class Configure(object):
         asdf.AsdfFile(self.config).write_to(filename)
 
     def setup_simulation(self, output_path, base_path,
-                         verbose=True, run_initial_conditions=True):
+                         run_initial_conditions=True, **kwargs):
         """
         Setup a HYDRAD simulation with desired outputs from a clean copy
 
@@ -78,7 +78,6 @@ class Configure(object):
         base_path (`str`): Path to existing HYDRAD
         name (`str`): Name of the output directory. If None (default), use
         timestamp
-        verbose (`bool`):
         run_initial_conditions (`bool`): If True, compile and run the initial
         conditions code
         """
@@ -87,20 +86,19 @@ class Configure(object):
             # so that if something fails, all the files are cleaned up
             copy_tree(base_path, tmpdir)
             if run_initial_conditions:
-                self.setup_initial_conditions(tmpdir, execute=True,
-                                              verbose=verbose)
-            self.setup_hydrad(tmpdir, verbose=verbose)
+                execute = kwargs.get('execute', True)
+                self.setup_initial_conditions(tmpdir, execute=execute)
+            self.setup_hydrad(tmpdir)
             self.save_config(os.path.join(tmpdir, 'pydrad_config.asdf'))
             shutil.copytree(tmpdir, output_path)
 
-    def setup_initial_conditions(self, root_dir, execute=True, verbose=True):
+    def setup_initial_conditions(self, root_dir, execute=True):
         """
         Compile and execute code to get the initial loop profile
 
         # Parameters
         root_dir (`str`):
         execute (`bool`): If True (default), compute initial conditions
-        verbose (`bool`):
         """
         files = [
             ('Initial_Conditions/source/config.h',
@@ -132,13 +130,11 @@ class Configure(object):
         run_shell_command(
             ['chmod', 'u+x', 'build_initial_conditions.bat'],
             os.path.join(root_dir, 'Initial_Conditions/build_scripts'),
-            shell=False,
-            verbose=verbose
+            shell=False
         )
         run_shell_command(
             ['./build_initial_conditions.bat'],
-            os.path.join(root_dir, 'Initial_Conditions/build_scripts'),
-            verbose=verbose
+            os.path.join(root_dir, 'Initial_Conditions/build_scripts')
         )
         if not os.path.exists(os.path.join(root_dir,
                                            'Initial_Conditions/profiles')):
@@ -147,7 +143,6 @@ class Configure(object):
             run_shell_command(
                 ['./Initial_Conditions.exe'],
                 root_dir,
-                verbose=verbose,
             )
             if self.config['heating']['background'].get('use_initial_conditions', False):
                 self.equilibrium_heating_rate = self.get_equilibrium_heating_rate(root_dir)
@@ -165,13 +160,12 @@ class Configure(object):
             equilibrium_heating_rate = float(f.readline()) * u.erg / u.s / (u.cm**3)
         return equilibrium_heating_rate
 
-    def setup_hydrad(self, root_dir, verbose=True):
+    def setup_hydrad(self, root_dir):
         """
         Compile HYDRAD code with appropriate header and config files
 
         # Parameters
         root_dir (`str`):
-        verbose (`bool`):
         """
         files = [
             ('Radiation_Model/source/config.h',
@@ -211,12 +205,10 @@ class Configure(object):
             ['chmod', 'u+x', build_script],
             os.path.join(root_dir, 'HYDRAD/build_scripts'),
             shell=False,
-            verbose=verbose,
         )
         run_shell_command(
             [f'./{build_script}'],
             os.path.join(root_dir, 'HYDRAD/build_scripts'),
-            verbose=verbose,
         )
         if not os.path.exists(os.path.join(root_dir, 'Results')):
             os.mkdir(os.path.join(root_dir, 'Results'))

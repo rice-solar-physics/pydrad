@@ -26,5 +26,6 @@ stages:
 install:
 - pip install -r requirements/requirements-dev.txt
 - pip install --upgrade numpy>=1.16
+- pip install --upgrade pytest>=4.6
 - python setup.py install
 script: pytest

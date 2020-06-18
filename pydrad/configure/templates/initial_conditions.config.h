@@ -22,7 +22,7 @@
 {%- endif %}
 {% if initial_conditions.use_poly_fit_magnetic_field and general.poly_fit_magnetic_field is defined -%}
 #define USE_POLY_FIT_TO_MAGNETIC_FIELD
-#define POLY_FIT_TO_MAGNETIC_FIELD_FILE "poly_fit.gravity"
+#define POLY_FIT_TO_MAGNETIC_FIELD_FILE "poly_fit.magnetic_field"
 {%- endif %}
 {% if general.open_field -%}
 #define OPEN_FIELD
