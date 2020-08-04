@@ -7,7 +7,7 @@ import glob
 import numpy as np
 from scipy.interpolate import splev, splrep
 import astropy.units as u
-import plasmapy.atomic
+import plasmapy.particles
 
 from pydrad import log
 from pydrad.visualize import (plot_strand,
@@ -135,7 +135,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         return np.arange(
             0, self.loop_length.to(u.cm).value, delta_s.to(u.cm).value)*u.cm
 
-    def get_unique_grid():
+    def get_unique_grid(self):
         all_coordinates = [p.coordinate.to(u.cm).value for p in self]
         return np.unique(np.concatenate(all_coordinates).ravel()) * u.cm
 
@@ -274,7 +274,7 @@ Timestep #: {self._index}"""
 
         # Then set attributes for each ion of each element
         for z, p in zip(Z, pop_arrays):
-            name = plasmapy.atomic.element_name(z)
+            name = plasmapy.particles.element_name(z)
             attr = f'_population_fraction_{name}'
             setattr(self, attr, p)
             for p in [(f'{attr[1:]}_{i+1}', attr, i, '') for i in range(z+1)]:
