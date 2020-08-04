@@ -17,7 +17,10 @@ def plot_time_distance(strand, quantities, delta_s: u.cm, **kwargs):
 
     # Parameters
     strand (`#hydrad_tools.parse.Strand`):
-    quantities (`str`, `list`): Name of quantity or quantities to plot
+    quantities (`str`, `list`, `tuple`): Name of quantity or quantities to plot.
+    Optionally, you can also pass in a tuple of `(str,array-like)`, where `str` is
+    the label and the second entry is the quantity to plot, already interpolated
+    onto a common grid.
     norm (`dict`, optional): Dictionary of colormap normalizations; one per
     quantity.
     """
@@ -25,7 +28,7 @@ def plot_time_distance(strand, quantities, delta_s: u.cm, **kwargs):
     s_mesh, t_mesh = np.meshgrid(grid.value, strand.time.value,)
     t_mesh = (t_mesh*strand.time.unit).to(kwargs.pop('time_unit', 's'))
     s_mesh = (s_mesh*grid.unit).to(kwargs.pop('space_unit', 'cm'))
-    if type(quantities) is str:
+    if type(quantities) is not list:
         quantities = [quantities]
     fig, ax = plt.subplots(
         len(quantities), 1,
@@ -38,7 +41,12 @@ def plot_time_distance(strand, quantities, delta_s: u.cm, **kwargs):
     norm = kwargs.pop('norm', {})
     cmap = kwargs.pop('cmap', None)
     for i, q in enumerate(quantities):
-        q_uni = strand.to_constant_grid(q, grid)
+        if type(q) is str:
+            q_uni = strand.to_constant_grid(q, grid)
+        else:
+            q, q_uni = q  # If q is a tuple of label, array
+        if q_uni.shape != t_mesh.shape:
+            raise ValueError('Quantity must have same shape as meshgrid.')
         im = ax[i].pcolormesh(
             t_mesh.value,
             s_mesh.value,
