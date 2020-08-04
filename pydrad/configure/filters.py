@@ -3,7 +3,7 @@ Custom Jinja2 filters
 """
 import numpy as np
 import astropy.units as u
-import plasmapy.atomic
+import plasmapy.particles
 
 from .util import MissingParameter
 
@@ -28,13 +28,13 @@ def log10_filter(value):
 def get_atomic_symbol(element):
     if type(element) is str:
         element = element.capitalize()
-    return plasmapy.atomic.atomic_symbol(element).lower()
+    return plasmapy.particles.atomic_symbol(element).lower()
 
 
 def get_atomic_number(element):
     if type(element) is str:
         element = element.capitalize()
-    return plasmapy.atomic.atomic_number(element)
+    return plasmapy.particles.atomic_number(element)
 
 
 def sort_elements(elements):
