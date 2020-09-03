@@ -324,17 +324,17 @@ Timestep #: {self._index}"""
         return np.average(quantity_bounds, weights=grid_widths_bounds)
 
     def column_emission_measure(self, min_logT=3.0, max_logT=8.0, dlogT = 0.05):
-    """
-    Computes the column emission measure over the whole loop
-    """
-    bins = np.arange(min_logT, max_logT+dlogT, dlogT)
-    N_bins = len(bins)
-    EMc = np.zeros(N_bins) * (u.cm**(-5))
-    indices = np.searchsorted(bins, np.log10(self.electron_temperature.value), side='right')
-    indices = [item-1 for item in indices]
-    for i in range(len(self.coordinate)):
-        EMc[indices[i]] += self.grid_widths[i] * self.electron_density[i] * self.ion_density[i]
-    return(EMc, bins)
+        """
+            Computes the column emission measure over the whole loop
+            """
+        bins = np.arange(min_logT, max_logT+dlogT, dlogT)
+        N_bins = len(bins)
+        EMc = np.zeros(N_bins) * (u.cm**(-5))
+        indices = np.searchsorted(bins, np.log10(self.electron_temperature.value), side='right')
+        indices = [item-1 for item in indices]
+        for i in range(len(self.coordinate)):
+            EMc[indices[i]] += self.grid_widths[i] * self.electron_density[i] * self.ion_density[i]
+        return(EMc, bins)
 
     def peek(self, **kwargs):
         """
