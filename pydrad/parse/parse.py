@@ -323,18 +323,17 @@ Timestep #: {self._index}"""
         grid_widths_bounds = self.grid_widths[i_bounds]
         return np.average(quantity_bounds, weights=grid_widths_bounds)
 
-    def column_emission_measure(self, min_logT=3.0, max_logT=8.0, dlogT = 0.05):
+    @u.quantity_input
+    def column_emission_measure(self, bins:u.K=None):
         """
-            Computes the column emission measure over the whole loop
-            """
-        bins = np.arange(min_logT, max_logT+dlogT, dlogT)
-        N_bins = len(bins)
-        EMc = np.zeros(N_bins) * (u.cm**(-5))
-        indices = np.searchsorted(bins, np.log10(self.electron_temperature.value), side='right')
-        indices = [item-1 for item in indices]
-        for i in range(len(self.coordinate)):
-            EMc[indices[i]] += self.grid_widths[i] * self.electron_density[i] * self.ion_density[i]
-        return(EMc, bins)
+        Computes the column emission measure, where it is assumed that the loop is
+        confined to a single pixel and oriented along the LOS
+        """
+        if bins is None:
+            bins = 10.0**(np.arange(3.0, 8.0, 0.05)) * u.K
+        weights = self.electron_density * self.ion_density * self.grid_widths
+        H, _, _ = np.histogram2d(self.grid_centers, self.electron_temperature, bins=(self.grid_edges, bins), weights=weights)
+        return H.sum(axis=0), bins
 
     def peek(self, **kwargs):
         """
