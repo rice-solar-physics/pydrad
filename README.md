@@ -1,7 +1,7 @@
 # pydrad
 
 [![Build Status](https://travis-ci.org/rice-solar-physics/pydrad.svg?branch=master)](https://travis-ci.org/rice-solar-physics/pydrad)
-[![Coverage Status](https://coveralls.io/repos/github/rice-solar-physics/pydrad/badge.svg?branch=master)](https://coveralls.io/github/rice-solar-physics/pydrad?branch=master)
+[![codecov](https://codecov.io/gh/rice-solar-physics/pydrad/branch/master/graph/badge.svg)](https://codecov.io/gh/rice-solar-physics/pydrad)
 
 Some Python tools to configure and parse output from the HYDrodynamics and RADiation (HYDRAD) code for field-aligned coronal loop physics.
 

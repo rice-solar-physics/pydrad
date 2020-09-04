@@ -6,9 +6,10 @@ jobs:
     python: 3.6
   - python: 3.7
   - python: 3.8
-  - script:
-    - pytest --cov=pydrad --cov-report=html
-    - coveralls
+  - script: pytest --cov=pydrad --cov-report=xml
+    after_success:
+    - pip install --upgrade codecov
+    - codecov --token=$CODECOV_TOKEN
   - stage: docs
     script:
     - cd docs && make && cd ..
