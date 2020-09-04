@@ -332,7 +332,8 @@ Timestep #: {self._index}"""
         if bins is None:
             bins = 10.0**(np.arange(3.0, 8.0, 0.05)) * u.K
         weights = self.electron_density * self.ion_density * self.grid_widths
-        H, _, _ = np.histogram2d(self.grid_centers, self.electron_temperature, bins=(self.grid_edges, bins), weights=weights)
+        H, _, _ = np.histogram2d(self.grid_centers, self.electron_temperature,
+                                 bins=(self.grid_edges, bins), weights=weights)
         return H.sum(axis=0), bins
 
     def peek(self, **kwargs):
