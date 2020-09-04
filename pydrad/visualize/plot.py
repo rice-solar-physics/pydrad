@@ -118,7 +118,7 @@ def _setup_figure(profile, limits, **kwargs):
     # Labels
     axes[0, 0].set_ylabel(r'$T$ [MK]')
     axes[0, 1].set_ylabel(r'$n$ [cm$^{-3}$]')
-    axes[1, 0].set_ylabel(r'$P$ [dyne cm$^{-2}$ s$^{-1}$]')
+    axes[1, 0].set_ylabel(r'$P$ [dyne cm$^{-2}$]')
     axes[1, 1].set_ylabel(r'$v$ [km s$^{-1}$]')
     axes[1, 0].set_xlabel(r'$s$ [Mm]')
     axes[1, 1].set_xlabel(r'$s$ [Mm]')

@@ -1,0 +1,8 @@
+[run]
+omit =
+  conftest.py
+  synthesizAR/tests/*
+  pydrad/*/tests/*
+  */pydrad/conftest.py
+  */pydrad/tests/*
+  */pydrad/*/tests/*
