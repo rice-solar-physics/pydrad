@@ -5,4 +5,4 @@ mkdocs
 mkdocs-material
 pydoc-markdown==2.0.2
 pytest-cov
-coveralls
+codecov
