@@ -328,6 +328,15 @@ Timestep #: {self._index}"""
         """
         Computes the column emission measure, where it is assumed that the loop is
         confined to a single pixel and oriented along the LOS
+        
+        # Parameters
+        bins (`astropy.units.Quantity`): temperature bin edges, including rightmost edge. If None (default),
+        the bins will be equally-spaced in $\log{T}$, with a left edge at $\log{T}=3$, a right edge at
+        $\log{T}=8$, and a bin width of $0.05$.
+        
+        # Returns
+        em (`astropy.units.Quantity`): the column emission measure in each bin
+        bins (`astropy.units.Quantity`): temperature bin edges. Note that `len(bins)=len(em)+1`.
         """
         if bins is None:
             bins = 10.0**(np.arange(3.0, 8.0, 0.05)) * u.K
