@@ -323,6 +323,28 @@ Timestep #: {self._index}"""
         grid_widths_bounds = self.grid_widths[i_bounds]
         return np.average(quantity_bounds, weights=grid_widths_bounds)
 
+    @u.quantity_input
+    def column_emission_measure(self, bins:u.K=None):
+        """
+        Computes the column emission measure, where it is assumed that the loop is
+        confined to a single pixel and oriented along the LOS
+        
+        # Parameters
+        bins (`astropy.units.Quantity`): temperature bin edges, including rightmost edge. If None (default),
+        the bins will be equally-spaced in $\log{T}$, with a left edge at $\log{T}=3$, a right edge at
+        $\log{T}=8$, and a bin width of $0.05$.
+        
+        # Returns
+        em (`astropy.units.Quantity`): the column emission measure in each bin
+        bins (`astropy.units.Quantity`): temperature bin edges. Note that `len(bins)=len(em)+1`.
+        """
+        if bins is None:
+            bins = 10.0**(np.arange(3.0, 8.0, 0.05)) * u.K
+        weights = self.electron_density * self.ion_density * self.grid_widths
+        H, _, _ = np.histogram2d(self.grid_centers, self.electron_temperature,
+                                 bins=(self.grid_edges, bins), weights=weights)
+        return H.sum(axis=0), bins
+
     def peek(self, **kwargs):
         """
         Quick look at profiles at a given timestep.
