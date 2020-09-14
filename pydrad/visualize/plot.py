@@ -6,7 +6,31 @@ import astropy.units as u
 import matplotlib.pyplot as plt
 import matplotlib.colors
 
-__all__ = ['plot_strand', 'plot_profile', 'plot_time_distance']
+__all__ = ['plot_strand', 'plot_profile', 'plot_time_distance', 'plot_histogram']
+
+
+def plot_histogram(vals, bins, ax=None, **kwargs):
+    """
+    Given a set of bin edges and the values in each bin, plot
+    the histogram.
+    
+    # Parameters
+    ax (`matplotlib.pyplot): Matplotlib axis instance
+    vals (array-like): value in each bin
+    bins (array-like): Bin edges, including the rightmost edge
+    kwargs : Plotting keyword arguments
+    """
+    if ax is None:
+        fig = plt.figure()
+        ax = plt.gca()
+    ymin = ax.get_ylim()[0]
+    ax.step(bins[:-1], vals, where='post', **kwargs)
+    if 'label' in kwargs:
+        del kwargs['label']
+    ax.step(bins[-2:], [vals[-1], vals[-1]], where='pre', **kwargs)
+    ax.vlines(bins[0], ymin, vals[0], **kwargs)
+    ax.vlines(bins[-1], ymin, vals[-1], **kwargs)
+    return ax
 
 
 @u.quantity_input

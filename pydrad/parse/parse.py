@@ -5,6 +5,7 @@ import os
 import glob
 
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.interpolate import splev, splrep
 import astropy.units as u
 import plasmapy.particles
@@ -13,7 +14,8 @@ from pydrad import log
 from pydrad.visualize import (plot_strand,
                               plot_profile,
                               animate_strand,
-                              plot_time_distance)
+                              plot_time_distance,
+                              plot_histogram)
 
 __all__ = ['Strand', 'Profile', 'InitialProfile']
 
@@ -166,7 +168,7 @@ class Profile(object):
 
     # Parameters
     hydrad_root (`str`): Path to HYDRAD directory
-    time (`int`): Timestep index
+    time (`astropy.units.Quantity`): 
     """
 
     @u.quantity_input
@@ -330,13 +332,15 @@ Timestep #: {self._index}"""
         confined to a single pixel and oriented along the LOS
         
         # Parameters
-        bins (`astropy.units.Quantity`): temperature bin edges, including rightmost edge. If None (default),
-        the bins will be equally-spaced in $\log{T}$, with a left edge at $\log{T}=3$, a right edge at
-        $\log{T}=8$, and a bin width of $0.05$.
+        bins (`astropy.units.Quantity`): temperature bin edges, including rightmost
+        edge. If None (default), the bins will be equally-spaced in $\log{T}$, with
+        a left edge at $\log{T}=3$, a right edge at $\log{T}=8$, and a bin width of
+        $0.05$.
         
         # Returns
-        em (`astropy.units.Quantity`): the column emission measure in each bin
-        bins (`astropy.units.Quantity`): temperature bin edges. Note that `len(bins)=len(em)+1`.
+        em (astropy.units.Quantity): the column emission measure in each bin
+        
+        bins (astropy.units.Quantity): temperature bin edges. Note that `len(bins)=len(em)+1`.
         """
         if bins is None:
             bins = 10.0**(np.arange(3.0, 8.0, 0.05)) * u.K
@@ -350,6 +354,19 @@ Timestep #: {self._index}"""
         Quick look at profiles at a given timestep.
         """
         plot_profile(self, **kwargs)
+
+    def peek_emission_measure(self, **kwargs):
+        """
+        Quick look at the column emission measure
+        """
+        bins = kwargs.pop('bins')
+        if 'color' not in kwargs:
+            kwargs['color'] = 'C0'
+        em, bins = self.column_emission_measure(bins=bins)
+        ax = plot_histogram(em.to('cm-5').value, bins.to('K').value, **kwargs)
+        ax.set_xlabel(r'$T$ [K]')
+        ax.set_ylabel(r'EM [cm$^{-5}$]')
+        plt.show()
 
 
 class InitialProfile(Profile):
