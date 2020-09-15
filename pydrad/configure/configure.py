@@ -76,8 +76,6 @@ class Configure(object):
         # Parameters
         output_path (`str`): Path to new copy of HYDRAD
         base_path (`str`): Path to existing HYDRAD
-        name (`str`): Name of the output directory. If None (default), use
-        timestamp
         run_initial_conditions (`bool`): If True, compile and run the initial
         conditions code
         """

@@ -35,7 +35,7 @@ def configuration_dict():
             'write_file_physical': True,
             'write_file_timescales': True,
             'loop_length':  90.*u.Mm,
-            'total_time':  5000.*u.s,
+            'total_time':  2.*u.s,
         },
         'grid': {
             'adapt': True,
@@ -116,4 +116,8 @@ def hydrad(tmp_path, configuration, hydrad_clean):
     else:
         hydrad_tmp = tmp_path / 'hydrad_tmp'
         configuration.setup_simulation(hydrad_tmp, hydrad_clean)
+        pydrad.configure.util.run_shell_command(
+            ['./HYDRAD.exe'],
+            hydrad_tmp,
+        )
         return hydrad_tmp
