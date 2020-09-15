@@ -364,6 +364,8 @@ Timestep #: {self._index}"""
             kwargs['color'] = 'C0'
         em, bins = self.column_emission_measure(bins=bins)
         ax = plot_histogram(em.to('cm-5').value, bins.to('K').value, **kwargs)
+        ax.set_yscale('log')
+        ax.set_xscale('log')
         ax.set_xlabel(r'$T$ [K]')
         ax.set_ylabel(r'EM [cm$^{-5}$]')
         plt.show()
