@@ -359,7 +359,7 @@ Timestep #: {self._index}"""
         """
         Quick look at the column emission measure
         """
-        bins = kwargs.pop('bins')
+        bins = kwargs.pop('bins', None)
         if 'color' not in kwargs:
             kwargs['color'] = 'C0'
         em, bins = self.column_emission_measure(bins=bins)
