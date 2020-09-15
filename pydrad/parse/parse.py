@@ -366,6 +366,8 @@ Timestep #: {self._index}"""
         ax = plot_histogram(em.to('cm-5').value, bins.to('K').value, **kwargs)
         ax.set_yscale('log')
         ax.set_xscale('log')
+        ax.set_xlim(kwargs.get('xlim'))
+        ax.set_ylim(kwargs.get('ylim'))
         ax.set_xlabel(r'$T$ [K]')
         ax.set_ylabel(r'EM [cm$^{-5}$]')
         plt.show()
