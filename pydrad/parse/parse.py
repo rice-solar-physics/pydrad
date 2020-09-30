@@ -82,7 +82,8 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         Save variables to an HDF5 file
 
         # Parameters
-        filename (`str` or path-like): filename to 
+        filename (`str` or path-like): path to HDF file
+        variables (`str`): Names of variables to save to file
         """
         with h5py.File(filename, 'w') as hf:
             ds = hf.create_dataset('time', data=self.time.value)
