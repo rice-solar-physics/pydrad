@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import splev, splrep
 import astropy.units as u
 import plasmapy.particles
+import h5py
 
 from pydrad import log
 from pydrad.visualize import (plot_strand,
@@ -75,6 +76,23 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
                            self.time[index],
                            master_time=self._master_time,
                            **self._profile_kwargs)
+
+    def to_hdf5(self, filename, *variables):
+        """
+        Save variables to an HDF5 file
+
+        # Parameters
+        filename (`str` or path-like): filename to 
+        """
+        with h5py.File(filename, 'w') as hf:
+            ds = hf.create_dataset('time', data=self.time.value)
+            ds.attrs['unit'] = self.time.unit.to_string()
+            for p in self:
+                grp = hf.create_group(f'index{p._index}')
+                for v in variables:
+                    data = getattr(p, v)
+                    ds = grp.create_dataset(v, data=data.value)
+                    ds.attrs['unit'] = data.unit.to_string()
 
     @property
     def time(self):
