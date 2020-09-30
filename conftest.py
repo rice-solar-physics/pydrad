@@ -35,7 +35,7 @@ def configuration_dict():
             'write_file_physical': True,
             'write_file_timescales': True,
             'loop_length':  90.*u.Mm,
-            'total_time':  2.*u.s,
+            'total_time':  5.*u.s,
         },
         'grid': {
             'adapt': True,
