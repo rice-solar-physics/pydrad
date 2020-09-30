@@ -3,4 +3,5 @@ matplotlib
 astropy
 Jinja2
 asdf
+h5py
 plasmapy[theory]
