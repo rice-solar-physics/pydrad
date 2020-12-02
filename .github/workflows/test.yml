@@ -34,11 +34,11 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: rice-solar-physics/HYDRAD
-        token: ${{secrets.PYDRAD_HYDRAD_CLONE}}
+        token: ${{ secrets.PYDRAD_HYDRAD_CLONE }}
         path: HYDRAD
     - name: Test
       run: |
         pytest --hydrad-dir=$GITHUB_WORKSPACE/HYDRAD --cov=pydrad --cov-report=xml
     - name: Report coverage
       run: |
-        codecov --token=${{secrets.CODECOV_TOKEN}}
+        codecov --token=${{ secrets.CODECOV_TOKEN }}
