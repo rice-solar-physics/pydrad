@@ -45,6 +45,7 @@ def configuration_dict():
             'maximum_cell_width':  0.5*u.Mm,
             'maximum_fractional_difference': 0.1,
             'maximum_refinement_level': 12,
+            'initial_refinement_level': 10,
             'maximum_variation': 0.1,
             'minimum_delta_s':  1.*u.cm,
             'minimum_fractional_difference': 0.05,
@@ -57,7 +58,7 @@ def configuration_dict():
             'background': {'use_initial_conditions': True},
             'beam': False,
             'events': [],
-            'heat_electrons': True,
+            'electron_heating': 1.0,
         },
         'initial_conditions': {
             'footpoint_density':  1.e+12*u.cm**(-3),
