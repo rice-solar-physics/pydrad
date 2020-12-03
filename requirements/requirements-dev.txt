@@ -1,8 +1,8 @@
 -r requirements.txt
 flake8
 pytest
-mkdocs
-mkdocs-material
-pydoc-markdown==2.0.2
+sphinx
+sphinx-automodapi
+sphinx-rtd-theme
 pytest-cov
 codecov

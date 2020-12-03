@@ -1,19 +1,20 @@
-API_DIR='api'
+# Minimal makefile for Sphinx documentation
+#
 
-all: configure parse plot
+# You can set these variables from the command line, and also
+# from the environment for the first two.
+SPHINXOPTS    ?=
+SPHINXBUILD   ?= sphinx-build
+SOURCEDIR     = .
+BUILDDIR      = _build
 
-configure: api_dir
-	pydocmd simple pydrad.configure++ pydrad.configure.Configure++ > $(API_DIR)/configure.md
+# Put it first so that "make" without argument is like "make help".
+help:
+	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-parse: api_dir
-	pydocmd simple pydrad.parse++ pydrad.parse.Strand++ pydrad.parse.Profile++ > $(API_DIR)/parse.md
+.PHONY: help Makefile
 
-plot: api_dir
-	pydocmd simple pydrad.visualize+ pydrad.visualize.plot_strand pydrad.visualize.animate_strand pydrad.visualize.plot_profile pydrad.visualize.plot_time_distance > $(API_DIR)/visualize.md
-
-api_dir:
-	mkdir -p $(API_DIR)
-
-clean:
-	echo "Cleaning up API docs"
-	rm -r $(API_DIR)/*
+# Catch-all target: route all unknown targets to Sphinx using the new
+# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
+%: Makefile
+	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
