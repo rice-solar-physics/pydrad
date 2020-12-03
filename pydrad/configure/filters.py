@@ -43,7 +43,7 @@ def sort_elements(elements):
 
 def is_required(value):
     # Check for missing values that are not False booleans
-    if not value and value is not False:
+    if not value and value is not False and value != 0:
         raise MissingParameter('Parameter required for configuration')
     else:
         return value

@@ -57,6 +57,7 @@
 
 // **** Grid ****
 #define MAX_REFINEMENT_LEVEL {{ grid.maximum_refinement_level | is_required }}
+#define INITIAL_REFINEMENT_LEVEL {{ grid.initial_refinement_level | is_required }}
 {% if grid.adapt -%}
 #define ADAPT
 #define ADAPT_EVERY_N_TIME_STEPS {{ grid.adapt_every_n_time_steps | is_required }}
