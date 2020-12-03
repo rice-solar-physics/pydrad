@@ -1,10 +1,6 @@
 Getting Started
 ===============
 
-This package contains various helpers for configuring, parsing, and
-plotting HYDRAD simulations. The HYDrodynamics and RADiation model is a
-code for modeling the field-aligned dynamics of coronal loops.
-
 Installing this Package
 -----------------------
 
