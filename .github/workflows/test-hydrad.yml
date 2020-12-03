@@ -38,6 +38,6 @@ jobs:
     - name: Report coverage
       uses: codecov/codecov-action@v1
       with:
-        fail-ci-if-error: true
+        fail_ci_if_error: true
         verbose: true
         file: ./coverage.xml
