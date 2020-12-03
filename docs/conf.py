@@ -24,6 +24,8 @@ author = 'Will Barnes'
 
 # -- General configuration ---------------------------------------------------
 
+master_doc = 'index'  # Needed for older versions of sphinx
+
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
