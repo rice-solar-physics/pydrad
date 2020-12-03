@@ -3,5 +3,6 @@ flake8
 pytest
 sphinx
 sphinx-automodapi
+sphinx-rtd-theme
 pytest-cov
 codecov
