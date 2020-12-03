@@ -16,5 +16,4 @@ code for modeling the field-aligned dynamics of coronal loops.
    getting_started
    configure
    parse
-   plot
    code_ref/index

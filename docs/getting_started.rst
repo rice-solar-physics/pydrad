@@ -1,5 +1,5 @@
-pydrad
-======
+Getting Started
+===============
 
 This package contains various helpers for configuring, parsing, and
 plotting HYDRAD simulations. The HYDrodynamics and RADiation model is a
