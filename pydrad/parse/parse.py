@@ -271,7 +271,7 @@ Timestep #: {self._index}"""
         try:
             with open(self._trm_filename, 'r') as f:
                 lines = f.readlines()
-        except:
+        except FileNotFoundError:
             log.debug(f'{self._trm_filename} not found')
             return
         
