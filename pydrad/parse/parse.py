@@ -275,7 +275,7 @@ Timestep #: {self._index}"""
             log.debug(f'{self._trm_filename} not found')
             return
         
-        n_elements = 1 + int(len(lines)/4)
+        n_elements = int(len(lines)/5)
         self._trm_data = np.zeros([n_elements, 3])
 
         # The files come in sets of 5 rows
@@ -288,7 +288,7 @@ Timestep #: {self._index}"""
         #  the electron heating, hydrogen heating,
         #  and bolometric radiative losses
         for i in range(len(lines)):
-            j = int(i/4)
+            j = int(i/5)
             line = lines[i].strip().split()
             # Electron heating and radiative loss terms from the 
             # electron energy equation
