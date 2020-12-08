@@ -297,11 +297,9 @@ Timestep #: {self._index}"""
             if i % 5 == 4:
                 self._trm_data[int(i/4)][2] = float(line[5])
         
-        properties = [
-                      ('electron_heat','_trm_data', 0, 'erg cm-3 s-1'),
-                      ('hydrogen_heat','_trm_data', 2, 'erg cm-3 s-1'),
-                      ('radiative_losses','_trm_data', 1, 'erg cm-3 s-1'),
-                     ]
+        properties = [('electron_heating_term', '_trm_data', 0, 'erg cm-3 s-1'),
+                      ('hydrogen_heating_term', '_trm_data', 2, 'erg cm-3 s-1'),
+                      ('radiative_loss_term', '_trm_data', 1, 'erg cm-3 s-1'),]
                      
         for p in properties:
             add_property(*p)
