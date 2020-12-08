@@ -288,14 +288,17 @@ Timestep #: {self._index}"""
         #  the electron heating, hydrogen heating,
         #  and bolometric radiative losses
         for i in range(len(lines)):
-            if i % 5 == 3 or i % 5 == 4:
-                line = lines[i].strip()
-                line = line.split()
+            j = int(i/4)
+            line = lines[i].strip().split()
+            # Electron heating and radiative loss terms from the 
+            # electron energy equation
             if i % 5 == 3:
-                self._trm_data[int(i/4)][0] = float(line[5])
-                self._trm_data[int(i/4)][1] = float(line[6])
+                self._trm_data[j, 0] = float(line[5])
+                self._trm_data[j, 1] = float(line[6])
+            # Hydrogen heating term from the hydrogen energy
+            # equation
             if i % 5 == 4:
-                self._trm_data[int(i/4)][2] = float(line[5])
+                self._trm_data[j, 2] = float(line[5])
         
         properties = [('electron_heating_term', '_trm_data', 0, 'erg cm-3 s-1'),
                       ('hydrogen_heating_term', '_trm_data', 2, 'erg cm-3 s-1'),
