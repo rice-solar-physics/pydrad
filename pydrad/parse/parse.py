@@ -206,6 +206,8 @@ class Profile(object):
             self._read_hstate()
         if kwargs.get('read_ine', True):
             self._read_ine()
+        if kwargs.get('read_trm', True):
+            self._read_trm()
 
     @property
     def _amr_filename(self):
@@ -218,10 +220,15 @@ class Profile(object):
                             f'Results/profile{self._index:d}.phy')
 
     @property
+    def _trm_filename(self):
+        return os.path.join(self.hydrad_root,
+                            f'Results/profile{self._index:d}.trm')
+    
+    @property
     def _ine_filename(self):
         return os.path.join(self.hydrad_root,
                             f'Results/profile{self._index:d}.ine')
-
+    
     @property
     def _hstate_filename(self):
         return os.path.join(self.hydrad_root,
@@ -257,6 +264,49 @@ Timestep #: {self._index}"""
                 self._grid_centers[i] = tmp[0]
                 self._grid_widths[i] = tmp[1]
 
+    def _read_trm(self):
+        """
+        Parse the equation terms file
+        """
+        try:
+            with open(self._trm_filename, 'r') as f:
+                lines = f.readlines()
+        except FileNotFoundError:
+            log.debug(f'{self._trm_filename} not found')
+            return
+        
+        n_elements = 1 + int(len(lines)/4)
+        self._trm_data = np.zeros([n_elements, 3])
+
+        # The files come in sets of 5 rows
+        #   -- Loop coordinate, and at each one:
+        #   -- Terms of mass equation
+        #   -- Terms of momentum equation
+        #   -- Terms of electron energy equation
+        #   -- Terms of hydrogen energy equation
+        # Right now, we only read 3 values from this:
+        #  the electron heating, hydrogen heating,
+        #  and bolometric radiative losses
+        for i in range(len(lines)):
+            j = int(i/4)
+            line = lines[i].strip().split()
+            # Electron heating and radiative loss terms from the 
+            # electron energy equation
+            if i % 5 == 3:
+                self._trm_data[j, 0] = float(line[5])
+                self._trm_data[j, 1] = float(line[6])
+            # Hydrogen heating term from the hydrogen energy
+            # equation
+            if i % 5 == 4:
+                self._trm_data[j, 2] = float(line[5])
+        
+        properties = [('electron_heating_term', '_trm_data', 0, 'erg cm-3 s-1'),
+                      ('hydrogen_heating_term', '_trm_data', 2, 'erg cm-3 s-1'),
+                      ('radiative_loss_term', '_trm_data', 1, 'erg cm-3 s-1'),]
+                     
+        for p in properties:
+            add_property(*p)
+        
     def _read_ine(self):
         """
         Parse non-equilibrium ionization population fraction files
