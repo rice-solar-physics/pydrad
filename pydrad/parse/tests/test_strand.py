@@ -20,6 +20,9 @@ VAR_NAMES = [
     'electron_pressure',
     'ion_pressure',
     'velocity',
+    'electron_heating_term',
+    'hydrogen_heating_term',
+    'radiative_loss_term',
 ]
 
 
