@@ -23,6 +23,9 @@ VAR_NAMES = [
     'electron_heating_term',
     'hydrogen_heating_term',
     'radiative_loss_term',
+    'sound_speed',
+    'electron_conduction',
+    'ion_conduction',
 ]
 
 
