@@ -473,13 +473,16 @@ def add_property(name, attr, index, unit):
 
 properties = [
     ('coordinate', '_phy_data', 0, 'cm'),
-    ('electron_temperature', '_phy_data', -4, 'K'),
-    ('ion_temperature', '_phy_data', -3, 'K'),
+    ('velocity', '_phy_data', 1, 'cm / s'),
+    ('sound_speed', '_phy_data', 2, 'cm / s'),
     ('electron_density', '_phy_data', 3, 'cm-3'),
     ('ion_density', '_phy_data', 4, 'cm-3'),
     ('electron_pressure', '_phy_data', 5, 'dyne cm-2'),
     ('ion_pressure', '_phy_data', 6, 'dyne cm-2'),
-    ('velocity', '_phy_data', 1, 'cm / s')
+    ('electron_temperature', '_phy_data', 7, 'K'),
+    ('ion_temperature', '_phy_data', 8, 'K'),
+    ('electron_conduction', '_phy_data', 9, 'erg s-1 cm-2'),
+    ('ion_conduction', '_phy_data', 10, 'erg s-1 cm-2'),
 ]
 properties += [(f'level_population_hydrogen_{i}', '_hstate_data', i, '') for i in range(1, 7)]
 for p in properties:
