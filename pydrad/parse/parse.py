@@ -28,7 +28,9 @@ def get_master_time(hydrad_root):
         with open('HYDRAD/config/hydrad.cfg', 'r') as f:
             lines = f.readlines()
         cadence = float(lines[3])
-        time = np.fromiter([i*cadence for i in range(len(amr_files))], dtype='float')
+        with open(amr_files[0]) as f:
+            start_time = float(f.readline())
+        time = np.fromiter([start_time + t * cadence for t in range(len(amr_files))], dtype='float')
     except FileNotFoundError:
         log.debug(f'HYDRAD/config/hydrad.cfg not found')
         time = np.zeros((len(amr_files),))
