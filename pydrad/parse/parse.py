@@ -24,10 +24,17 @@ __all__ = ['Strand', 'Profile', 'InitialProfile']
 def get_master_time(hydrad_root):
     log.debug('Reading master time array from all AMR files')
     amr_files = glob.glob(os.path.join(hydrad_root, 'Results/profile*.amr'))
-    time = np.zeros((len(amr_files),))
-    for i, af in enumerate(amr_files):
-        with open(af, 'r') as f:
-            time[i] = f.readline()
+    try:
+        with open('HYDRAD/config/hydrad.cfg', 'r') as f:
+            lines = f.readlines()
+        cadence = float(lines[3])
+        time = np.fromiter([i*cadence for i in range(len(amr_files))], dtype='float')
+    except FileNotFoundError:
+        log.debug(f'HYDRAD/config/hydrad.cfg not found')
+        time = np.zeros((len(amr_files),))
+        for i, af in enumerate(amr_files):
+            with open(af, 'r') as f:
+                time[i] = f.readline()
     return sorted(time) * u.s
 
 
