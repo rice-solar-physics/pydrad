@@ -37,5 +37,5 @@
 #define MAX_CELLS {{ maximum_cells | is_required }}
 #define MAX_REFINEMENT_LEVEL {{ grid.maximum_refinement_level | is_required }}
 #define INITIAL_REFINEMENT_LEVEL {{ grid.initial_refinement_level | is_required }}
-#define MIN_DS {{ grid.minimum_delta_s | is_required | units_filter('cm') }}
+#define MIN_DS {{ grid.minimum_delta_s | is_required | units_filter('cm') | sci_notation }}
 #define MAX_VARIATION {{ grid.maximum_variation | is_required + 1.0}}

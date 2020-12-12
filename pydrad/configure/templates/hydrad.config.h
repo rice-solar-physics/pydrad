@@ -37,10 +37,10 @@
 
 // **** Solver ****
 {% if general.use_openmp %}#define OPENMP{% endif %}
-#define SAFETY_RADIATION {{ solver.safety_radiation | is_required}}
-#define SAFETY_CONDUCTION {{ solver.safety_conduction | is_required}}
-#define SAFETY_ADVECTION {{ solver.safety_advection | is_required}}
-#define SAFETY_VISCOSITY {{ solver.safety_viscosity | is_required}}
+#define SAFETY_RADIATION {{ solver.safety_radiation | is_required }}
+#define SAFETY_CONDUCTION {{ solver.safety_conduction | is_required }}
+#define SAFETY_ADVECTION {{ solver.safety_advection | is_required }}
+#define SAFETY_VISCOSITY {{ solver.safety_viscosity | is_required }}
 #define TIME_STEP_INCREASE_LIMIT {{ solver.timestep_increase_limit | is_required + 1.0 }}
 {% if solver.relative_viscous_timescale -%}
 #define NUMERICAL_VISCOSITY
