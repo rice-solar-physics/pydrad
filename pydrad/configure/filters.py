@@ -7,8 +7,15 @@ import plasmapy.particles
 
 from .util import MissingParameter
 
-__all__ = ['units_filter', 'log10_filter', 'get_atomic_symbol',
-           'get_atomic_number', 'sort_elements', 'is_required']
+__all__ = [
+    'units_filter',
+    'log10_filter',
+    'get_atomic_symbol',
+    'get_atomic_number',
+    'sort_elements',
+    'is_required',
+    'sci_notation',
+]
 
 
 def units_filter(quantity, unit):
@@ -47,3 +54,14 @@ def is_required(value):
         raise MissingParameter('Parameter required for configuration')
     else:
         return value
+
+
+def sci_notation(value, sig_figs=8):
+    """
+    Print value in scientific notation with number of signficant
+    digits specified by `sig_figs`. This filter is required as
+    there are known issues when supplying some quantities
+    (e.g. loop length) at arbitrarily high precision
+    """
+    format_str = f'1.{sig_figs}e'
+    return f'{value:{format_str}}'

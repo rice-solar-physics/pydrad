@@ -41,6 +41,7 @@ class Configure(object):
         self.env.filters['get_atomic_number'] = filters.get_atomic_number
         self.env.filters['sort_elements'] = filters.sort_elements
         self.env.filters['is_required'] = filters.is_required
+        self.env.filters['sci_notation'] = filters.sci_notation
         # NOTE: Freeze the date at instantiation so that files can be compared
         # exactly for testing
         if kwargs.get('freeze_date', False):
@@ -387,7 +388,8 @@ class Configure(object):
         """
         return self.env.get_template('coefficients.cfg').render(
             date=self.date,
-            coefficients=self.config['general']['poly_fit_magnetic_field']
+            fit=self.config['general']['poly_fit_magnetic_field'],
+            y_unit='G',
         )
 
     @property
@@ -398,7 +400,8 @@ class Configure(object):
         """
         return self.env.get_template('coefficients.cfg').render(
             date=self.date,
-            coefficients=self.config['general']['poly_fit_gravity']
+            fit=self.config['general']['poly_fit_gravity'],
+            y_unit='cm s-2',
         )
 
     @property
@@ -419,10 +422,14 @@ class Configure(object):
     def maximum_cells(self):
         """
         Maximum allowed number of grid cells,
-        $n_{max}=\lfloor 2^{L_R}/n_{min}\\rfloor$, where $L_R$ is the maximum
+        $n_{max}=\lfloor 2^{L_R}n_{min}\\rfloor$, where $L_R$ is the maximum
         refinement level and $n_{min}$ is the minimum allowed number of
-        grid cells.
+        grid cells. Optionally, if the number of maximum cells is specified
+        in in ``config['grid']['maximum_cells']``, this value will take
+        precedence.
         """
+        if 'maximum_cells' in self.config['grid']:
+            return int(self.config['grid']['maximum_cells'])
         n_min = self.config['general']['loop_length'] / self.config['grid']['maximum_cell_width']
         if n_min.decompose().unit != u.dimensionless_unscaled:
             raise u.UnitConversionError(
