@@ -21,29 +21,26 @@ from pydrad.visualize import (plot_strand,
 __all__ = ['Strand', 'Profile', 'InitialProfile']
 
 
-def get_master_time(hydrad_root, read_from_cfg=None):
+def get_master_time(hydrad_root, read_from_cfg=False):
     amr_files = glob.glob(os.path.join(hydrad_root, 'Results/profile*.amr'))
-    if read_from_cfg is None:
+    if read_from_cfg:
+        log.debug('Creating master time array from config files')
+        try:
+            with open(os.path.join(hydrad_root, 'HYDRAD/config/hydrad.cfg'), 'r') as f:
+                lines = f.readlines()
+            cadence = float(lines[3])
+            with open(amr_files[0]) as f:
+                start_time = float(f.readline())
+            time = start_time + np.arange(len(amr_files)) * cadence
+        except FileNotFoundError:
+            log.debug('HYDRAD/config/hydrad.cfg not found')
+            return
+    else:
         log.debug('Reading master time array from all AMR files')
         time = np.zeros((len(amr_files),))
         for i, af in enumerate(amr_files):
             with open(af, 'r') as f:
                 time[i] = f.readline()
-    else:
-        log.debug('Creating master time array from config files')
-        try:
-            with open('HYDRAD/config/hydrad.cfg', 'r') as f:
-                lines = f.readlines()
-            cadence = float(lines[3])
-            with open(amr_files[0]) as f:
-                start_time = float(f.readline())
-            time = np.fromiter([start_time + t * cadence for t in range(len(amr_files))], dtype='float')
-        except FileNotFoundError:
-            log.debug('HYDRAD/config/hydrad.cfg not found -- reading AMR instead')
-            time = np.zeros((len(amr_files),))
-            for i, af in enumerate(amr_files):
-                with open(af, 'r') as f:
-                    time[i] = f.readline()
     return sorted(time) * u.s
 
 
@@ -63,7 +60,7 @@ class Strand(object):
         self._master_time = kwargs.pop('master_time', None)
         if self._master_time is None:
             self._master_time = get_master_time(self.hydrad_root,
-                                                read_from_cfg=kwargs.get('read_from_cfg'))
+                                                read_from_cfg=kwargs.get('read_from_cfg', False))
         # NOTE: time is only specified when slicing a Strand. When not
         # slicing, it should be read from the results.
         self._time = kwargs.pop('time', self._master_time)
@@ -216,7 +213,7 @@ class Profile(object):
         self._master_time = kwargs.get('master_time')
         if self._master_time is None:
             self._master_time = get_master_time(self.hydrad_root,
-                                                read_from_cfg=kwargs.get('read_from_cfg'))
+                                                read_from_cfg=kwargs.get('read_from_cfg', False))
         # Read results files
         self._read_phy()
         self._read_amr()
