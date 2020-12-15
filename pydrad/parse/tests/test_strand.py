@@ -45,6 +45,12 @@ def test_has_quantity(strand, quantity):
         assert isinstance(getattr(p, quantity), u.Quantity)
 
 
+def test_time_arrays_same(hydrad, strand):
+    """Check that reading time arrays different ways yields same answer"""
+    strand2 = Strand(hydrad, read_from_cfg=True)
+    assert u.allclose(strand.time, strand2.time, rtol=0.0, atol=1e-5*u.s)
+
+
 def test_to_hdf5(strand, tmp_path):
     filename = tmp_path / 'hydrad_results.h5'
     strand.to_hdf5(filename, *VAR_NAMES)
