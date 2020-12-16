@@ -25,16 +25,12 @@ def get_master_time(hydrad_root, read_from_cfg=False):
     amr_files = glob.glob(os.path.join(hydrad_root, 'Results/profile*.amr'))
     if read_from_cfg:
         log.debug('Creating master time array from config files')
-        try:
-            with open(os.path.join(hydrad_root, 'HYDRAD/config/hydrad.cfg'), 'r') as f:
-                lines = f.readlines()
-            cadence = float(lines[3])
-            with open(amr_files[0]) as f:
-                start_time = float(f.readline())
-            time = start_time + np.arange(len(amr_files)) * cadence
-        except FileNotFoundError:
-            log.debug('HYDRAD/config/hydrad.cfg not found')
-            return
+        with open(os.path.join(hydrad_root, 'HYDRAD/config/hydrad.cfg'), 'r') as f:
+            lines = f.readlines()
+        cadence = float(lines[3])
+        with open(amr_files[0]) as f:
+            start_time = float(f.readline())
+        time = start_time + np.arange(len(amr_files)) * cadence
     else:
         log.debug('Reading master time array from all AMR files')
         time = np.zeros((len(amr_files),))
