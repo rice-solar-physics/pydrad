@@ -21,13 +21,22 @@ from pydrad.visualize import (plot_strand,
 __all__ = ['Strand', 'Profile', 'InitialProfile']
 
 
-def get_master_time(hydrad_root):
-    log.debug('Reading master time array from all AMR files')
+def get_master_time(hydrad_root, read_from_cfg=False):
     amr_files = glob.glob(os.path.join(hydrad_root, 'Results/profile*.amr'))
-    time = np.zeros((len(amr_files),))
-    for i, af in enumerate(amr_files):
-        with open(af, 'r') as f:
-            time[i] = f.readline()
+    if read_from_cfg:
+        log.debug('Creating master time array from config files')
+        with open(os.path.join(hydrad_root, 'HYDRAD/config/hydrad.cfg'), 'r') as f:
+            lines = f.readlines()
+        cadence = float(lines[3])
+        with open(amr_files[0]) as f:
+            start_time = float(f.readline())
+        time = start_time + np.arange(len(amr_files)) * cadence
+    else:
+        log.debug('Reading master time array from all AMR files')
+        time = np.zeros((len(amr_files),))
+        for i, af in enumerate(amr_files):
+            with open(af, 'r') as f:
+                time[i] = f.readline()
     return sorted(time) * u.s
 
 
@@ -46,7 +55,8 @@ class Strand(object):
         # when slicing.
         self._master_time = kwargs.pop('master_time', None)
         if self._master_time is None:
-            self._master_time = get_master_time(self.hydrad_root)
+            self._master_time = get_master_time(self.hydrad_root,
+                                                read_from_cfg=kwargs.get('read_from_cfg', False))
         # NOTE: time is only specified when slicing a Strand. When not
         # slicing, it should be read from the results.
         self._time = kwargs.pop('time', self._master_time)
@@ -198,7 +208,8 @@ class Profile(object):
         self.time = time
         self._master_time = kwargs.get('master_time')
         if self._master_time is None:
-            self._master_time = get_master_time(self.hydrad_root)
+            self._master_time = get_master_time(self.hydrad_root,
+                                                read_from_cfg=kwargs.get('read_from_cfg', False))
         # Read results files
         self._read_phy()
         self._read_amr()
