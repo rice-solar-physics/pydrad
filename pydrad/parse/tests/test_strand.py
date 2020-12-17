@@ -48,7 +48,7 @@ def test_has_quantity(strand, quantity):
 def test_time_arrays_same(hydrad, strand):
     """Check that reading time arrays different ways yields same answer"""
     strand2 = Strand(hydrad, read_from_cfg=True)
-    assert u.allclose(strand.time, strand2.time, rtol=0.0, atol=1e-5*u.s)
+    assert u.allclose(strand.time, strand2.time, rtol=0.0, atol=1e-2*u.s)
 
 
 def test_to_hdf5(strand, tmp_path):
