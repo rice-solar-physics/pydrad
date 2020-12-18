@@ -410,13 +410,18 @@ class Configure(object):
         Minimum allowed number of grid cells,
         $n_{min}=\lceil L/\Delta s_{max}\\rceil$, where $L$ is the loop
         length and $\Delta s_{max}$ is the maximum allowed grid cell width.
+        Optionally, if the minimum number of cells is specified
+        in ``config['grid']['minimum_cells']``, this value will take
+        precedence.
         """
+        if 'minimum_cells' in self.config['grid']:
+            return int(self.config['grid']['minimum_cells'])
         n_min = self.config['general']['loop_length'] / self.config['grid']['maximum_cell_width']
         if n_min.decompose().unit != u.dimensionless_unscaled:
             raise u.UnitConversionError(
                 f'''Maximum cell width must be able to be converted to 
                 {self.config['general']['loop_length'].unit}''')
-        return int(np.ceil(n_min.decompose()))
+        return int(np.round(n_min.decompose()))
 
     @property
     def maximum_cells(self):
@@ -424,8 +429,8 @@ class Configure(object):
         Maximum allowed number of grid cells,
         $n_{max}=\lfloor 2^{L_R}n_{min}\\rfloor$, where $L_R$ is the maximum
         refinement level and $n_{min}$ is the minimum allowed number of
-        grid cells. Optionally, if the number of maximum cells is specified
-        in in ``config['grid']['maximum_cells']``, this value will take
+        grid cells. Optionally, if the maximum number of cells is specified
+        in ``config['grid']['maximum_cells']``, this value will take
         precedence.
         """
         if 'maximum_cells' in self.config['grid']:
