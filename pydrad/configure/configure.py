@@ -410,8 +410,8 @@ class Configure(object):
         Minimum allowed number of grid cells,
         $n_{min}=\lceil L/\Delta s_{max}\\rceil$, where $L$ is the loop
         length and $\Delta s_{max}$ is the maximum allowed grid cell width.
-        Optionally, if the number of maximum cells is specified
-        in ``config['grid']['maximum_cells']``, this value will take
+        Optionally, if the minimum number of cells is specified
+        in ``config['grid']['minimum_cells']``, this value will take
         precedence.
         """
         if 'minimum_cells' in self.config['grid']:
@@ -429,7 +429,7 @@ class Configure(object):
         Maximum allowed number of grid cells,
         $n_{max}=\lfloor 2^{L_R}n_{min}\\rfloor$, where $L_R$ is the maximum
         refinement level and $n_{min}$ is the minimum allowed number of
-        grid cells. Optionally, if the number of maximum cells is specified
+        grid cells. Optionally, if the maximum number of cells is specified
         in ``config['grid']['maximum_cells']``, this value will take
         precedence.
         """
