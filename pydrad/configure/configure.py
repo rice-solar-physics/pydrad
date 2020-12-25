@@ -128,35 +128,24 @@ class Configure(object):
                 f.write(filestring)
         # NOTE: make sure we have needed permissions to run compile script
 		# Only do this on Unix-based systems
-        if platform.system() != 'Windows':
+        if not self.on_windows:
             run_shell_command(
                 ['chmod', 'u+x', 'build_initial_conditions.bat'],
                 os.path.join(root_dir, 'Initial_Conditions/build_scripts'),
                 shell=False
             )
-            run_shell_command(
-                ['./build_initial_conditions.bat'],
-                os.path.join(root_dir, 'Initial_Conditions/build_scripts')
-            )
-        else:
-            run_shell_command(
-                ['build_initial_conditions.bat'],
-                os.path.join(root_dir, 'Initial_Conditions/build_scripts')
-            )
+        run_shell_command(
+			['./build_initial_conditions.bat'],
+			os.path.join(root_dir, 'Initial_Conditions/build_scripts')
+        )
         if not os.path.exists(os.path.join(root_dir,
                                            'Initial_Conditions/profiles')):
             os.mkdir(os.path.join(root_dir, 'Initial_Conditions/profiles'))
         if execute:
-            if platform.system() != 'Windows':
-                run_shell_command(
-                    ['./Initial_Conditions.exe'],
-                    root_dir,
-                )
-            else:
-                run_shell_command(
-                    ['Initial_Conditions.exe'],
-                    root_dir,
-                )
+            run_shell_command(
+                ['./Initial_Conditions.exe'],
+                root_dir,
+            )
             if self.config['heating']['background'].get('use_initial_conditions', False):
                 self.equilibrium_heating_rate = self.get_equilibrium_heating_rate(root_dir)
 
@@ -214,22 +203,17 @@ class Configure(object):
         else:
             build_script = 'build_HYDRAD.bat'
         # NOTE: make sure we have needed permissions to run compile script
-		# Only do this on Unix-based systems
-        if platform.system() != 'Windows':
+		# Only do this on Unix-based systems (chmod not valid on Windows)
+        if not self.on_windows:
             run_shell_command(
                 ['chmod', 'u+x', build_script],
                 os.path.join(root_dir, 'HYDRAD/build_scripts'),
                 shell=False,
             )
-            run_shell_command(
-                [f'./{build_script}'],
-                os.path.join(root_dir, 'HYDRAD/build_scripts'),
-            )
-        else:
-            run_shell_command(
-                [f'{build_script}'],
-                os.path.join(root_dir, 'HYDRAD/build_scripts'),
-            )
+        run_shell_command(
+			[f'./{build_script}'],
+			os.path.join(root_dir, 'HYDRAD/build_scripts'),
+        )
         if not os.path.exists(os.path.join(root_dir, 'Results')):
             os.mkdir(os.path.join(root_dir, 'Results'))
 
@@ -463,3 +447,10 @@ class Configure(object):
                 {self.config['general']['loop_length'].unit}''')
         return int(np.floor(
             2**self.config['grid']['maximum_refinement_level'] * n_min))
+
+    @property
+    def on_windows(self):
+        """
+        Determine whether the user's operating system is Windows
+        """
+        return platform.system().lower() == 'windows'
