@@ -24,7 +24,7 @@ class HYDRADError(Exception):
 def run_shell_command(cmd, cwd, shell=True):
     # remove "./" from commands if the user is working on Windows
     if platform.system().lower() == 'windows' and cmd[0][0:2] == './':
-        cmd = [cmd[0][2:]]
+        cmd[0] = cmd[0][2:]
     cmd = subprocess.run(
         cmd,
         cwd=cwd,
