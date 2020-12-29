@@ -135,8 +135,8 @@ class Configure(object):
                 shell=False
             )
         run_shell_command(
-			['./build_initial_conditions.bat'],
-			os.path.join(root_dir, 'Initial_Conditions/build_scripts')
+		['./build_initial_conditions.bat'],
+		os.path.join(root_dir, 'Initial_Conditions/build_scripts')
         )
         if not os.path.exists(os.path.join(root_dir,
                                            'Initial_Conditions/profiles')):
