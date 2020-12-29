@@ -211,8 +211,8 @@ class Configure(object):
                 shell=False,
             )
         run_shell_command(
-			[f'./{build_script}'],
-			os.path.join(root_dir, 'HYDRAD/build_scripts'),
+		[f'./{build_script}'],
+		os.path.join(root_dir, 'HYDRAD/build_scripts'),
         )
         if not os.path.exists(os.path.join(root_dir, 'Results')):
             os.mkdir(os.path.join(root_dir, 'Results'))
