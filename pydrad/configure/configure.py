@@ -6,7 +6,7 @@ import copy
 import datetime
 import tempfile
 import shutil
-import platform
+
 from distutils.dir_util import copy_tree
 
 import numpy as np
@@ -15,7 +15,7 @@ from jinja2 import Environment, PackageLoader, ChoiceLoader, DictLoader
 import asdf
 
 from . import filters
-from .util import run_shell_command
+from .util import run_shell_command, on_windows
 
 __all__ = ['Configure']
 
@@ -128,7 +128,7 @@ class Configure(object):
                 f.write(filestring)
         # NOTE: make sure we have needed permissions to run compile script
 		# Only do this on Unix-based systems
-        if not self.on_windows:
+        if not on_windows:
             run_shell_command(
                 ['chmod', 'u+x', 'build_initial_conditions.bat'],
                 os.path.join(root_dir, 'Initial_Conditions/build_scripts'),
@@ -204,7 +204,7 @@ class Configure(object):
             build_script = 'build_HYDRAD.bat'
         # NOTE: make sure we have needed permissions to run compile script
 		# Only do this on Unix-based systems (chmod not valid on Windows)
-        if not self.on_windows:
+        if not on_windows:
             run_shell_command(
                 ['chmod', 'u+x', build_script],
                 os.path.join(root_dir, 'HYDRAD/build_scripts'),
@@ -448,9 +448,4 @@ class Configure(object):
         return int(np.floor(
             2**self.config['grid']['maximum_refinement_level'] * n_min))
 
-    @property
-    def on_windows(self):
-        """
-        Determine whether the user's operating system is Windows
-        """
-        return platform.system().lower() == 'windows'
+
