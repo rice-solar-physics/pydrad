@@ -6,7 +6,6 @@ import copy
 import datetime
 import tempfile
 import shutil
-
 from distutils.dir_util import copy_tree
 
 import numpy as np
@@ -128,15 +127,15 @@ class Configure(object):
                 f.write(filestring)
         # NOTE: make sure we have needed permissions to run compile script
 		# Only do this on Unix-based systems
-        if not on_windows:
+        if not on_windows():
             run_shell_command(
                 ['chmod', 'u+x', 'build_initial_conditions.bat'],
                 os.path.join(root_dir, 'Initial_Conditions/build_scripts'),
                 shell=False
             )
         run_shell_command(
-		['./build_initial_conditions.bat'],
-		os.path.join(root_dir, 'Initial_Conditions/build_scripts')
+		    ['./build_initial_conditions.bat'],
+		    os.path.join(root_dir, 'Initial_Conditions/build_scripts')
         )
         if not os.path.exists(os.path.join(root_dir,
                                            'Initial_Conditions/profiles')):
@@ -204,15 +203,15 @@ class Configure(object):
             build_script = 'build_HYDRAD.bat'
         # NOTE: make sure we have needed permissions to run compile script
 		# Only do this on Unix-based systems (chmod not valid on Windows)
-        if not on_windows:
+        if not on_windows():
             run_shell_command(
                 ['chmod', 'u+x', build_script],
                 os.path.join(root_dir, 'HYDRAD/build_scripts'),
                 shell=False,
             )
         run_shell_command(
-		[f'./{build_script}'],
-		os.path.join(root_dir, 'HYDRAD/build_scripts'),
+		    [f'./{build_script}'],
+		    os.path.join(root_dir, 'HYDRAD/build_scripts'),
         )
         if not os.path.exists(os.path.join(root_dir, 'Results')):
             os.mkdir(os.path.join(root_dir, 'Results'))
@@ -447,5 +446,3 @@ class Configure(object):
                 {self.config['general']['loop_length'].unit}''')
         return int(np.floor(
             2**self.config['grid']['maximum_refinement_level'] * n_min))
-
-

@@ -22,7 +22,7 @@ class HYDRADError(Exception):
 
 
 def run_shell_command(cmd, cwd, shell=True):
-    # remove "./" from commands if the user is working on Windows
+    # Remove "./" from commands if the user is working on Windows
     if on_windows() and cmd[0][0:2] == './':
         cmd[0] = cmd[0][2:]
     cmd = subprocess.run(
@@ -42,9 +42,9 @@ def run_shell_command(cmd, cwd, shell=True):
     if any([e in s.lower() for s in [stderr, stdout] for e in hydrad_error_messages]):
         raise HYDRADError(f'{stderr}\n{stdout}')
 
+
 def on_windows():
     """
     Determine whether the user's operating system is Windows
     """
     return platform.system().lower() == 'windows'
-	
