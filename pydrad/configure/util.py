@@ -2,6 +2,7 @@
 Utilities for HYDRAD configuration
 """
 import subprocess
+import platform
 
 from pydrad import log
 
@@ -21,6 +22,9 @@ class HYDRADError(Exception):
 
 
 def run_shell_command(cmd, cwd, shell=True):
+    # Remove "./" from commands if the user is working on Windows
+    if on_windows() and cmd[0][0:2] == './':
+        cmd[0] = cmd[0][2:]
     cmd = subprocess.run(
         cmd,
         cwd=cwd,
@@ -37,3 +41,10 @@ def run_shell_command(cmd, cwd, shell=True):
     hydrad_error_messages = ['segmentation fault', 'abort', 'error:']
     if any([e in s.lower() for s in [stderr, stdout] for e in hydrad_error_messages]):
         raise HYDRADError(f'{stderr}\n{stdout}')
+
+
+def on_windows():
+    """
+    Determine whether the user's operating system is Windows
+    """
+    return platform.system().lower() == 'windows'

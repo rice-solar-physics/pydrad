@@ -14,7 +14,7 @@ from jinja2 import Environment, PackageLoader, ChoiceLoader, DictLoader
 import asdf
 
 from . import filters
-from .util import run_shell_command
+from .util import run_shell_command, on_windows
 
 __all__ = ['Configure']
 
@@ -126,14 +126,16 @@ class Configure(object):
             with open(os.path.join(root_dir, filename), 'w') as f:
                 f.write(filestring)
         # NOTE: make sure we have needed permissions to run compile script
+		# Only do this on Unix-based systems
+        if not on_windows():
+            run_shell_command(
+                ['chmod', 'u+x', 'build_initial_conditions.bat'],
+                os.path.join(root_dir, 'Initial_Conditions/build_scripts'),
+                shell=False
+            )
         run_shell_command(
-            ['chmod', 'u+x', 'build_initial_conditions.bat'],
-            os.path.join(root_dir, 'Initial_Conditions/build_scripts'),
-            shell=False
-        )
-        run_shell_command(
-            ['./build_initial_conditions.bat'],
-            os.path.join(root_dir, 'Initial_Conditions/build_scripts')
+		    ['./build_initial_conditions.bat'],
+		    os.path.join(root_dir, 'Initial_Conditions/build_scripts')
         )
         if not os.path.exists(os.path.join(root_dir,
                                            'Initial_Conditions/profiles')):
@@ -200,14 +202,16 @@ class Configure(object):
         else:
             build_script = 'build_HYDRAD.bat'
         # NOTE: make sure we have needed permissions to run compile script
+		# Only do this on Unix-based systems (chmod not valid on Windows)
+        if not on_windows():
+            run_shell_command(
+                ['chmod', 'u+x', build_script],
+                os.path.join(root_dir, 'HYDRAD/build_scripts'),
+                shell=False,
+            )
         run_shell_command(
-            ['chmod', 'u+x', build_script],
-            os.path.join(root_dir, 'HYDRAD/build_scripts'),
-            shell=False,
-        )
-        run_shell_command(
-            [f'./{build_script}'],
-            os.path.join(root_dir, 'HYDRAD/build_scripts'),
+		    [f'./{build_script}'],
+		    os.path.join(root_dir, 'HYDRAD/build_scripts'),
         )
         if not os.path.exists(os.path.join(root_dir, 'Results')):
             os.mkdir(os.path.join(root_dir, 'Results'))
