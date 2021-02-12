@@ -45,14 +45,24 @@ def plot_time_distance(strand, quantities, delta_s: u.cm, **kwargs):
     Make a time-distance plot for a particular quantity or
     quantities on a uniform grid.
 
-    # Parameters
-    strand (`#hydrad_tools.parse.Strand`):
-    quantities (`str`, `list`, `tuple`): Name of quantity or quantities to plot.
-    Optionally, you can also pass in a tuple of `(str,array-like)`, where `str` is
-    the label and the second entry is the quantity to plot, already interpolated
-    onto a common grid.
-    norm (`dict`, optional): Dictionary of colormap normalizations; one per
-    quantity.
+    Parameters
+    ----------
+    strand : `~pydrad.parse.Strand`
+    quantities : `str`, `list`, `tuple`
+        Name of quantity or quantities to plot. Optionally, you can also pass
+        in a tuple of `(str, array-like)`, where `str` is the label and the
+        second entry is the quantity to plot, already interpolated onto a
+        common grid.
+    norm : `dict`, optional
+        Dictionary of colormap normalizations; one per quantity.
+    cmap : `str` or colormap instance
+        Colormap to use for all quantities except velocity which will always
+        use the ``RdBu_r`` diverging colormap.
+    figsize : `tuple`, optional
+    time_unit : `str` or `astropy.quantity.Unit`, optional
+        Unit for the time axis
+    space_unit : `str` or `astropy.quantity.Unit`, optional
+        Unit for the spatial axis
     """
     grid = strand.get_uniform_grid(delta_s).to(kwargs.pop('space_unit', 'cm'))
     # Interpolate quantities to constant grid as needed
@@ -110,12 +120,20 @@ def plot_strand(strand, limits=None, cmap='viridis', **kwargs):
     """
     Plot hydrodynamic quantities at multiple timesteps
 
-    # Parameters
-    strand (#pydrad.parse.Strand): Loop strand object
-    limits (`dict`): Set axes limits for hydrodynamic quantities, optional
-    cmap (`str`): The colormap to map the timestep index to
-    plot_kwargs (`dict`): Any keyword arguments used matplotlib.plot, optional
-    figsize (`tuple`): Width and height of figure, optional
+    This function takes all of the same keyword arguments as
+    `~pydrad.visualize.plot_profile`.
+
+    Parameters
+    ----------
+    strand : `~pydrad.parse.Strand`
+    limits : `dict`, optional
+        Axes limits for hydrodynamic quantities
+    cmap : `str` or colormap instance
+        The colormap to map the timestep index to
+
+    See Also
+    --------
+    plot_profile
     """
     limits = {} if limits is None else limits
     plot_kwargs = kwargs.get('plot_kwargs', {})
@@ -132,11 +150,15 @@ def plot_profile(profile, **kwargs):
     """
     Plot hydrodynamic quantites at a single timestep
 
-    # Parameters
-    profile (#pydrad.parse.Strand): Loop profile object
-    limits (`dict`): Set axes limits for hydrodynamic quantities, optional
-    plot_kwargs (`dict`): Any keyword arguments used matplotlib.plot, optional
-    figsize (`tuple`): Width and height of figure, optional
+    Parameters
+    ----------
+    profile : `~pydrad.parse.Profile`
+    limits : `dict`, optional
+        Axes limits for hydrodynamic quantities
+    plot_kwargs : `dict`, optional
+        Any keyword arguments used `~matplotlib.pyplot.plot`
+    figsize : `tuple`, optional
+        Width and height of figure
     """
     limits = kwargs.pop('limits', {})
     plot_kwargs = kwargs.get('plot_kwargs', {})

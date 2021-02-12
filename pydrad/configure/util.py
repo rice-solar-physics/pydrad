@@ -35,6 +35,29 @@ class HYDRADError(Exception):
 
 
 def run_shell_command(cmd, cwd, shell=True):
+    """
+    Wrapper function for running shell commands.
+
+    This is essentially a light wrapper around `subprocess.run`
+    and includes some error handling and logging specific to
+    running the shell commands needed to run and compile HYDRAD.
+
+    Parameters
+    ----------
+    cmd : `list`
+        Command to run
+    cwd : `str` or path-like
+        Directory to run the command in
+    shell : `bool`, optional
+        See `~subprocess.run`
+
+    Raises
+    ------
+    HYDRADError
+        This error is raised if HYDRAD or initial conditions code
+        fails to compile or if there is a runtime error in the
+        initial conditions code.
+    """
     # Remove "./" from commands if the user is working on Windows
     if on_windows() and cmd[0][0:2] == './':
         cmd[0] = cmd[0][2:]
