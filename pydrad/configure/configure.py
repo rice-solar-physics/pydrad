@@ -371,10 +371,10 @@ class Configure(object):
         Sixth-order polynomial fit coefficients for computing flux tube
         expansion
         """
+        fit = self._fit_poly_domains('poly_fit_magnetic_field', 'G')
         return self.env.get_template('coefficients.cfg').render(
             date=self.date,
-            fit=self.config['general']['poly_fit_magnetic_field'],
-            y_unit='G',
+            **fit,
         )
 
     @property
@@ -383,11 +383,30 @@ class Configure(object):
         Sixth-order polynomial fit coefficients for computing gravitational
         acceleration
         """
+        fit = self._fit_poly_domains('poly_fit_gravity', 'cm s-2')
         return self.env.get_template('coefficients.cfg').render(
             date=self.date,
-            fit=self.config['general']['poly_fit_gravity'],
-            y_unit='cm s-2',
+            **fit,
         )
+
+    def _fit_poly_domains(self, name, unit):
+        """
+        Perform polynomial fit to quantity as a function of field aligned coordinate
+        over multiple domains and return fitting coefficients.
+        """
+        # TODO: refactor to be independent of dictionary
+        fit = copy.deepcopy(self.config['general'][name])
+        x = (fit['x'] / self.config['general']['loop_length']).decompose().to(u.dimensionless_unscaled).value
+        y = fit['y'].to(unit).value
+        coefficients = []
+        minmax = []
+        for i in range(len(fit['domains'])-1):
+            i_d = np.where(np.logical_and(x>=fit['domains'][i], x<=fit['domains'][i+1]))
+            coefficients.append(np.polyfit(x[i_d], y[i_d], fit['order'])[::-1])
+            minmax.append([y[i_d].min(), y[i_d].max()])
+        fit['minmax'] = minmax
+        fit['coefficients'] = coefficients
+        return fit
 
     @property
     def minimum_cells(self):
