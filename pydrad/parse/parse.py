@@ -24,7 +24,7 @@ __all__ = ['Strand', 'Profile', 'InitialProfile']
 
 
 def get_master_time(hydrad_root, read_from_cfg=False):
-    amr_files = glob.glob(os.path.join(hydrad_root, 'Results/profile*.amr'))
+    amr_files = sorted(glob.glob(os.path.join(hydrad_root, 'Results/profile*.amr')))
     if read_from_cfg:
         log.debug('Creating master time array from config files')
         # NOTE: Sometimes this file is capitalized and some OSes are sensitive to this

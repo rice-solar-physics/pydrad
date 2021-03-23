@@ -50,7 +50,7 @@ def test_time_arrays_same(hydrad, strand):
     strand2 = Strand(hydrad, read_from_cfg=True)
     print(strand.time)
     print(strand2.time)
-    assert u.allclose(strand.time, strand2.time, rtol=1e-3, atol=0.0*u.s)
+    assert u.allclose(strand.time, strand2.time, rtol=0.0, atol=1e-2*u.s)
 
 
 def test_to_hdf5(strand, tmp_path):
