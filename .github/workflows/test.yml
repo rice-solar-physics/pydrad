@@ -25,6 +25,17 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install -r requirements/requirements-dev.txt
         python setup.py install
+    - name: Clone HYDRAD
+      uses: actions/checkout@v2
+      with:
+        repository: rice-solar-physics/HYDRAD
+        path: HYDRAD
     - name: Test
       run: |
-        pytest --cov=pydrad --cov-report=xml
+        pytest --hydrad-dir=$GITHUB_WORKSPACE/HYDRAD --cov=pydrad --cov-report=xml
+    - name: Report coverage
+      uses: codecov/codecov-action@v1
+      with:
+        fail_ci_if_error: true
+        verbose: true
+        file: ./coverage.xml
