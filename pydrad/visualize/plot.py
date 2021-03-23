@@ -1,6 +1,8 @@
 """
 Plotting methods to easily visualize HYDRAD results
 """
+import copy
+
 import numpy as np
 import astropy.units as u
 import matplotlib.pyplot as plt
@@ -54,6 +56,7 @@ def plot_time_distance(strand, quantities, delta_s: u.cm, **kwargs):
     """
     grid = strand.get_uniform_grid(delta_s).to(kwargs.pop('space_unit', 'cm'))
     # Interpolate quantities to constant grid as needed
+    quantities = copy.deepcopy(quantities)
     for i, q in enumerate(quantities):
         if type(q) is str:
             quantities[i] = (q, strand.to_constant_grid(q, grid))
@@ -68,6 +71,7 @@ def plot_time_mesh(strand, quantities, y_grid, y_label, **kwargs):
     y_mesh, t_mesh = np.meshgrid(y_grid.value, strand.time.value,)
     t_mesh = (t_mesh * strand.time.unit).to(kwargs.pop('time_unit', 's'))
     y_mesh = y_mesh * y_grid.unit
+    quantities = copy.deepcopy(quantities)
     if type(quantities) is not list:
         quantities = [quantities]
     fig, ax = plt.subplots(

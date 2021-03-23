@@ -231,6 +231,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
             kwargs['norm'] = {'EM': kwargs['norm']}
         plot_time_mesh(self, [('EM', em)], bin_centers, r'$T$', yscale='log', **kwargs)
 
+
 class Profile(object):
     """
     Container for HYDRAD results at a given timestep. Typically accessed
