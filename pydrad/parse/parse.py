@@ -12,20 +12,27 @@ import plasmapy.particles
 import h5py
 
 from pydrad import log
+from pydrad.configure import Configure
 from pydrad.visualize import (plot_strand,
                               plot_profile,
                               animate_strand,
                               plot_time_distance,
-                              plot_histogram)
+                              plot_histogram,
+                              plot_time_mesh)
 
 __all__ = ['Strand', 'Profile', 'InitialProfile']
 
 
 def get_master_time(hydrad_root, read_from_cfg=False):
-    amr_files = glob.glob(os.path.join(hydrad_root, 'Results/profile*.amr'))
+    amr_files = sorted(glob.glob(os.path.join(hydrad_root, 'Results/profile*.amr')))
     if read_from_cfg:
         log.debug('Creating master time array from config files')
-        with open(os.path.join(hydrad_root, 'HYDRAD/config/hydrad.cfg'), 'r') as f:
+        # NOTE: Sometimes this file is capitalized and some OSes are sensitive to this
+        cfg_file = os.path.join(hydrad_root, 'HYDRAD/config/hydrad.cfg')
+        if not os.path.isfile(cfg_file):
+            log.debug('hydrad.cfg not found; trying HYDRAD.cfg')
+            cfg_file = os.path.join(hydrad_root, 'HYDRAD/config/HYDRAD.cfg')
+        with open(cfg_file, 'r') as f:
             lines = f.readlines()
         cadence = float(lines[3])
         with open(amr_files[0]) as f:
@@ -104,6 +111,14 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
                     data = getattr(p, v)
                     ds = grp.create_dataset(v, data=data.value)
                     ds.attrs['unit'] = data.unit.to_string()
+
+    @property
+    def config(self):
+        """
+        Configuration options. This will only work if the simuation was also
+        configured by pydrad.
+        """
+        return Configure.load_config(os.path.join(self.hydrad_root, 'pydrad_config.asdf'))
 
     @property
     def time(self):
@@ -188,6 +203,33 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
             q_uniform[i, :] = splev(grid_cm, tsk, ext=0)
 
         return q_uniform * q.unit
+
+    def spatial_average(self, quantity, bounds=None):
+        """
+        Compute a spatial average of a specific quantity or quantities                             
+        """
+        return u.Quantity([p.spatial_average(quantity, bounds=bounds) for p in self])
+
+    def column_emission_measure(self, bins=None, bounds=None):
+        """
+        Column emission measure as a function of time
+
+        See Also
+        --------
+        Profile.column_emission_measure
+        """
+        _, bins = self[0].column_emission_measure(bins=bins, bounds=bounds)
+        em = np.stack([p.column_emission_measure(bins=bins, bounds=bounds)[0] for p in self])
+        return em, bins
+
+    def peek_emission_measure(self, bins=None, bounds=None, **kwargs):
+        em, bins = self.column_emission_measure(bins=bins, bounds=bounds)
+        bin_centers = (bins[1:] + bins[:-1])/2
+        if 'cmap' in kwargs:
+            kwargs['cmap'] = {'EM': kwargs['cmap']}
+        if 'norm' in kwargs:
+            kwargs['norm'] = {'EM': kwargs['norm']}
+        plot_time_mesh(self, [('EM', em)], bin_centers, r'$T$', yscale='log', **kwargs)
 
 
 class Profile(object):
@@ -373,25 +415,46 @@ Timestep #: {self._index}"""
             self._hstate_data = None
 
     @property
-    def grid_centers(self):
+    @u.quantity_input
+    def grid_centers(self) -> u.cm:
         """
         Spatial location of the grid centers
         """
         return u.Quantity(self._grid_centers, 'cm')
 
     @property
-    def grid_widths(self):
+    @u.quantity_input
+    def grid_widths(self) -> u.cm:
         """
         Spatial width of each grid cell
         """
         return u.Quantity(self._grid_widths, 'cm')
 
     @property
-    def grid_edges(self):
+    @u.quantity_input
+    def grid_edges(self) -> u.cm:
         """
-        Spatial location of left edge of each grid cell
+        Spatial location of the edges of each grid cell,
+        including the rightmost edge
         """
-        return self.grid_centers - self.grid_widths/2.
+        left = self.grid_centers - self.grid_widths/2.
+        return np.append(left, left[-1:] + self.grid_widths[-1])
+
+    @property
+    @u.quantity_input
+    def grid_edges_left(self) -> u.cm:
+        """
+        Spatial location of the left edge of each grid cell
+        """
+        return self.grid_edges[:-1]
+
+    @property
+    @u.quantity_input
+    def grid_edges_right(self) -> u.cm:
+        """
+        Spatial location of the right edge of each grid cell
+        """
+        return self.grid_edges[1:]
 
     def spatial_average(self, quantity, bounds=None):
         """
@@ -406,7 +469,7 @@ Timestep #: {self._index}"""
         return np.average(quantity_bounds, weights=grid_widths_bounds)
 
     @u.quantity_input
-    def column_emission_measure(self, bins:u.K=None):
+    def column_emission_measure(self, bins:u.K=None, bounds:u.cm=None):
         """
         Computes the column emission measure, where it is assumed that the loop is
         confined to a single pixel and oriented along the LOS
@@ -424,10 +487,12 @@ Timestep #: {self._index}"""
         """
         if bins is None:
             bins = 10.0**(np.arange(3.0, 8.0, 0.05)) * u.K
+        if bounds is None:
+            bounds = self.grid_edges[[0,-1]]
         weights = self.electron_density * self.ion_density * self.grid_widths
         H, _, _ = np.histogram2d(self.grid_centers, self.electron_temperature,
-                                 bins=(self.grid_edges, bins), weights=weights)
-        return H.sum(axis=0), bins
+                                 bins=(bounds, bins), weights=weights)
+        return H.squeeze(), bins
 
     def peek(self, **kwargs):
         """

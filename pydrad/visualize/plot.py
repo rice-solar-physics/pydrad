@@ -1,12 +1,18 @@
 """
 Plotting methods to easily visualize HYDRAD results
 """
+import copy
+
 import numpy as np
 import astropy.units as u
 import matplotlib.pyplot as plt
 import matplotlib.colors
 
-__all__ = ['plot_strand', 'plot_profile', 'plot_time_distance', 'plot_histogram']
+__all__ = ['plot_strand',
+           'plot_profile',
+           'plot_time_distance',
+           'plot_histogram',
+           'plot_time_mesh',]
 
 
 def plot_histogram(vals, bins, ax=None, **kwargs):
@@ -48,10 +54,24 @@ def plot_time_distance(strand, quantities, delta_s: u.cm, **kwargs):
     norm (`dict`, optional): Dictionary of colormap normalizations; one per
     quantity.
     """
-    grid = strand.get_uniform_grid(delta_s)
-    s_mesh, t_mesh = np.meshgrid(grid.value, strand.time.value,)
-    t_mesh = (t_mesh*strand.time.unit).to(kwargs.pop('time_unit', 's'))
-    s_mesh = (s_mesh*grid.unit).to(kwargs.pop('space_unit', 'cm'))
+    grid = strand.get_uniform_grid(delta_s).to(kwargs.pop('space_unit', 'cm'))
+    # Interpolate quantities to constant grid as needed
+    quantities = copy.deepcopy(quantities)
+    for i, q in enumerate(quantities):
+        if type(q) is str:
+            quantities[i] = (q, strand.to_constant_grid(q, grid))
+    plot_time_mesh(strand, quantities, grid, r'$s$', **kwargs)
+
+
+def plot_time_mesh(strand, quantities, y_grid, y_label, **kwargs):
+    """
+    Plot a given quantity as a function of some variable and time
+    for a given strand.
+    """
+    y_mesh, t_mesh = np.meshgrid(y_grid.value, strand.time.value,)
+    t_mesh = (t_mesh * strand.time.unit).to(kwargs.pop('time_unit', 's'))
+    y_mesh = y_mesh * y_grid.unit
+    quantities = copy.deepcopy(quantities)
     if type(quantities) is not list:
         quantities = [quantities]
     fig, ax = plt.subplots(
@@ -62,30 +82,28 @@ def plot_time_distance(strand, quantities, delta_s: u.cm, **kwargs):
     )
     if len(quantities) == 1:
         ax = [ax]
+    # NOTE: remove these here so we can send the rest to pcolormesh
     norm = kwargs.pop('norm', {})
-    cmap = kwargs.pop('cmap', None)
+    cmap = kwargs.pop('cmap', {})
+    yscale = kwargs.pop('yscale', 'linear')
     for i, q in enumerate(quantities):
-        if type(q) is str:
-            q_uni = strand.to_constant_grid(q, grid)
-        else:
-            q, q_uni = q  # If q is a tuple of label, array
-        if q_uni.shape != t_mesh.shape:
-            raise ValueError('Quantity must have same shape as meshgrid.')
+        label, data = q  # If q is a tuple of label, array
         im = ax[i].pcolormesh(
             t_mesh.value,
-            s_mesh.value,
-            q_uni.value,
-            cmap='RdBu_r' if q == 'velocity' else cmap,
-            norm=norm.get(q, None),
+            y_mesh.value,
+            data.value,
+            cmap=cmap.get(label, 'viridis'),
+            norm=norm.get(label, None),
             **kwargs,
         )
         cbar = fig.colorbar(im, ax=ax[i])
-        if q_uni.unit is u.dimensionless_unscaled:
-            cbar.ax.set_ylabel(f'{q}')
+        if data.unit is u.dimensionless_unscaled:
+            cbar.ax.set_ylabel(f'{label}')
         else:
-            cbar.ax.set_ylabel(f'{q} [{q_uni.unit}]')
-    ax[i].set_xlabel(f'$t$ [{t_mesh.unit}]')
-    ax[i].set_ylabel(f'$s$ [{s_mesh.unit}]')
+            cbar.ax.set_ylabel(f'{label} [{data.unit}]')
+    ax[-1].set_xlabel(f'$t$ [{t_mesh.unit}]')
+    ax[-1].set_ylabel(f'{y_label} [{y_mesh.unit}]')
+    ax[-1].set_yscale(yscale)
 
 
 def plot_strand(strand, limits=None, cmap='viridis', **kwargs):

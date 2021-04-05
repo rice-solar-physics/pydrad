@@ -1,10 +1,23 @@
 """
 Utilities for HYDRAD configuration
 """
+import os
 import subprocess
 import platform
+import tempfile
+import shutil
+from distutils.dir_util import copy_tree
+
+import astropy.units as u
 
 from pydrad import log
+
+__all__ = ['MissingParameter',
+           'HYDRADError',
+           'run_shell_command',
+           'on_windows',
+           'hydrad_stripped_down',
+           'get_equilibrium_heating_rate']
 
 
 class MissingParameter(Exception):
@@ -48,3 +61,53 @@ def on_windows():
     Determine whether the user's operating system is Windows
     """
     return platform.system().lower() == 'windows'
+
+
+def hydrad_stripped_down(output_path, base_path=None, from_github=False):
+    """
+    Create a clean copy of HYDRAD with only the files necessary to run the code. May be
+    useful when making many copies.
+
+    Parameters
+    ----------
+    output_path : pathlike
+        Path to the new stripped down version
+    base_path : pathlike, optional
+        Path to the original copy. This will not be modified.
+    from_github : `bool`, optional
+        If True, grab the latest copy of HYDRAD from GitHub. In this case,
+        `base_path` is ignored. Note that this requires the GitPython package.
+    """
+    # NOTE: this is all done in a temp directory and then copied over
+    # so that if something fails, all the files are cleaned up
+    with tempfile.TemporaryDirectory() as tmpdir:
+        if from_github:
+            import git
+            git.Repo.clone_from('https://github.com/rice-solar-physics/HYDRAD',
+                                tmpdir)
+        elif base_path:
+            copy_tree(base_path, tmpdir)
+        else:
+            raise ValueError('Specify local path to HYDRAD or clone from GitHub')
+        rm_dirs =['Forward_Model', 'HYDRAD_GUI', 'Visualisation', '.git']
+        rm_files = ['HYDRAD_GUI.jar', 'LICENSE', 'README.md', '.gitignore']
+        for d in rm_dirs:
+            shutil.rmtree(os.path.join(tmpdir, d))
+        for f in rm_files:
+            os.remove(os.path.join(tmpdir, f))
+        shutil.copytree(tmpdir, output_path)
+
+
+def get_equilibrium_heating_rate(root_dir):
+    """
+    Read equilibrium heating rate from initial conditions results
+
+    Parameters
+    ----------
+    root_dir : `str` or pathlike
+        Path to HYDRAD directory
+    """
+    filename = os.path.join(root_dir, 'Initial_Conditions/profiles/initial.amr.sol')
+    with open(filename, 'r') as f:
+        equilibrium_heating_rate = float(f.readline()) * u.Unit('erg cm-3 s-1')
+    return equilibrium_heating_rate

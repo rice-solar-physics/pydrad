@@ -48,6 +48,8 @@ def test_has_quantity(strand, quantity):
 def test_time_arrays_same(hydrad, strand):
     """Check that reading time arrays different ways yields same answer"""
     strand2 = Strand(hydrad, read_from_cfg=True)
+    print(strand.time)
+    print(strand2.time)
     assert u.allclose(strand.time, strand2.time, rtol=0.0, atol=1e-2*u.s)
 
 

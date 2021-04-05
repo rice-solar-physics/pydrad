@@ -14,7 +14,7 @@ from jinja2 import Environment, PackageLoader, ChoiceLoader, DictLoader
 import asdf
 
 from . import filters
-from .util import run_shell_command, on_windows
+from .util import run_shell_command, on_windows, get_equilibrium_heating_rate
 
 __all__ = ['Configure']
 
@@ -69,8 +69,12 @@ class Configure(object):
         """
         asdf.AsdfFile(self.config).write_to(filename)
 
-    def setup_simulation(self, output_path, base_path,
-                         run_initial_conditions=True, **kwargs):
+    def setup_simulation(self,
+                         output_path,
+                         base_path,
+                         run_initial_conditions=True,
+                         overwrite=False,
+                         **kwargs):
         """
         Setup a HYDRAD simulation with desired outputs from a clean copy
 
@@ -79,6 +83,8 @@ class Configure(object):
         base_path (`str`): Path to existing HYDRAD
         run_initial_conditions (`bool`): If True, compile and run the initial
         conditions code
+        overwrite : `bool`
+            If True and the `output_path` directory already exists, overwrite it
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             # NOTE: this is all done in a temp directory and then copied over
@@ -89,6 +95,9 @@ class Configure(object):
                 self.setup_initial_conditions(tmpdir, execute=execute)
             self.setup_hydrad(tmpdir)
             self.save_config(os.path.join(tmpdir, 'pydrad_config.asdf'))
+            if overwrite:
+                if os.path.exists(output_path):
+                    shutil.rmtree(output_path)
             shutil.copytree(tmpdir, output_path)
 
     def setup_initial_conditions(self, root_dir, execute=True):
@@ -146,20 +155,7 @@ class Configure(object):
                 root_dir,
             )
             if self.config['heating']['background'].get('use_initial_conditions', False):
-                self.equilibrium_heating_rate = self.get_equilibrium_heating_rate(root_dir)
-
-    def get_equilibrium_heating_rate(self, root_dir):
-        """
-        Read equilibrium heating rate from initial conditions results
-
-        # Parameters
-        root_dir (`str`): Path to HYDRAD directory
-        """
-        filename = os.path.join(root_dir,
-                                'Initial_Conditions/profiles/initial.amr.sol')
-        with open(filename, 'r') as f:
-            equilibrium_heating_rate = float(f.readline()) * u.erg / u.s / (u.cm**3)
-        return equilibrium_heating_rate
+                self.equilibrium_heating_rate = get_equilibrium_heating_rate(root_dir)
 
     def setup_hydrad(self, root_dir):
         """
@@ -292,26 +288,11 @@ class Configure(object):
         values, you must run the initial conditions and set the
         `equilibrium_heating_rate` attribute first.
         """
-        if self.config['heating'].get('background', False):
-            bg = self.config['heating']['background']
-            if bg.get('use_initial_conditions', False):
-                background = {
-                    'rate': self.equilibrium_heating_rate,
-                    'location': self.config['initial_conditions']['heating_location'],
-                    'scale_height': self.config['initial_conditions']['heating_scale_height'],
-                }
-            elif all((k in bg for k in ('rate', 'location', 'scale_height'))):
-                background = self.config['heating']['background']
-            else:
-                raise ValueError(
-                    'Set use_initial_conditions to True or set parameters '
-                    'explicitly in order to use background heating.')
-        else:
-            background = {
-                'rate': 0*u.erg/(u.cm**3 * u.s),
-                'location': 0*u.cm,
-                'scale_height': 0*u.cm
-            }
+        background = copy.deepcopy(self.config['heating']['background'])
+        if background.get('use_initial_conditions', False):
+            background['rate'] = self.equilibrium_heating_rate
+            background['location'] = self.config['initial_conditions']['heating_location']
+            background['scale_height'] = self.config['initial_conditions']['heating_scale_height']
         return self.env.get_template('heating.cfg').render(
             date=self.date,
             background=background,
@@ -390,10 +371,10 @@ class Configure(object):
         Sixth-order polynomial fit coefficients for computing flux tube
         expansion
         """
+        fit = self._fit_poly_domains('poly_fit_magnetic_field', 'G')
         return self.env.get_template('coefficients.cfg').render(
             date=self.date,
-            fit=self.config['general']['poly_fit_magnetic_field'],
-            y_unit='G',
+            **fit,
         )
 
     @property
@@ -402,11 +383,30 @@ class Configure(object):
         Sixth-order polynomial fit coefficients for computing gravitational
         acceleration
         """
+        fit = self._fit_poly_domains('poly_fit_gravity', 'cm s-2')
         return self.env.get_template('coefficients.cfg').render(
             date=self.date,
-            fit=self.config['general']['poly_fit_gravity'],
-            y_unit='cm s-2',
+            **fit,
         )
+
+    def _fit_poly_domains(self, name, unit):
+        """
+        Perform polynomial fit to quantity as a function of field aligned coordinate
+        over multiple domains and return fitting coefficients.
+        """
+        # TODO: refactor to be independent of dictionary
+        fit = copy.deepcopy(self.config['general'][name])
+        x = (fit['x'] / self.config['general']['loop_length']).decompose().to(u.dimensionless_unscaled).value
+        y = fit['y'].to(unit).value
+        coefficients = []
+        minmax = []
+        for i in range(len(fit['domains'])-1):
+            i_d = np.where(np.logical_and(x>=fit['domains'][i], x<=fit['domains'][i+1]))
+            coefficients.append(np.polyfit(x[i_d], y[i_d], fit['order'])[::-1])
+            minmax.append([y[i_d].min(), y[i_d].max()])
+        fit['minmax'] = minmax
+        fit['coefficients'] = coefficients
+        return fit
 
     @property
     def minimum_cells(self):
