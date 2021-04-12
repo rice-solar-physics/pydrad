@@ -1,0 +1,407 @@
+General:
+  Name:
+  - total_time
+  - output_interval
+  - loop_length
+  - loop_inclination
+  - footpoint_height
+  - poly_fit_gravity
+  - poly_fit_magnetic_field
+  - logging_frequency
+  - initial_amr_file
+  - write_file_physical
+  - write_file_ion_populations
+  - write_file_hydrogren_level_populations
+  - write_file_timescales
+  - write_file_equation_terms
+  - heat_flux_limiting_coefficient
+  - heat_flux_timestep_limit
+  - use_kinetic_model
+  - minimum_collisional_coupling_timescale
+  - force_single_fluid
+  - use_openmp
+  - open_field
+  - force_symmetry
+  Description:
+  - Total duration of the simulation
+  - How often results are printed to file
+  - Footpoint-to-footpoint distance of the coronal loop
+  - Angle between loop and surface normal
+  - Length of the chromosphere
+  - Configuration parameters for the piecewise polynomial fit to the gravitational
+    profile
+  - Configuration parameters for the piecewise polynomial fit to the magnetic field
+    profile
+  - Frequency (in number of timesteps) that progress is printed to the screen
+  - Adaptive mesh file to initialize loop from; if not given, uses the result from
+    the initial conditions code
+  - Toggle writing ``.phy`` solutions file
+  - Toggle writing ``.ine`` file
+  - Toggle writing ``.hstate`` file
+  - Toggle writing ``.scl`` file
+  - Toggle writing ``.trm`` file
+  - See Eq. A15 of `BC13 <https://doi.org/10.1088/0004-637X/770/1/12>`__
+  - Minimum value the heat flux will limit timestep to
+  - Toggle using the kinetic model for the heat flux
+  - ''
+  - If true, force electron and ion quantities to be equal
+  - If true, parallelize over threads with `OpenMP <https://www.openmp.org/>`__. This
+    option is most useful when including a NLTE chromosphere.
+  - If true, one footpoint is assumed to not connect to the surface
+  - ''
+  Type:
+  - '``int``'
+  - '``int``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``dict``'
+  - '``dict``'
+  - '``int``'
+  - '``str``'
+  - '``bool``'
+  - '``bool``'
+  - '``bool``'
+  - '``bool``'
+  - '``bool``'
+  - '``float``'
+  - '``float``'
+  - '``bool``'
+  - '``float``'
+  - '``bool``'
+  - '``bool``'
+  - '``bool``'
+  - '``bool``'
+  Units:
+  - s
+  - s
+  - cm
+  - degree
+  - cm
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - s
+  - ''
+  - s
+  - ''
+  - ''
+  - ''
+  - ''
+Polynomial Fit:
+  Name:
+  - x
+  - y
+  - domains
+  - order
+  Description:
+  - Spatial coordinate of the profile
+  - Profile, either gravity or magnetic field
+  - Left and right edges, in normalized spatial coordinates, over which to perform the fit. If fitting a single polynomial over the entire domain, this can just be ``[0,1]``.
+  - Order of the polynomial fit
+  Type:
+  - 'array-like'
+  - 'array-like'
+  - 'array-like'
+  - '``int``'
+  Units:
+  - 'cm'
+  - 'cm s\ :math:`-2` or G'
+  - ''
+  - ''
+Initial Conditions:
+  Name:
+  - footpoint_temperature
+  - footpoint_density
+  - heating_location
+  - heating_scale_height
+  - isothermal
+  - heating_range_lower_bound
+  - heating_range_upper_bound
+  - heating_range_step_size
+  - heating_range_fine_tuning
+  - use_poly_fit_gravity
+  - use_poly_fit_magnetic_field
+  Description:
+  - Temperature at the loop footpoints
+  - Density at the loop footpoints
+  - Loop coordinate where heating is deposited to get equilibrium solution
+  - Spatial scale of heating to get equilibrium solution
+  - If true, initial temperature profile is uniform
+  - Lower bound on rate search range
+  - Upper bound on rate search range
+  - Resolution of heating rate search range
+  - ''
+  - If true, use polynomial fit to gravitational profile when calculating initial conditions
+  - If true, use polynomial fit to magnetic field profile when calculating initial conditions
+  Type:
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``bool``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``bool``'
+  - '``bool``'
+  Units:
+  - 'K'
+  - 'cm\ :math:`^{-3}`'
+  - 'cm'
+  - 'cm'
+  - ''
+  - 'erg cm\ :math:`^{-3}` s\ :math:`^{-1}`'
+  - 'erg cm\ :math:`^{-3}` s\ :math:`^{-1}`' 
+  - ''
+  - ''
+  - ''
+  - ''
+Radiation:
+  Name:
+  - use_power_law_radiative_losses
+  - lookup_table
+  - decouple_ionization_state_solver
+  - density_dependent_rates
+  - optically_thick_radiation
+  - nlte_chromosphere
+  - minimum_density_limit
+  - ranges_dataset
+  - emissivity_dataset
+  - abundance_dataset
+  - rates_dataset
+  - elements_equilibrium
+  - elements_nonequilibrium
+  Description:
+  - If true, use piecewise power-law to calculate radiative losses
+  - Path (relative to the root of the HYDRAD directory) to lookup table for radiative losses. Ignored unless use_power_law_radiative_losses is also set.
+  - If true, the non-equilibrium populationfractions are not fed back into the radiative loss   calculation. This option will be ignored unless a  list of elements is also  passed to ``elements_nonequilibrium``. If ``use_power_law_radiative_losses`` is false, the equilibrium population fractions will be used to calculate the  radiative losses.
+  - ''
+  - If true, include optically thick lines in radiative losses
+  - 'Treat the chromosphere as being in non-local thermal equilibrium. **NOTE: This may significantly increase the computation time.**'
+  - Density floor of the corona. This option is required if ``nlte_chromosphere`` is true.
+  - Temperature and density ranges dataset
+  - Name of emissivity dataset
+  - Name of abundance dataset
+  - Name of ionization/recombination dataset
+  - Elements for which the population fractions will be calculated assuming ionization equilibrium
+  - Elements for which the time-dependent, non-equilibrium population fractions will be calculated
+  Type:
+  - '``bool``'
+  - '``str``'
+  - '``bool``'
+  - '``bool``'
+  - '``bool``'
+  - '``bool``'
+  - '``float``'
+  - '``str``'
+  - '``str``'
+  - '``str``'
+  - '``str``'
+  - '``list``'
+  - '``list``'
+  Units:
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - 'cm\ :math:`^{-3}`'
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+Heating:
+  Name:
+  - electron_heating
+  - beam
+  - alfven_wave
+  - background
+  - events
+  Description:
+  - Fraction of energy partitioned to the electrons. If 1, all of the heat is deposited in the electrons. If 0, all of the heat is deposited in the ions.
+  - Toggle beam heating model
+  - Toggle Alfvèn wave heating model (experimental)
+  - Parameters for configuring the background heating
+  - List of properties for each heating event.
+  Type:
+  - '``float``'
+  - '``bool``'
+  - '``bool``'
+  - '``dict``'
+  - '``list``'
+Heating_bg:
+  Name:
+  - use_initial_conditions
+  - location
+  - scale_height
+  - rate
+  Description:
+  - If true, use the heating parameters from the initial conditions and the computed equilibrium heating rate; if true, all other background heating parameters are ignored.
+  - Location of the energy deposition
+  - Spatial scale of the energy deposition
+  - Peak heating rate of the Gaussian heating profile              
+  Type:
+  - '``bool``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  Units:
+  - ''
+  - 'cm'
+  - 'cm'
+  - 'erg cm\ :math:`^{-3}` s\ :math:`^{-1}`'
+Heating_events:
+  Name:
+  - time_start
+  - rise_duration
+  - decay_duration
+  - total_duration
+  - location
+  - scale_height
+  - rate
+  Units:
+  - 's'
+  - 's'
+  - 's'
+  - 's'
+  - 'cm'
+  - 'cm'
+  - 'erg cm\ :math:`^{-3}` s\ :math:`^{-1}`'
+Grid:
+  Name:
+  - adapt     
+  - adapt_every_n_time_steps
+  - maximum_cell_width
+  - maximum_refinement_level
+  - minimum_delta_s
+  - maximum_variation
+  - refine_on_density
+  - refine_on_electron_energy
+  - refine_on_hydrogen_energy
+  - minimum_fractional_difference
+  - maximum_fractional_difference
+  - linear_restriction
+  - enforce_conservation
+  Description:
+  - Toggle using adaptive mesh refinement
+  - How often to adapt on timestep
+  - The maximum allowed width of any grid cell
+  - The maximum number of times a grid cell can be split; see `BC13 <https://doi.org/10.1088/0004-637X/770/1/12>`__
+  - Smallest allowed grid cell width in the initial setup
+  - ''
+  - ''
+  - ''
+  - ''
+  - Minimum allowed difference (between 0 and 1) between adjacent cells
+  - Maximum allowed difference (between 0 and 1) between adjacent cells
+  - ''
+  - ''            
+  Type:
+  - '``bool``'
+  - '``int``'
+  - '``float``'
+  - '``int``'
+  - '``float``'
+  - '``float``'
+  - '``bool``'
+  - '``bool``'
+  - '``bool``'
+  - '``float``'
+  - '``float``'
+  - '``bool``'
+  - '``bool``'
+  Units:
+  - ''
+  - ''
+  - 'cm'
+  - ''
+  - 'cm'
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+Solver:
+  Name:
+  - epsilon   
+  - safety_radiation
+  - safety_conduction
+  - safety_advection
+  - safety_atomic
+  - safety_viscosity
+  - cutoff_ion_fraction
+  - epsilon_d 
+  - epsilon_r           
+  - timestep_increase_limit
+  - relative_viscous_timescale
+  - minimum_radiation_temperature
+  - zero_over_temperature_interval
+  - minimum_temperature
+  - maximum_optically_thin_density
+  - cutoff_temperature_fraction
+  Description:
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - 'Population fractions below this value are set to 0'
+  - 'Safety factor for ion population solver; see `B09 <http://doi.org/10.1051/0004-6361/200810735>`__'
+  - 'Safety factor for ion population solver; see `B09 <http://doi.org/10.1051/0004-6361/200810735>`__'
+  - Allowed fractional difference (between 0 and 1) between consecutive timesteps
+  - ''
+  - ''
+  - 'Temperature interval over which the chromospheric radiative losses are set to zero'
+  - ''
+  - ''
+  - 'Ratio between cutoff temperature and peak temperature. If set, use the method of             `JB19 <https://doi.org/10 .3847/2041-8213/ab0c1f>`__ to model the transition region.                   '
+  Type:
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  Units:
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - ''
+  - 'K'
+  - 'K'
+  - 'K'
+  - 'cm\ :math:`^{-3}`'
+  - ''
