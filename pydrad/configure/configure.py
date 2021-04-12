@@ -91,6 +91,9 @@ class Configure(object):
             Path to existing HYDRAD
         run_initial_conditions : `bool`
             If True, compile and run the initial conditions code
+        overwrite : `bool`
+            If True, overwrite an existing HYDRAD instance at ``output_path``
+            if it exists.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             # NOTE: this is all done in a temp directory and then copied over

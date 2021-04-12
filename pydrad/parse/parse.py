@@ -141,7 +141,6 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
                     ds.attrs['unit'] = data.unit.to_string()
 
     @property
-<<<<<<< HEAD
     def config(self):
         """
         Configuration options. This will only work if the simuation was also
@@ -150,11 +149,8 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         return Configure.load_config(os.path.join(self.hydrad_root, 'pydrad_config.asdf'))
 
     @property
-    def time(self):
-=======
     @u.quantity_input
     def time(self) -> u.s:
->>>>>>> start updating all of the docstrings
         """
         Simulation time
         """
@@ -245,7 +241,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
 
     def spatial_average(self, quantity, bounds=None):
         """
-        Compute a spatial average of a specific quantity or quantities                             
+        Compute a spatial average of a specific quantity or quantities
         """
         return u.Quantity([p.spatial_average(quantity, bounds=bounds) for p in self])
 
@@ -519,14 +515,10 @@ Timestep #: {self._index}"""
         return np.average(quantity_bounds, weights=grid_widths_bounds)
 
     @u.quantity_input
-<<<<<<< HEAD
-    def column_emission_measure(self, bins:u.K=None, bounds:u.cm=None):
-=======
-    def column_emission_measure(self, bins: u.K = None):
->>>>>>> start updating all of the docstrings
+    def column_emission_measure(self, bins: u.K = None, bounds: u.cm = None):
         """
-        Computes the column emission measure, where it is assumed that the loop is
-        confined to a single pixel and oriented along the line of sight.
+        Computes the column emission measure, where it is assumed that the loop
+        is confined to a single pixel and oriented along the line of sight.
         
         Parameters
         ----------
@@ -546,7 +538,7 @@ Timestep #: {self._index}"""
         if bins is None:
             bins = 10.0**(np.arange(3.0, 8.0, 0.05)) * u.K
         if bounds is None:
-            bounds = self.grid_edges[[0,-1]]
+            bounds = self.grid_edges[[0, -1]]
         weights = self.electron_density * self.ion_density * self.grid_widths
         H, _, _ = np.histogram2d(self.grid_centers, self.electron_temperature,
                                  bins=(bounds, bins), weights=weights)
