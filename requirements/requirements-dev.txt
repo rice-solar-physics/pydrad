@@ -1,8 +1,10 @@
 -r requirements.txt
 flake8
+pillow
 pytest
 sphinx
 sphinx-automodapi
+sphinx-gallery
 sphinx-rtd-theme
 pytest-cov
 codecov
