@@ -1,6 +1,8 @@
 # Ignore auto-generated docs
 site/
 docs/api/*
+docs/config_tables.rst
+docs/generated
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
