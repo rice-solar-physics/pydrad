@@ -50,8 +50,8 @@ General:
   - If true, one footpoint is assumed to not connect to the surface
   - ''
   Type:
-  - '``int``'
-  - '``int``'
+  - '``float``'
+  - '``float``'
   - '``float``'
   - '``float``'
   - '``float``'
