@@ -113,11 +113,11 @@ class Configure(object):
 
         Parameters
         ----------
-        root_dir :`str`
+        root_dir : `str`
             Path to new HYDRAD copy
         execute : `bool`
             If True (default), compute initial conditions. Otherwise, they
-            are only compiled. This is useful for debuggging.
+            are only compiled. This is useful for debugging.
         """
         files = [
             ('Initial_Conditions/source/config.h',
@@ -174,7 +174,7 @@ class Configure(object):
 
         Parameters
         -----------
-        root_dir : (`str`)
+        root_dir : `str`
             Path to new HYDRAD copy
         """
         files = [

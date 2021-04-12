@@ -20,11 +20,21 @@ def plot_histogram(vals, bins, ax=None, **kwargs):
     Given a set of bin edges and the values in each bin, plot
     the histogram.
     
-    # Parameters
-    ax (`matplotlib.pyplot): Matplotlib axis instance
-    vals (array-like): value in each bin
-    bins (array-like): Bin edges, including the rightmost edge
-    kwargs : Plotting keyword arguments
+    Parameters
+    ----------
+    vals : array-like
+        value in each bin
+    bins : array-like
+        Bin edges, including the rightmost edge
+    ax : `matplotlib.pyplot`, optional
+        Matplotlib axis instance
+    kwargs : `dict`
+        Plotting keyword arguments
+
+    Returns
+    -------
+    ax : `matplotlib.pyplot`
+        Axes instance with histogram plot attached
     """
     if ax is None:
         fig = plt.figure()

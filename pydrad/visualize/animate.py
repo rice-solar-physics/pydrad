@@ -24,7 +24,7 @@ def animate_strand(strand, **kwargs):
     plot_kwargs : `dict`, optional
         See `~pydrad.visualize.plot_profile`
     limits : `dict`, optional
-        Dictionary of tuples specifying the limits on the temperature, presssure,
+        Dictionary of tuples specifying the limits on the temperature, pressure,
         density, and velocity plots
     """
     plot_kwargs = kwargs.get('plot_kwargs', {})

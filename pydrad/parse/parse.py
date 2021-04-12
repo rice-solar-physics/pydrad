@@ -274,13 +274,13 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
 class Profile(object):
     """
     Container for HYDRAD results at a given timestep. Typically accessed
-    through `~pydrad.parse.Strand`
+    through `pydrad.parse.Strand`
 
     Parameters
     ----------
     hydrad_root : `str`
         Path to HYDRAD directory
-    time : `astropy.units.Quantity`
+    time : `~astropy.units.Quantity`
         Timestep corresponding to the profile of interest
     """
 
@@ -369,7 +369,7 @@ Timestep #: {self._index}"""
         except FileNotFoundError:
             log.debug(f'{self._trm_filename} not found')
             return
-        
+
         n_elements = int(len(lines)/5)
         self._trm_data = np.zeros([n_elements, 3])
 
@@ -394,14 +394,14 @@ Timestep #: {self._index}"""
             # equation
             if i % 5 == 4:
                 self._trm_data[j, 2] = float(line[5])
-        
+
         properties = [('electron_heating_term', '_trm_data', 0, 'erg cm-3 s-1'),
                       ('hydrogen_heating_term', '_trm_data', 2, 'erg cm-3 s-1'),
                       ('radiative_loss_term', '_trm_data', 1, 'erg cm-3 s-1')]
-                     
+
         for p in properties:
             add_property(*p)
-        
+
     def _read_ine(self):
         """
         Parse non-equilibrium ionization population fraction files
@@ -506,7 +506,7 @@ Timestep #: {self._index}"""
         ----------
         quantity : `str`
             Name of the desired quantity to average
-        bounds : `astropy.units.Quantity`, optional
+        bounds : `~astropy.units.Quantity`, optional
             Array of length 2 specifying the range over which
             to take the spatial average.
         """
