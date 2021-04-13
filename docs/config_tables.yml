@@ -285,6 +285,8 @@ Grid:
   - adapt_every_n_time_steps
   - maximum_cell_width
   - maximum_refinement_level
+  - minimum_cells
+  - maximum_cells
   - minimum_delta_s
   - maximum_variation
   - refine_on_density
@@ -299,6 +301,8 @@ Grid:
   - How often to adapt on timestep
   - The maximum allowed width of any grid cell
   - The maximum number of times a grid cell can be split; see `BC13 <https://doi.org/10.1088/0004-637X/770/1/12>`__
+  - 'Minimum allowed number of grid cells. If this is not set explicitly, it is calculated as :math:`n_{min}=\lceil L/\Delta s_{max}\rceil`, where :math:`L` is the loop length and :math:`\Delta s_{max}` is the maximum allowed grid cell width.'
+  - 'Maximum allowed number of grid cells. If this is not set explicitly, :math:`n_{max}=\lfloor 2^{L_R}n_{min}\rfloor`, where :math:`L_R` is the maximum refinement level and :math:`n_{min}` is the minimum allowed number of grid cells.'
   - Smallest allowed grid cell width in the initial setup
   - ''
   - ''
@@ -313,6 +317,8 @@ Grid:
   - '``int``'
   - '``float``'
   - '``int``'
+  - '``int``'
+  - '``int``'
   - '``float``'
   - '``float``'
   - '``bool``'
@@ -326,6 +332,8 @@ Grid:
   - ''
   - ''
   - 'cm'
+  - ''
+  - ''
   - ''
   - 'cm'
   - ''
