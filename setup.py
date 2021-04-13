@@ -11,8 +11,9 @@ setup(
     packages=[
         'pydrad',
         'pydrad.configure',
+        'pydrad.configure.data',
         'pydrad.parse',
-        'pydrad.visualize'
+        'pydrad.visualize',
     ],
     author_email='will.t.barnes@gmail.com',
     description='Tools for configuring and parsing HYDRAD simulations'

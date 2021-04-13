@@ -122,6 +122,8 @@ page = """
     need to edit the information in the config tables, please do so
     in the config_tables.yml file. Changes to this file will not persist
     after each docs build.
+
+.. _configuration tables:
  
 HYDRAD Configuration Parameters
 ================================
