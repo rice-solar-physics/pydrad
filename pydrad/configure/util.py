@@ -75,7 +75,7 @@ def run_shell_command(cmd, cwd, shell=True):
         log.info(stdout)
     if stderr:
         log.warn(stderr)
-    hydrad_error_messages = ['segmentation fault', 'abort', 'error:']
+    hydrad_error_messages = ['segmentation fault', 'abort', 'error']
     if any([e in s.lower() for s in [stderr, stdout] for e in hydrad_error_messages]):
         raise HYDRADError(f'{stderr}\n{stdout}')
 
