@@ -7,19 +7,20 @@ import numpy as np
 import astropy.units as u
 import matplotlib.pyplot as plt
 import matplotlib.colors
+from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 
 __all__ = ['plot_strand',
            'plot_profile',
            'plot_time_distance',
            'plot_histogram',
-           'plot_time_mesh',]
+           'plot_time_mesh']
 
 
 def plot_histogram(vals, bins, ax=None, **kwargs):
     """
     Given a set of bin edges and the values in each bin, plot
     the histogram.
-    
+
     Parameters
     ----------
     vals : array-like
@@ -37,7 +38,6 @@ def plot_histogram(vals, bins, ax=None, **kwargs):
         Axes instance with histogram plot attached
     """
     if ax is None:
-        fig = plt.figure()
         ax = plt.gca()
     ymin = ax.get_ylim()[0]
     ax.step(bins[:-1], vals, where='post', **kwargs)
@@ -105,9 +105,10 @@ def plot_time_mesh(strand, quantities, y_grid, y_label, **kwargs):
     # NOTE: remove these here so we can send the rest to pcolormesh
     norm = kwargs.pop('norm', {})
     cmap = kwargs.pop('cmap', {})
+    units = kwargs.pop('units', {})
     yscale = kwargs.pop('yscale', 'linear')
-    for i, q in enumerate(quantities):
-        label, data = q  # If q is a tuple of label, array
+    for i, (label, data) in enumerate(quantities):
+        data = data.to(units.get(label, data.unit))
         im = ax[i].pcolormesh(
             t_mesh.value,
             y_mesh.value,
@@ -116,11 +117,13 @@ def plot_time_mesh(strand, quantities, y_grid, y_label, **kwargs):
             norm=norm.get(label, None),
             **kwargs,
         )
-        cbar = fig.colorbar(im, ax=ax[i])
+        cax = make_axes_locatable(ax[i]).append_axes(
+            "right", size="5%", pad="1%")
+        cbar = fig.colorbar(im, cax=cax)
+        cbar_label = f'{label}'
         if data.unit is u.dimensionless_unscaled:
-            cbar.ax.set_ylabel(f'{label}')
-        else:
-            cbar.ax.set_ylabel(f'{label} [{data.unit}]')
+            cbar_label += f' [{data.unit}]'
+        cbar.set_label(cbar_label)
     ax[-1].set_xlabel(f'$t$ [{t_mesh.unit}]')
     ax[-1].set_ylabel(f'{y_label} [{y_mesh.unit}]')
     ax[-1].set_yscale(yscale)
