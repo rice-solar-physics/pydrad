@@ -80,7 +80,8 @@ def plot_time_distance(strand, quantities, delta_s: u.cm, **kwargs):
     for i, q in enumerate(quantities):
         if type(q) is str:
             quantities[i] = (q, strand.to_constant_grid(q, grid))
-    plot_time_mesh(strand, quantities, grid, r'$s$', **kwargs)
+    fig, ax = plot_time_mesh(strand, quantities, grid, r'$s$', **kwargs)
+    return fig, ax
 
 
 def plot_time_mesh(strand, quantities, y_grid, y_label, **kwargs):
@@ -106,7 +107,10 @@ def plot_time_mesh(strand, quantities, y_grid, y_label, **kwargs):
     norm = kwargs.pop('norm', {})
     cmap = kwargs.pop('cmap', {})
     units = kwargs.pop('units', {})
+    labels = kwargs.pop('labels', {})
     yscale = kwargs.pop('yscale', 'linear')
+    cbar_size = kwargs.pop('cbar_size', '5%')
+    cbar_pad = kwargs.pop('cbar_pad', '1%')
     for i, (label, data) in enumerate(quantities):
         data = data.to(units.get(label, data.unit))
         im = ax[i].pcolormesh(
@@ -118,15 +122,20 @@ def plot_time_mesh(strand, quantities, y_grid, y_label, **kwargs):
             **kwargs,
         )
         cax = make_axes_locatable(ax[i]).append_axes(
-            "right", size="5%", pad="1%")
+            "right",
+            size=cbar_size,
+            pad=cbar_pad,
+        )
         cbar = fig.colorbar(im, cax=cax)
-        cbar_label = f'{label}'
-        if data.unit is u.dimensionless_unscaled:
+        cbar_label = labels.get(label, label)
+        if data.unit != u.dimensionless_unscaled:
             cbar_label += f' [{data.unit}]'
         cbar.set_label(cbar_label)
+        ax[i].set_ylabel(f'{y_label} [{y_mesh.unit}]')
     ax[-1].set_xlabel(f'$t$ [{t_mesh.unit}]')
-    ax[-1].set_ylabel(f'{y_label} [{y_mesh.unit}]')
     ax[-1].set_yscale(yscale)
+
+    return fig, ax
 
 
 def plot_strand(strand, limits=None, cmap='viridis', **kwargs):
