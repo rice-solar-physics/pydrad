@@ -17,7 +17,7 @@ from pydrad.configure.util import get_clean_hydrad, run_shell_command
 from pydrad.configure.data import get_defaults
 from pydrad.parse import Strand
 
-tmpdir = tempfile.mkdtemp()  # Change this to wherever you want to save your clean HYDRAD copy
+tmpdir = tempfile.mkdtemp()  # Change to wherever you want to save your clean HYDRAD copy
 
 
 #################################################################
@@ -63,8 +63,8 @@ config['heating']['events'] = []
 # for more details on appropriately resolving gradients in the transition
 # region. This is an especially important consideration in impulsive
 # heating scenarios.
-config['grid']['initial_refinement_level'] = 3
-config['grid']['maximum_refinement_level'] = 3
+config['grid']['initial_refinement_level'] = 6
+config['grid']['maximum_refinement_level'] = 6
 config['solver']['cutoff_temperature_fraction'] = 0.2
 
 #################################################################
@@ -140,7 +140,7 @@ s.peek()
 # provides a convenience method for this visualization as well.
 # Because of the differences in spatial grids between time steps,
 # the quantities are reinterpolated onto a uniform grid of specified
-# resolution before plotting.
+# resolution, in this case 0.5 Mm, before plotting.
 s.peek_time_distance('electron_temperature', 0.5*u.Mm)
 
 #################################################################
@@ -148,6 +148,7 @@ s.peek_time_distance('electron_temperature', 0.5*u.Mm)
 # quantities on different colormaps
 s.peek_time_distance(
     ['electron_temperature', 'electron_density', 'velocity'],
+    0.5*u.Mm,
     cmap={'velocity': 'RdBu_r'},
     time_unit='h',
     space_unit='Mm',
