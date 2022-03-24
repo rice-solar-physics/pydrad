@@ -101,11 +101,13 @@ def plot_time_mesh(strand, quantities, y_grid, y_label, **kwargs):
     y_label : `str`
         Axis label for the other dimension against which to plot the quantity
         or quantities.
-    norm : `dict`, optional
-        Dictionary of colormap normalizations; one per quantity.
-    cmap : `str` or colormap instance
+    norm : normalization or `dict`, optional
+        Colormap normalization or dictionary of normalizations with keys
+        corresponding to the quantity names.
+    cmap : `str` or colormap instance or `dict`, optional
         Colormap to use for all quantities except velocity which will always
-        use the ``RdBu_r`` diverging colormap.
+        use the ``RdBu_r`` diverging colormap. If `dict`, mapping of colormaps
+        to different quantity names.
     figsize : `tuple`, optional
         Dimensions of the resulting figure
     time_unit : `str` or `astropy.quantity.Unit`, optional
@@ -143,8 +145,8 @@ def plot_time_mesh(strand, quantities, y_grid, y_label, **kwargs):
             t_mesh.value,
             y_mesh.value,
             data.value,
-            cmap=cmap.get(label, 'viridis'),
-            norm=norm.get(label, None),
+            cmap=cmap.get(label, 'viridis') if isinstance(cmap, dict) else cmap,
+            norm=norm.get(label, None) if isinstance(norm, dict) else norm,
             **kwargs,
         )
         cax = make_axes_locatable(ax[i]).append_axes(
