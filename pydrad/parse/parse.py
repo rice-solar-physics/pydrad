@@ -208,7 +208,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
     def get_uniform_grid(self, delta_s: u.cm) -> u.cm:
         """
         Create a spatial grid with uniform spacing `delta_s`.
-        
+
         Parameters
         ----------
         delta_s : `astropy.units.Quantity`
@@ -319,12 +319,12 @@ class Profile(object):
     def _trm_filename(self):
         return os.path.join(self.hydrad_root,
                             f'Results/profile{self._index:d}.trm')
-    
+
     @property
     def _ine_filename(self):
         return os.path.join(self.hydrad_root,
                             f'Results/profile{self._index:d}.ine')
-    
+
     @property
     def _hstate_filename(self):
         return os.path.join(self.hydrad_root,
@@ -524,7 +524,7 @@ Timestep #: {self._index}"""
         """
         Computes the column emission measure, where it is assumed that the loop
         is confined to a single pixel and oriented along the line of sight.
-        
+
         Parameters
         ----------
         bins : `~astropy.units.Quantity`, optional
@@ -532,7 +532,7 @@ Timestep #: {self._index}"""
             the bins will be equally-spaced in :math:`\log{T}`, with a left
             edge at :math:`\log{T}=3`, a right edge at :math:`\log{T}=8`, and a
             bin width of :math:`0.05`.
-        
+
         Returns
         -------
         em : `~astropy.units.Quantity`
