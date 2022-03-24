@@ -101,7 +101,7 @@ from astropy.io import ascii
 
 
 with open('config_tables.yml', 'r') as f:
-    config = yaml.load(f)
+    config = yaml.safe_load(f)
 
 
 def render_rst_table(section):
