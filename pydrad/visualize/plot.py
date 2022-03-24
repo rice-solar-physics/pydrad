@@ -63,20 +63,20 @@ def plot_time_distance(strand, quantities, delta_s: u.cm, **kwargs):
         in a tuple of `(str, array-like)`, where `str` is the label and the
         second entry is the quantity to plot, already interpolated onto a
         common grid.
-    norm : `dict`, optional
-        Dictionary of colormap normalizations; one per quantity.
-    cmap : `str` or colormap instance
-        Colormap to use for all quantities except velocity which will always
-        use the ``RdBu_r`` diverging colormap.
-    figsize : `tuple`, optional
-    time_unit : `str` or `astropy.quantity.Unit`, optional
-        Unit for the time axis
+    delta_s : `~astropy.units.Quantity`
+        Spacing of the uniform spatial grid to interpolate the quantity onto
     space_unit : `str` or `astropy.quantity.Unit`, optional
         Unit for the spatial axis
+
+    Optional Parameters
+    -------------------
+    All other parameters are passed to `~pydrad.visualize.plot_time_mesh`.
     """
     grid = strand.get_uniform_grid(delta_s).to(kwargs.pop('space_unit', 'cm'))
     # Interpolate quantities to constant grid as needed
     quantities = copy.deepcopy(quantities)
+    if type(quantities) is not list:
+        quantities = [quantities]
     for i, q in enumerate(quantities):
         if type(q) is str:
             quantities[i] = (q, strand.to_constant_grid(q, grid))
@@ -87,6 +87,32 @@ def plot_time_mesh(strand, quantities, y_grid, y_label, **kwargs):
     """
     Plot a given quantity as a function of some variable and time
     for a given strand.
+
+    Parameters
+    ----------
+    strand : `~pydrad.parse.Strand`
+    quantities : `list`, `tuple`
+        List of or single tuple of `(str, array-like)`, where `str`
+        is the label and the second entry is the quantity to plot,
+        already interpolated onto a common grid.
+    y_grid : `~astropy.units.Quantity`
+        Grid other than time to interpolate the quantity onto.
+    y_label : `str`
+        Axis label for the other dimension against which to plot the quantity
+        or quantities.
+    norm : `dict`, optional
+        Dictionary of colormap normalizations; one per quantity.
+    cmap : `str` or colormap instance
+        Colormap to use for all quantities except velocity which will always
+        use the ``RdBu_r`` diverging colormap.
+    figsize : `tuple`, optional
+        Dimensions of the resulting figure
+    time_unit : `str` or `astropy.quantity.Unit`, optional
+        Unit for the time axis
+
+    Optional Parameters
+    -------------------
+    All other keyword arguments are passed to `matplotlib.pcolormesh`.
     """
     y_mesh, t_mesh = np.meshgrid(y_grid.value, strand.time.value,)
     t_mesh = (t_mesh * strand.time.unit).to(kwargs.pop('time_unit', 's'))
@@ -156,7 +182,6 @@ def plot_strand(strand, limits=None, cmap='viridis', **kwargs):
     for i, p in enumerate(strand):
         plot_kwargs['color'] = colors(i)
         _ = _plot_profile(p, axes, **plot_kwargs)
-    plt.show()
 
 
 def plot_profile(profile, **kwargs):
@@ -177,7 +202,6 @@ def plot_profile(profile, **kwargs):
     plot_kwargs = kwargs.get('plot_kwargs', {})
     fig, axes = _setup_figure(profile, limits, **kwargs)
     _plot_profile(profile, axes, **plot_kwargs)
-    plt.show()
 
 
 def _setup_figure(profile, limits, **kwargs):

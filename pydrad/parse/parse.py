@@ -184,6 +184,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         the same keyword arguments as `~pydrad.visualize.plot_strand`
         """
         plot_strand(self, **kwargs)
+        plt.show()
 
     @u.quantity_input
     def peek_time_distance(self, quantities, delta_s: u.cm, **kwargs):
@@ -192,6 +193,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         the same keyword arguments as `~pydrad.visualize.plot_time_distance`
         """
         plot_time_distance(self, quantities, delta_s, **kwargs)
+        plt.show()
 
     def animate(self, **kwargs):
         """
@@ -265,6 +267,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         if 'norm' in kwargs:
             kwargs['norm'] = {'EM': kwargs['norm']}
         plot_time_mesh(self, [('EM', em)], bin_centers, r'$T$', yscale='log', **kwargs)
+        plt.show()
 
 
 class Profile(object):
@@ -551,6 +554,7 @@ Timestep #: {self._index}"""
         Takes the same keyword arguments as `~pydrad.visualize.plot_profile`.
         """
         plot_profile(self, **kwargs)
+        plt.show()
 
     def peek_emission_measure(self, **kwargs):
         """
