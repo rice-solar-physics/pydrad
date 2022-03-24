@@ -187,12 +187,14 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         plt.show()
 
     @u.quantity_input
-    def peek_time_distance(self, quantities, delta_s: u.cm, **kwargs):
+    def peek_time_distance(self, quantities=None, delta_s: u.cm = 1*u.Mm, **kwargs):
         """
         Quick look at time-distance plots of various quantities. Takes
         the same keyword arguments as `~pydrad.visualize.plot_time_distance`
         """
-        plot_time_distance(self, quantities, delta_s, **kwargs)
+        if quantities is None:
+            quantities = ['electron_temperature', 'electron_density', 'velocity']
+        _ = plot_time_distance(self, quantities, delta_s, **kwargs)
         plt.show()
 
     def animate(self, **kwargs):
@@ -262,11 +264,11 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
     def peek_emission_measure(self, bins=None, bounds=None, **kwargs):
         em, bins = self.column_emission_measure(bins=bins, bounds=bounds)
         bin_centers = (bins[1:] + bins[:-1])/2
-        if 'cmap' in kwargs:
-            kwargs['cmap'] = {'EM': kwargs['cmap']}
-        if 'norm' in kwargs:
-            kwargs['norm'] = {'EM': kwargs['norm']}
-        plot_time_mesh(self, [('EM', em)], bin_centers, r'$T$', yscale='log', **kwargs)
+        # Make API consistent with plot_time_mesh
+        for k in ['cmap', 'norm', 'units', 'labels']:
+            if k in kwargs:
+                kwargs[k] = {'EM': kwargs[k]}
+        _ = plot_time_mesh(self, [('EM', em)], bin_centers, r'$T$', yscale='log', **kwargs)
         plt.show()
 
 
