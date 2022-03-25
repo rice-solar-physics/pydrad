@@ -52,20 +52,18 @@ config['general']['loop_length'] = 50 * u.Mm
 config['heating']['background']['use_initial_conditions'] = True
 config['heating']['events'] = []
 
-#################################################################
-# To reduce the commputation time of our example simulation, we
-# use the approach of
-# `Johnston et al. (2019) <https://iopscience.iop.org/article/10.3847/2041-8213/ab0c1f>`__
-# to appropriately
-# resolve the transition region even in the case of reduced adaptive
-# mesh refinement. See
+################################################################
+# To reduce the commputation time and memory footprint of our
+# example simulation, we reduce the degree to which our spatial
+# grid is refined.
+# In general, this is something that should be done cautiously.
+# See
 # `Bradshaw and Cargill (2013) <https://ui.adsabs.harvard.edu/abs/2013ApJ...770...12B>`__
 # for more details on appropriately resolving gradients in the transition
 # region. This is an especially important consideration in impulsive
 # heating scenarios.
 config['grid']['initial_refinement_level'] = 6
 config['grid']['maximum_refinement_level'] = 6
-config['solver']['cutoff_temperature_fraction'] = 0.2
 
 #################################################################
 # Next, we'll setup and run the simulation. We'll run HYDRAD
