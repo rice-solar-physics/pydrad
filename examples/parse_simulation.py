@@ -11,6 +11,7 @@ import os
 import tempfile
 
 import astropy.units as u
+from astropy.visualization import ImageNormalize, LogStretch
 
 from pydrad.configure import Configure
 from pydrad.configure.util import get_clean_hydrad, run_shell_command
@@ -31,7 +32,7 @@ tmpdir = tempfile.mkdtemp()  # Change to wherever you want to save your clean HY
 # -  ``amr`` – data related to the adapative mesh
 # -  ``trm`` – equation terms at each grid cell
 #
-# Parsing all of these files can be difficult. `~pydrad` provides a
+# Parsing all of these files can be difficult. `pydrad` provides a
 # convenient object, `~pydrad.parse.Strand`, for easily accessing the
 # data associated with a particular HYDRAD run.
 #
@@ -42,7 +43,7 @@ get_clean_hydrad(hydrad_clean, from_github=True)
 
 #################################################################
 # We'll start with the default configuration and setup a simple
-# simulation for a 50 Mm loop lasting 1000 s in which there are no
+# simulation for a 50 Mm loop lasting 500 s in which there are no
 # heating events such that the loop is maintained in static
 # equilibrium.
 config = get_defaults()
@@ -112,20 +113,22 @@ print(s.initial_conditions)
 
 #################################################################
 # The `~pydrad.parse.Strand` object can also be indexed in more complex ways
-# in the same manner `list` or array to get the simulation only over a
+# in the same manner as a `list` or array to get the simulation only over a
 # particular time range or at a particular time cadence.
+# As an example, we can grab only the first 5 time steps or every
+# other time step.
 print(s[:5])
 print(s[::2])
 
 #################################################################
-# The most simple way to visualize HYDRAD output is to look at a
+# The simplest way to visualize HYDRAD output is to look at a
 # single time step as a function of field-aligned coordinate.
 # The `~pydrad.parse.Profile` object provides a simple quicklook
 # method for this,
 s[0].peek()
 
 #################################################################
-# Similarly, we can call this method on `~pydrad.parse.Strand` to
+# Similarly, we can call this method on a `~pydrad.parse.Strand` to
 # overplot every profile at each time step, where the time step is
 # mapped to the colormap.
 # For additional information about what arguments can be passed in
@@ -148,6 +151,9 @@ s.peek_time_distance(
     ['electron_temperature', 'electron_density', 'velocity'],
     0.5*u.Mm,
     cmap={'velocity': 'RdBu_r'},
+    labels={'electron_temperatture': r'$T_e$',
+            'electron_density': r'$n_e$'},
+    norm={'electron_density': ImageNormalize(vmin=1e8, vmax=1e12, stretch=LogStretch())},
     time_unit='h',
     space_unit='Mm',
 )
