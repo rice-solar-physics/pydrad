@@ -151,7 +151,7 @@ s.peek_time_distance(
     ['electron_temperature', 'electron_density', 'velocity'],
     0.5*u.Mm,
     cmap={'velocity': 'RdBu_r'},
-    labels={'electron_temperatture': r'$T_e$',
+    labels={'electron_temperature': r'$T_e$',
             'electron_density': r'$n_e$'},
     norm={'electron_density': ImageNormalize(vmin=1e8, vmax=1e12, stretch=LogStretch())},
     time_unit='h',
