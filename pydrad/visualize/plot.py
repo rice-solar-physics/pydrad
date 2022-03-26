@@ -72,6 +72,11 @@ def plot_time_distance(strand, quantities, delta_s: u.cm, **kwargs):
     -------------------
     All other parameters are passed to `~pydrad.visualize.plot_time_mesh`.
     """
+    # NOTE: I'm setting this as the default here so that the quadrilaterals
+    # (i.e. the cells represented in the mesh) are centered on grid points.
+    # This is because the time and spatial grids here represent the centers
+    # of the grid points and thus should be centered on their faces.
+    shading = kwargs.pop('shading', 'nearest')
     grid = strand.get_uniform_grid(delta_s).to(kwargs.pop('space_unit', 'cm'))
     # Interpolate quantities to constant grid as needed
     quantities = copy.deepcopy(quantities)
@@ -80,7 +85,7 @@ def plot_time_distance(strand, quantities, delta_s: u.cm, **kwargs):
     for i, q in enumerate(quantities):
         if type(q) is str:
             quantities[i] = (q, strand.to_constant_grid(q, grid))
-    fig, ax = plot_time_mesh(strand, quantities, grid, r'$s$', **kwargs)
+    fig, ax = plot_time_mesh(strand, quantities, grid, r'$s$', shading=shading, **kwargs)
     return fig, ax
 
 
