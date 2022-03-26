@@ -23,9 +23,12 @@ class Configure(object):
     """
     Configure HYDRAD simulations from a single Python `dict`
 
-    # Parameters
-    config (`dict`): All input parameters for configuring simulation
-    templates (`dict`): Templates to override defaults, optional
+    Parameters
+    ----------
+    config : `dict`
+        All input parameters for configuring simulation
+    templates : `dict`
+        Templates to override defaults, optional
     """
 
     def __init__(self, config, **kwargs):
@@ -53,8 +56,9 @@ class Configure(object):
         """
         Load a base configuration from an ASDF file
 
-        # Parameters
-        filename (`str`): Path to ASDF configuration file
+        Parameters
+        ----------
+        filename : `str`
         """
         with asdf.open(filename) as af:
             config = copy.deepcopy(dict(af.tree))
@@ -64,8 +68,9 @@ class Configure(object):
         """
         Save the simulation configuration as an ASDF file
 
-        # Parameters
-        filename (`str`): Path to YAML configuration file
+        Parameters
+        ----------
+        filename : `str`
         """
         asdf.AsdfFile(self.config).write_to(filename)
 
@@ -78,13 +83,17 @@ class Configure(object):
         """
         Setup a HYDRAD simulation with desired outputs from a clean copy
 
-        # Parameters
-        output_path (`str`): Path to new copy of HYDRAD
-        base_path (`str`): Path to existing HYDRAD
-        run_initial_conditions (`bool`): If True, compile and run the initial
-        conditions code
+        Parameters
+        ----------
+        output_path : `str`
+            Path to new copy of HYDRAD
+        base_path : `str`
+            Path to existing HYDRAD
+        run_initial_conditions : `bool`
+            If True, compile and run the initial conditions code
         overwrite : `bool`
-            If True and the `output_path` directory already exists, overwrite it
+            If True, overwrite an existing HYDRAD instance at ``output_path``
+            if it exists.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             # NOTE: this is all done in a temp directory and then copied over
@@ -102,11 +111,16 @@ class Configure(object):
 
     def setup_initial_conditions(self, root_dir, execute=True):
         """
-        Compile and execute code to get the initial loop profile
+        Compile and run the initial conditions code to get the initial
+        loop profile
 
-        # Parameters
-        root_dir (`str`):
-        execute (`bool`): If True (default), compute initial conditions
+        Parameters
+        ----------
+        root_dir : `str`
+            Path to new HYDRAD copy
+        execute : `bool`
+            If True (default), compute initial conditions. Otherwise, they
+            are only compiled. This is useful for debugging.
         """
         files = [
             ('Initial_Conditions/source/config.h',
@@ -135,7 +149,7 @@ class Configure(object):
             with open(os.path.join(root_dir, filename), 'w') as f:
                 f.write(filestring)
         # NOTE: make sure we have needed permissions to run compile script
-		# Only do this on Unix-based systems
+        # Only do this on Unix-based systems
         if not on_windows():
             run_shell_command(
                 ['chmod', 'u+x', 'build_initial_conditions.bat'],
@@ -143,8 +157,8 @@ class Configure(object):
                 shell=False
             )
         run_shell_command(
-		    ['./build_initial_conditions.bat'],
-		    os.path.join(root_dir, 'Initial_Conditions/build_scripts')
+            ['./build_initial_conditions.bat'],
+            os.path.join(root_dir, 'Initial_Conditions/build_scripts')
         )
         if not os.path.exists(os.path.join(root_dir,
                                            'Initial_Conditions/profiles')):
@@ -161,8 +175,10 @@ class Configure(object):
         """
         Compile HYDRAD code with appropriate header and config files
 
-        # Parameters
-        root_dir (`str`):
+        Parameters
+        -----------
+        root_dir : `str`
+            Path to new HYDRAD copy
         """
         files = [
             ('Radiation_Model/source/config.h',
@@ -198,7 +214,7 @@ class Configure(object):
         else:
             build_script = 'build_HYDRAD.bat'
         # NOTE: make sure we have needed permissions to run compile script
-		# Only do this on Unix-based systems (chmod not valid on Windows)
+        # Only do this on Unix-based systems (chmod not valid on Windows)
         if not on_windows():
             run_shell_command(
                 ['chmod', 'u+x', build_script],
@@ -206,8 +222,8 @@ class Configure(object):
                 shell=False,
             )
         run_shell_command(
-		    [f'./{build_script}'],
-		    os.path.join(root_dir, 'HYDRAD/build_scripts'),
+            [f'./{build_script}'],
+            os.path.join(root_dir, 'HYDRAD/build_scripts'),
         )
         if not os.path.exists(os.path.join(root_dir, 'Results')):
             os.mkdir(os.path.join(root_dir, 'Results'))
@@ -412,8 +428,8 @@ class Configure(object):
     def minimum_cells(self):
         """
         Minimum allowed number of grid cells,
-        $n_{min}=\lceil L/\Delta s_{max}\\rceil$, where $L$ is the loop
-        length and $\Delta s_{max}$ is the maximum allowed grid cell width.
+        :math:`n_{min}=\lceil L/\Delta s_{max}\\rceil`, where :math:`L` is the loop
+        length and :math:`\Delta s_{max}` is the maximum allowed grid cell width.
         Optionally, if the minimum number of cells is specified
         in ``config['grid']['minimum_cells']``, this value will take
         precedence.
@@ -431,8 +447,8 @@ class Configure(object):
     def maximum_cells(self):
         """
         Maximum allowed number of grid cells,
-        $n_{max}=\lfloor 2^{L_R}n_{min}\\rfloor$, where $L_R$ is the maximum
-        refinement level and $n_{min}$ is the minimum allowed number of
+        :math:`n_{max}=\lfloor 2^{L_R}n_{min}\\rfloor`, where :math:`L_R` is the maximum
+        refinement level and :math:`n_{min}` is the minimum allowed number of
         grid cells. Optionally, if the maximum number of cells is specified
         in ``config['grid']['maximum_cells']``, this value will take
         precedence.

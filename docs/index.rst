@@ -14,6 +14,6 @@ code for modeling the field-aligned dynamics of coronal loops.
    :maxdepth: 2
 
    getting_started
-   configure
-   parse
+   generated/gallery/index
+   config_tables
    code_ref/index

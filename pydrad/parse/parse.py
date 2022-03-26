@@ -24,6 +24,23 @@ __all__ = ['Strand', 'Profile', 'InitialProfile']
 
 
 def get_master_time(hydrad_root, read_from_cfg=False):
+    """
+    Get array of times that correspond to each timestep for the entire simulation.
+
+    Parameters
+    ----------
+    hydrad_root : `str` or path-like
+    read_from_cfg : `bool`, optional
+        If True, create the time array from the cadence as specified in
+        `HYDRAD/config/hydrad.cfg` and the start time as given in the first
+        AMR file. Note that this is substantially faster than reading the time
+        from every AMR file, but there may be small differences between these
+        approximate time steps and the exact time steps listed in the AMR files.
+
+    Returns
+    -------
+    : `~astropy.units.Quantity`
+    """
     amr_files = sorted(glob.glob(os.path.join(hydrad_root, 'Results/profile*.amr')))
     if read_from_cfg:
         log.debug('Creating master time array from config files')
@@ -51,8 +68,16 @@ class Strand(object):
     """
     Container for parsing HYDRAD results
 
-    # Parameters
-    hydrad_root (`str`): Path to HYDRAD simulation directory
+    Parameters
+    ----------
+    hydrad_root : `str` or path-like
+        Path to HYDRAD simulation directory
+    read_from_cfg : `bool`, optional
+        If True, create the time array from the cadence as specified in
+        `HYDRAD/config/hydrad.cfg` and the start time as given in the first
+        AMR file. Note that this is substantially faster than reading the time
+        from every AMR file, but there may be small differences between these
+        approximate time steps and the exact time steps listed in the AMR files.
     """
 
     def __init__(self, hydrad_root, **kwargs):
@@ -98,9 +123,12 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         """
         Save variables to an HDF5 file
 
-        # Parameters
-        filename (`str` or path-like): path to HDF file
-        variables (`str`): Names of variables to save to file
+        Parameters
+        ----------
+        filename : `str` or path-like
+            Path to HDF file
+        variables : `list`
+            Names of variables to save to file
         """
         with h5py.File(filename, 'w') as hf:
             ds = hf.create_dataset('time', data=self.time.value)
@@ -121,14 +149,16 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         return Configure.load_config(os.path.join(self.hydrad_root, 'pydrad_config.asdf'))
 
     @property
-    def time(self):
+    @u.quantity_input
+    def time(self) -> u.s:
         """
         Simulation time
         """
         return self._time
 
     @property
-    def loop_length(self):
+    @u.quantity_input
+    def loop_length(self) -> u.cm:
         """
         Footpoint-to-footpoint loop length
         """
@@ -140,7 +170,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
     @property
     def initial_conditions(self):
         """
-        #Profile for the solutions to the hydrostatic
+        `~pydrad.parse.Profile` for the solutions to the hydrostatic
         equations used as initial conditions.
         """
         return InitialProfile(self.hydrad_root,
@@ -151,37 +181,44 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
     def peek(self, **kwargs):
         """
         Quick look at all profiles for the run on a single plot. Takes
-        the same keyword arguments as #pydrad.visualize.plot_strand
+        the same keyword arguments as `~pydrad.visualize.plot_strand`
         """
         plot_strand(self, **kwargs)
+        plt.show()
 
     @u.quantity_input
-    def peek_time_distance(self, quantities, delta_s: u.cm, **kwargs):
+    def peek_time_distance(self, quantities=None, delta_s: u.cm = 1*u.Mm, **kwargs):
         """
         Quick look at time-distance plots of various quantities. Takes
-        the same keyword arguments as #pydrad.visualize.plot_time_distance
+        the same keyword arguments as `~pydrad.visualize.plot_time_distance`
         """
-        plot_time_distance(self, quantities, delta_s, **kwargs)
+        if quantities is None:
+            quantities = ['electron_temperature', 'electron_density', 'velocity']
+        _ = plot_time_distance(self, quantities, delta_s, **kwargs)
+        plt.show()
 
     def animate(self, **kwargs):
         """
         Simple animation of time-dependent loop profiles. Takes the same
-        keyword arguments as #pydrad.visualize.animate_strand
+        keyword arguments as `~pydrad.visualize.animate_strand`
         """
         return animate_strand(self, **kwargs)
 
     @u.quantity_input
-    def get_uniform_grid(self, delta_s: u.cm):
+    def get_uniform_grid(self, delta_s: u.cm) -> u.cm:
         """
         Create a spatial grid with uniform spacing `delta_s`.
-        
-        # Parameters:
-        delta_s (`astropy.units.Quantity`): Spacing between each grid point
+
+        Parameters
+        ----------
+        delta_s : `astropy.units.Quantity`
+            Spacing between each grid point
         """
         return np.arange(
             0, self.loop_length.to(u.cm).value, delta_s.to(u.cm).value)*u.cm
 
-    def get_unique_grid(self):
+    @u.quantity_input
+    def get_unique_grid(self) -> u.cm:
         all_coordinates = [p.coordinate.to(u.cm).value for p in self]
         return np.unique(np.concatenate(all_coordinates).ravel()) * u.cm
 
@@ -191,9 +228,11 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         Interpolate a given quantity onto a spatial grid that is the same at
         each time step.
 
-        # Parameters
-        name (`str`): Name of quantity
-        grid (`astropy.units.Quantity`): Spatial grid to interpolate onto
+        Parameters
+        ----------
+        name : `str`
+        grid : `~astropy.units.Quantity`
+            Spatial grid to interpolate onto
         """
         q_uniform = np.zeros(self.time.shape+grid.shape)
         grid_cm = grid.to(u.cm).value
@@ -206,7 +245,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
 
     def spatial_average(self, quantity, bounds=None):
         """
-        Compute a spatial average of a specific quantity or quantities                             
+        Compute a spatial average of a specific quantity or quantities
         """
         return u.Quantity([p.spatial_average(quantity, bounds=bounds) for p in self])
 
@@ -225,21 +264,25 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
     def peek_emission_measure(self, bins=None, bounds=None, **kwargs):
         em, bins = self.column_emission_measure(bins=bins, bounds=bounds)
         bin_centers = (bins[1:] + bins[:-1])/2
-        if 'cmap' in kwargs:
-            kwargs['cmap'] = {'EM': kwargs['cmap']}
-        if 'norm' in kwargs:
-            kwargs['norm'] = {'EM': kwargs['norm']}
-        plot_time_mesh(self, [('EM', em)], bin_centers, r'$T$', yscale='log', **kwargs)
+        # Make API consistent with plot_time_mesh
+        for k in ['cmap', 'norm', 'units', 'labels']:
+            if k in kwargs:
+                kwargs[k] = {'EM': kwargs[k]}
+        _ = plot_time_mesh(self, [('EM', em)], bin_centers, r'$T$', yscale='log', **kwargs)
+        plt.show()
 
 
 class Profile(object):
     """
     Container for HYDRAD results at a given timestep. Typically accessed
-    through #Strand
+    through `pydrad.parse.Strand`
 
-    # Parameters
-    hydrad_root (`str`): Path to HYDRAD directory
-    time (`astropy.units.Quantity`): 
+    Parameters
+    ----------
+    hydrad_root : `str`
+        Path to HYDRAD directory
+    time : `~astropy.units.Quantity`
+        Timestep corresponding to the profile of interest
     """
 
     @u.quantity_input
@@ -276,12 +319,12 @@ class Profile(object):
     def _trm_filename(self):
         return os.path.join(self.hydrad_root,
                             f'Results/profile{self._index:d}.trm')
-    
+
     @property
     def _ine_filename(self):
         return os.path.join(self.hydrad_root,
                             f'Results/profile{self._index:d}.ine')
-    
+
     @property
     def _hstate_filename(self):
         return os.path.join(self.hydrad_root,
@@ -327,7 +370,7 @@ Timestep #: {self._index}"""
         except FileNotFoundError:
             log.debug(f'{self._trm_filename} not found')
             return
-        
+
         n_elements = int(len(lines)/5)
         self._trm_data = np.zeros([n_elements, 3])
 
@@ -343,7 +386,7 @@ Timestep #: {self._index}"""
         for i in range(len(lines)):
             j = int(i/5)
             line = lines[i].strip().split()
-            # Electron heating and radiative loss terms from the 
+            # Electron heating and radiative loss terms from the
             # electron energy equation
             if i % 5 == 3:
                 self._trm_data[j, 0] = float(line[5])
@@ -352,14 +395,14 @@ Timestep #: {self._index}"""
             # equation
             if i % 5 == 4:
                 self._trm_data[j, 2] = float(line[5])
-        
+
         properties = [('electron_heating_term', '_trm_data', 0, 'erg cm-3 s-1'),
                       ('hydrogen_heating_term', '_trm_data', 2, 'erg cm-3 s-1'),
-                      ('radiative_loss_term', '_trm_data', 1, 'erg cm-3 s-1'),]
-                     
+                      ('radiative_loss_term', '_trm_data', 1, 'erg cm-3 s-1')]
+
         for p in properties:
             add_property(*p)
-        
+
     def _read_ine(self):
         """
         Parse non-equilibrium ionization population fraction files
@@ -459,6 +502,14 @@ Timestep #: {self._index}"""
     def spatial_average(self, quantity, bounds=None):
         """
         Compute a spatial average of a specific quantity
+
+        Parameters
+        ----------
+        quantity : `str`
+            Name of the desired quantity to average
+        bounds : `~astropy.units.Quantity`, optional
+            Array of length 2 specifying the range over which
+            to take the spatial average.
         """
         if bounds is None:
             bounds = self.coordinate[[0, -1]]
@@ -469,26 +520,30 @@ Timestep #: {self._index}"""
         return np.average(quantity_bounds, weights=grid_widths_bounds)
 
     @u.quantity_input
-    def column_emission_measure(self, bins:u.K=None, bounds:u.cm=None):
+    def column_emission_measure(self, bins: u.K = None, bounds: u.cm = None):
         """
-        Computes the column emission measure, where it is assumed that the loop is
-        confined to a single pixel and oriented along the LOS
-        
-        # Parameters
-        bins (`astropy.units.Quantity`): temperature bin edges, including rightmost
-        edge. If None (default), the bins will be equally-spaced in $\log{T}$, with
-        a left edge at $\log{T}=3$, a right edge at $\log{T}=8$, and a bin width of
-        $0.05$.
-        
-        # Returns
-        em (astropy.units.Quantity): the column emission measure in each bin
-        
-        bins (astropy.units.Quantity): temperature bin edges. Note that `len(bins)=len(em)+1`.
+        Computes the column emission measure, where it is assumed that the loop
+        is confined to a single pixel and oriented along the line of sight.
+
+        Parameters
+        ----------
+        bins : `~astropy.units.Quantity`, optional
+            Temperature bin edges, including rightmost edge. If None (default),
+            the bins will be equally-spaced in :math:`\log{T}`, with a left
+            edge at :math:`\log{T}=3`, a right edge at :math:`\log{T}=8`, and a
+            bin width of :math:`0.05`.
+
+        Returns
+        -------
+        em : `~astropy.units.Quantity`
+            The column emission measure in each bin
+        bins : `~astropy.units.Quantity`
+            Temperature bin edges. Note that ``len(bins)=len(em)+1``.
         """
         if bins is None:
             bins = 10.0**(np.arange(3.0, 8.0, 0.05)) * u.K
         if bounds is None:
-            bounds = self.grid_edges[[0,-1]]
+            bounds = self.grid_edges[[0, -1]]
         weights = self.electron_density * self.ion_density * self.grid_widths
         H, _, _ = np.histogram2d(self.grid_centers, self.electron_temperature,
                                  bins=(bounds, bins), weights=weights)
@@ -497,12 +552,18 @@ Timestep #: {self._index}"""
     def peek(self, **kwargs):
         """
         Quick look at profiles at a given timestep.
+
+        Takes the same keyword arguments as `~pydrad.visualize.plot_profile`.
         """
         plot_profile(self, **kwargs)
+        plt.show()
 
     def peek_emission_measure(self, **kwargs):
         """
-        Quick look at the column emission measure
+        Quick look at the column emission measure.
+
+        Takes the same keyword arguments as `column_emission_measure` and
+        `~pydrad.visualize.plot_histogram`.
         """
         bins = kwargs.pop('bins', None)
         if 'color' not in kwargs:
@@ -542,7 +603,7 @@ def add_property(name, attr, index, unit):
         if data is None:
             raise ValueError(f'No data available for {name}')
         return u.Quantity(data[:, index], unit)
-    property_template.__doc__ = f'{" ".join(name.split("_")).capitalize()} as a function of $s$'
+    property_template.__doc__ = f'{" ".join(name.split("_")).capitalize()} as a function of :math:`s`'
     property_template.__name__ = name
     setattr(Profile, property_template.__name__, property(property_template))
 

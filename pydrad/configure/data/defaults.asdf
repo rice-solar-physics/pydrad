@@ -38,11 +38,11 @@ grid:
   initial_refinement_level: 10
   linear_restriction: true
   maximum_cell_width: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'Mm', value: 0.5}
-  maximum_fractional_difference: 0.1
+  maximum_fractional_difference: 0.2
   maximum_refinement_level: 12
   maximum_variation: 0.1
   minimum_delta_s: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm', value: 1.0}
-  minimum_fractional_difference: 0.05
+  minimum_fractional_difference: 0.1
   refine_on_density: true
   refine_on_electron_energy: true
   refine_on_hydrogen_energy: true
@@ -53,13 +53,13 @@ heating:
   electron_heating: 1.0
   events: []
 initial_conditions:
-  footpoint_density: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm-3', value: 1000000000000.0}
-  footpoint_temperature: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'K', value: 10000.0}
+  footpoint_density: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm-3', value: 100000000000.0}
+  footpoint_temperature: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'K', value: 20000.0}
   heating_location: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'Mm', value: 45.0}
   heating_range_fine_tuning: 10000.0
   heating_range_lower_bound: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm-3 erg
       s-1', value: 1.0e-08}
-  heating_range_step_size: 0.01
+  heating_range_step_size: 0.001
   heating_range_upper_bound: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm-3 erg
       s-1', value: 100.0}
   heating_scale_height: !unit/quantity-1.1.0 {unit: !unit/unit-1.0.0 'cm', value: 1.0e+300}

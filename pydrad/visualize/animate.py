@@ -11,10 +11,21 @@ __all__ = ['animate_strand']
 
 def animate_strand(strand, **kwargs):
     """
-    Return a matplotlib animation of time-dependent hydrodynamic quantities of a
-    strand. Takes the same arguments as #pydrad.visualize.plot_strand(). See the
-    [matplotlib animation docs](https://matplotlib.org/api/animation_api.html) 
-    for examples on how to write the movie to a file.
+    Animate temperature, density, and pressure as a function of time and space.
+
+    Create an animation of time-dependent hydrodynamic quantities of a
+    strand. See the
+    `matplotlib animation docs <https://matplotlib.org/api/animation_api.html>`_
+    for examples on how to display the animation.
+
+    Parameters
+    ----------
+    strand : `~pydrad.parse.Strand`
+    plot_kwargs : `dict`, optional
+        See `~pydrad.visualize.plot_profile`
+    limits : `dict`, optional
+        Dictionary of tuples specifying the limits on the temperature, pressure,
+        density, and velocity plots
     """
     plot_kwargs = kwargs.get('plot_kwargs', {})
     limits = kwargs.get('limits', {})
@@ -42,5 +53,10 @@ def animate_strand(strand, **kwargs):
         return l1a, l1b, l2a, l2b, l3a, l3b, l4
     
     return FuncAnimation(
-        fig, update_plot, blit=kwargs.get('blit', True), frames=len(strand),
-        interval=kwargs.get('interval', 10), repeat=kwargs.get('repeat', True))
+        fig,
+        update_plot,
+        blit=kwargs.get('blit', True),
+        frames=len(strand),
+        interval=kwargs.get('interval', 10),
+        repeat=kwargs.get('repeat', True)
+    )
