@@ -223,7 +223,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         return np.unique(np.concatenate(all_coordinates).ravel()) * u.cm
 
     @u.quantity_input
-    def to_constant_grid(self, name, grid: u.cm):
+    def to_constant_grid(self, name, grid: u.cm, order=1):
         """
         Interpolate a given quantity onto a spatial grid that is the same at
         each time step.
@@ -233,12 +233,14 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         name : `str`
         grid : `~astropy.units.Quantity`
             Spatial grid to interpolate onto
+        order : `int`
+            Order of the spline interpolation. Defualt is 1.
         """
         q_uniform = np.zeros(self.time.shape+grid.shape)
         grid_cm = grid.to(u.cm).value
         for i, p in enumerate(self):
             q = getattr(p, name)
-            tsk = splrep(p.coordinate.to(u.cm).value, q.value,)
+            tsk = splrep(p.coordinate.to(u.cm).value, q.value, k=order)
             q_uniform[i, :] = splev(grid_cm, tsk, ext=0)
 
         return q_uniform * q.unit
