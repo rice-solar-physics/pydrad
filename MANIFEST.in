@@ -1,3 +1,5 @@
 include README.md
 include LICENSE
+include pyproject.toml
 include pydrad/configure/templates/*
+include pydrad/configure/data/*
