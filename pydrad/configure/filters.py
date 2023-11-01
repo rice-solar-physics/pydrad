@@ -4,6 +4,7 @@ Custom Jinja2 filters
 import numpy as np
 import astropy.units as u
 import plasmapy.particles
+from jinja2 import Undefined
 
 from .util import MissingParameter
 
@@ -49,8 +50,7 @@ def sort_elements(elements):
 
 
 def is_required(value):
-    # Check for missing values that are not False booleans
-    if not value and value is not False and value != 0:
+    if isinstance(value, Undefined):
         raise MissingParameter('Parameter required for configuration')
     else:
         return value
