@@ -32,6 +32,7 @@ jobs:
       toxdeps: tox-pypi-filter
       envs: |
         - linux: codestyle
+          python-version: '3.11'
   docs:
     needs: [test]
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1

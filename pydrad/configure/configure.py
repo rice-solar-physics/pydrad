@@ -442,9 +442,9 @@ class Configure(object):
 
     @property
     def maximum_cells(self):
-        """
+        r"""
         Maximum allowed number of grid cells,
-        :math:`n_{max}=\lfloor 2^{L_R}n_{min}\\rfloor`, where :math:`L_R` is the maximum
+        :math:`n_{max}=\lfloor 2^{L_R}n_{min}\rfloor`, where :math:`L_R` is the maximum
         refinement level and :math:`n_{min}` is the minimum allowed number of
         grid cells. Optionally, if the maximum number of cells is specified
         in ``config['grid']['maximum_cells']``, this value will take
