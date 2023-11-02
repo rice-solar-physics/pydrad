@@ -75,7 +75,7 @@ def run_shell_command(cmd, cwd, shell=True):
     if stdout:
         log.info(stdout)
     if stderr:
-        log.warn(stderr)
+        log.warning(stderr)
     hydrad_error_messages = ['segmentation fault', 'abort', 'error']
     if any([e in s.lower() for s in [stderr, stdout] for e in hydrad_error_messages]):
         raise HYDRADError(f'{stderr}\n{stdout}')
@@ -139,12 +139,12 @@ def get_clean_hydrad(output_path, base_path=None, from_github=False, overwrite=F
             try:
                 shutil.rmtree(os.path.join(tmpdir, d))
             except FileNotFoundError:
-                log.warn(f'Cannot remove {d}. Directory not found.')
+                log.warning(f'Cannot remove {d}. Directory not found.')
         for f in rm_files:
             try:
                 os.remove(os.path.join(tmpdir, f))
             except FileNotFoundError:
-                log.warn(f'Cannot remove {f}. File not found.')
+                log.warning(f'Cannot remove {f}. File not found.')
         shutil.copytree(tmpdir, output_path, dirs_exist_ok=overwrite)
 
 
