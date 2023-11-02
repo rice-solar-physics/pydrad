@@ -3,9 +3,10 @@ pydrad--a Python package for configuring, parsing and visualizing
 HYDRAD simulations.
 """
 import logging
+
 from astropy.logger import AstropyLogger
 
-from .version import version as __version__
+from pydrad.version import version as __version__
 
 
 def _init_log():

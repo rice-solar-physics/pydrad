@@ -94,13 +94,14 @@ sphinx_gallery_conf = {
 
 # -- Generate config parameter tables ------------------------------------------
 import io
+import pathlib
+
 import yaml
-from jinja2 import Environment
-from astropy.table import Table
 from astropy.io import ascii
+from astropy.table import Table
+from jinja2 import Environment
 
-
-with open('config_tables.yml', 'r') as f:
+with pathlib.Path('config_tables.yml').open() as f:
     config = yaml.safe_load(f)
 
 
@@ -124,7 +125,7 @@ page = """
     after each docs build.
 
 .. _configuration tables:
- 
+
 HYDRAD Configuration Parameters
 ================================
 
@@ -185,5 +186,5 @@ Grid
 {{ 'Grid' | render_rst_table }}
 """
 
-with open('config_tables.rst', 'w') as f:
+with pathlib.Path('config_tables.rst').open(mode='w') as f:
     f.write(env.from_string(page).render())

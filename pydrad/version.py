@@ -3,9 +3,9 @@
 # fall back on the generated _version module.
 try:
     try:
-        from ._dev.scm_version import version
+        from pydrad._dev.scm_version import version
     except ImportError:
-        from ._version import version
+        from pydrad._version import version
 except Exception:
     import warnings
 

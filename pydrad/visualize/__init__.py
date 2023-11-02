@@ -1,5 +1,5 @@
 """
 Methods for plotting and animating HYDRAD output
 """
-from .plot import *
-from .animate import *
+from pydrad.visualize.animate import *
+from pydrad.visualize.plot import *

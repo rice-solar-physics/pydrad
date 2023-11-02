@@ -1,12 +1,12 @@
 """
 Custom Jinja2 filters
 """
-import numpy as np
 import astropy.units as u
+import numpy as np
 import plasmapy.particles
 from jinja2 import Undefined
 
-from .util import MissingParameter
+from pydrad.configure.util import MissingParameter
 
 __all__ = [
     'units_filter',
@@ -58,7 +58,7 @@ def is_required(value):
 
 def sci_notation(value, sig_figs=8):
     """
-    Print value in scientific notation with number of signficant
+    Print value in scientific notation with number of significant
     digits specified by `sig_figs`. This filter is required as
     there are known issues when supplying some quantities
     (e.g. loop length) at arbitrarily high precision

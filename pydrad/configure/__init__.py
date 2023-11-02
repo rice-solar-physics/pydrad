@@ -1,4 +1,4 @@
 """
-Programatically configure HYDRAD simulations
+Programmatically configure HYDRAD simulations
 """
-from .configure import *
+from pydrad.configure.configure import *

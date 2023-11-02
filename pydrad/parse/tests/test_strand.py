@@ -1,12 +1,11 @@
 """
 Test parsing HYDRAD results
 """
+import astropy.units as u
 import h5py
 import pytest
-import astropy.units as u
 
 from pydrad.parse import Strand
-
 
 VAR_NAMES = [
     'coordinate',

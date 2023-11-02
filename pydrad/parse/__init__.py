@@ -1,4 +1,4 @@
 """
 Objects for easily parsing HYDRAD results
 """
-from .parse import *
+from pydrad.parse.parse import *

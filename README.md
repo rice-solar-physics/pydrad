@@ -20,7 +20,7 @@ If you'd like to run the tests and confirm that everything is working alright,
 ```shell
 $ pip install -r requirements/requirements-dev.txt
 $ pytest
-``` 
+```
 
 See the [docs](https://rice-solar-physics.github.io/pydrad/) for more info. Additionally, **you will need access to the HYDRAD source code.**
 
