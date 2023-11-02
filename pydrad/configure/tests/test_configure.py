@@ -15,4 +15,5 @@ import pytest
      pathlib.Path('Initial_Conditions') / 'profiles' / 'initial.amr.phy',
      pathlib.Path('Initial_Conditions') / 'profiles' / 'initial.amr.sol'])
 def test_generated_files_exist(hydrad, filename):
-    assert (hydrad / filename).is_file()
+    generated_file = pathlib.Path(hydrad / filename)
+    assert generated_file.is_file()
