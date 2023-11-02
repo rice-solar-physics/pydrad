@@ -144,7 +144,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         Configuration options. This will only work if the simuation was also
         configured by pydrad.
         """
-        return Configure.load_config(os.path.join(self.hydrad_root, 'pydrad_config.asdf'))
+        return Configure.load_config(self.hydrad_root / 'pydrad_config.asdf')
 
     @property
     @u.quantity_input
@@ -578,15 +578,11 @@ class InitialProfile(Profile):
 
     @property
     def _amr_filename(self):
-        return os.path.join(
-            self.hydrad_root,
-            'Initial_Conditions/profiles/initial.amr')
+        return self.hydrad_root / 'Initial_Conditions' / 'profiles' / 'initial.amr'
 
     @property
     def _phy_filename(self):
-        return os.path.join(
-            self.hydrad_root,
-            'Initial_Conditions/profiles/initial.amr.phy')
+        return self.hydrad_root / 'Initial_Conditions' / 'profiles' / 'initial.amr.phy'
 
 
 def add_property(name, attr, index, unit):
