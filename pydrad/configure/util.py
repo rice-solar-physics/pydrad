@@ -1,13 +1,14 @@
 """
 Utilities for HYDRAD configuration
 """
-from distutils.dir_util import copy_tree
 import glob
 import os
+import pathlib
 import platform
 import shutil
 import subprocess
 import tempfile
+from distutils.dir_util import copy_tree
 
 import astropy.units as u
 
@@ -87,7 +88,7 @@ def on_windows():
     return platform.system().lower() == 'windows'
 
 
-def get_clean_hydrad(output_path, base_path=None, from_github=False):
+def get_clean_hydrad(output_path, base_path=None, from_github=False, overwrite=False):
     """
     Create a clean copy of HYDRAD with only the files necessary to run the code.
     May be useful when making many copies.
@@ -101,6 +102,10 @@ def get_clean_hydrad(output_path, base_path=None, from_github=False):
     from_github : `bool`, optional
         If True, grab the latest copy of HYDRAD from GitHub. In this case,
         `base_path` is ignored. Note that this requires the GitPython package.
+    overwrite : `bool`, optional
+        If True, overwrite the directory at `output_path` if it exists. You may need
+        to set this to true of the path you are writing your clean copy to HYDRAD to
+        already exists, but is empty.
     """
     # NOTE: this is all done in a temp directory and then copied over
     # so that if something fails, all the files are cleaned up
@@ -140,7 +145,7 @@ def get_clean_hydrad(output_path, base_path=None, from_github=False):
                 os.remove(os.path.join(tmpdir, f))
             except FileNotFoundError:
                 log.warn(f'Cannot remove {f}. File not found.')
-        shutil.copytree(tmpdir, output_path)
+        shutil.copytree(tmpdir, output_path, dirs_exist_ok=overwrite)
 
 
 def get_equilibrium_heating_rate(root_dir):
@@ -152,7 +157,7 @@ def get_equilibrium_heating_rate(root_dir):
     root_dir : `str` or pathlike
         Path to HYDRAD directory
     """
-    filename = os.path.join(root_dir, 'Initial_Conditions/profiles/initial.amr.sol')
-    with open(filename, 'r') as f:
+    filename = pathlib.Path(root_dir) / 'Initial_Conditions' / 'profiles' / 'initial.amr.sol'
+    with filename.open() as f:
         equilibrium_heating_rate = float(f.readline()) * u.Unit('erg cm-3 s-1')
     return equilibrium_heating_rate
