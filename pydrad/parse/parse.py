@@ -516,7 +516,7 @@ Timestep #: {self._index}"""
 
     @u.quantity_input
     def column_emission_measure(self, bins: u.K = None, bounds: u.cm = None):
-        """
+        r"""
         Computes the column emission measure, where it is assumed that the loop
         is confined to a single pixel and oriented along the line of sight.
 
