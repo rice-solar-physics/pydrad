@@ -26,12 +26,12 @@ jobs:
       coverage: 'codecov'
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-  precommit:
+  codestyle:
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
     with:
       toxdeps: tox-pypi-filter
       envs: |
-        - linux: pre-commit
+        - linux: codestyle
   docs:
     needs: [test]
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
