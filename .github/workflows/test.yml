@@ -16,9 +16,7 @@ jobs:
     with:
       toxdeps: tox-pypi-filter
       envs: |
-        - macos: py39
         - macos: py311
-        - windows: py39
         - windows: py311
         - linux: py39
         - linux: py310
