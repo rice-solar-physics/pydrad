@@ -1,20 +1,22 @@
 """
 Configure HYDRAD simulations
 """
-import os
 import copy
 import datetime
-import tempfile
+import os
+import pathlib
 import shutil
+import tempfile
 from distutils.dir_util import copy_tree
 
-import numpy as np
-import astropy.units as u
-from jinja2 import Environment, PackageLoader, ChoiceLoader, DictLoader
 import asdf
+import astropy.units as u
+import numpy as np
+from jinja2 import ChoiceLoader, DictLoader, Environment, PackageLoader
 
-from . import filters
-from .util import run_shell_command, on_windows, get_equilibrium_heating_rate
+from pydrad.configure import filters
+from pydrad.configure.util import (get_equilibrium_heating_rate, on_windows,
+                                   run_shell_command)
 
 __all__ = ['Configure']
 
@@ -104,10 +106,7 @@ class Configure(object):
                 self.setup_initial_conditions(tmpdir, execute=execute)
             self.setup_hydrad(tmpdir)
             self.save_config(os.path.join(tmpdir, 'pydrad_config.asdf'))
-            if overwrite:
-                if os.path.exists(output_path):
-                    shutil.rmtree(output_path)
-            shutil.copytree(tmpdir, output_path)
+            shutil.copytree(tmpdir, output_path, dirs_exist_ok=overwrite)
 
     def setup_initial_conditions(self, root_dir, execute=True):
         """
@@ -116,12 +115,13 @@ class Configure(object):
 
         Parameters
         ----------
-        root_dir : `str`
+        root_dir : path-like
             Path to new HYDRAD copy
         execute : `bool`
             If True (default), compute initial conditions. Otherwise, they
             are only compiled. This is useful for debugging.
         """
+        root_dir = pathlib.Path(root_dir)
         files = [
             ('Initial_Conditions/source/config.h',
              self.initial_conditions_header),
@@ -146,23 +146,21 @@ class Configure(object):
                 and 'poly_fit_magnetic_field' in self.config['general']):
             files += [('poly_fit.magnetic_field', self.poly_fit_magnetic_field)]
         for filename, filestring in files:
-            with open(os.path.join(root_dir, filename), 'w') as f:
+            with (root_dir / filename).open(mode='w') as f:
                 f.write(filestring)
         # NOTE: make sure we have needed permissions to run compile script
         # Only do this on Unix-based systems
         if not on_windows():
             run_shell_command(
                 ['chmod', 'u+x', 'build_initial_conditions.bat'],
-                os.path.join(root_dir, 'Initial_Conditions/build_scripts'),
+                root_dir / 'Initial_Conditions' / 'build_scripts',
                 shell=False
             )
         run_shell_command(
             ['./build_initial_conditions.bat'],
-            os.path.join(root_dir, 'Initial_Conditions/build_scripts')
+            root_dir / 'Initial_Conditions' / 'build_scripts',
         )
-        if not os.path.exists(os.path.join(root_dir,
-                                           'Initial_Conditions/profiles')):
-            os.mkdir(os.path.join(root_dir, 'Initial_Conditions/profiles'))
+        (root_dir / 'Initial_Conditions' / 'profiles').mkdir(parents=True, exist_ok=True)
         if execute:
             run_shell_command(
                 ['./Initial_Conditions.exe'],
@@ -180,6 +178,7 @@ class Configure(object):
         root_dir : `str`
             Path to new HYDRAD copy
         """
+        root_dir = pathlib.Path(root_dir)
         files = [
             ('Radiation_Model/source/config.h',
              self.radiation_header),
@@ -206,7 +205,7 @@ class Configure(object):
             files += [('Heating_Model/config/beam_heating_model.cfg',
                        self.beam_heating_cfg)]
         for filename, filestring in files:
-            with open(os.path.join(root_dir, filename), 'w') as f:
+            with (root_dir / filename).open(mode='w') as f:
                 f.write(filestring)
         # NOTE: using OpenMP requires an alternate compile script
         if self.config['general'].get('use_openmp', False):
@@ -218,15 +217,14 @@ class Configure(object):
         if not on_windows():
             run_shell_command(
                 ['chmod', 'u+x', build_script],
-                os.path.join(root_dir, 'HYDRAD/build_scripts'),
+                root_dir / 'HYDRAD' / 'build_scripts',
                 shell=False,
             )
         run_shell_command(
             [f'./{build_script}'],
-            os.path.join(root_dir, 'HYDRAD/build_scripts'),
+            root_dir / 'HYDRAD' / 'build_scripts',
         )
-        if not os.path.exists(os.path.join(root_dir, 'Results')):
-            os.mkdir(os.path.join(root_dir, 'Results'))
+        (root_dir / 'Results').mkdir(parents=True, exist_ok=True)
 
     @property
     def date(self):
@@ -250,7 +248,7 @@ class Configure(object):
         """
         Return the unrendered template.
         """
-        with open(self.env.get_template(name).filename, 'r') as f:
+        with pathlib.Path(self.env.get_template(name).filename).open() as f:
             return f.read()
 
     @property
@@ -426,9 +424,9 @@ class Configure(object):
 
     @property
     def minimum_cells(self):
-        """
+        r"""
         Minimum allowed number of grid cells,
-        :math:`n_{min}=\lceil L/\Delta s_{max}\\rceil`, where :math:`L` is the loop
+        :math:`n_{min}=\lceil L/\Delta s_{max}\rceil`, where :math:`L` is the loop
         length and :math:`\Delta s_{max}` is the maximum allowed grid cell width.
         Optionally, if the minimum number of cells is specified
         in ``config['grid']['minimum_cells']``, this value will take
@@ -436,11 +434,10 @@ class Configure(object):
         """
         if 'minimum_cells' in self.config['grid']:
             return int(self.config['grid']['minimum_cells'])
-        n_min = self.config['general']['loop_length'] / self.config['grid']['maximum_cell_width']
+        L = self.config['general']['loop_length']
+        n_min = L / self.config['grid']['maximum_cell_width']
         if n_min.decompose().unit != u.dimensionless_unscaled:
-            raise u.UnitConversionError(
-                f'''Maximum cell width must be able to be converted to 
-                {self.config['general']['loop_length'].unit}''')
+            raise u.UnitConversionError(f'''Maximum cell width must be able to be converted to {L.unit}''')
         return int(np.round(n_min.decompose()))
 
     @property
