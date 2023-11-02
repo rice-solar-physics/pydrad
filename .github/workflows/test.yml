@@ -1,41 +1,64 @@
-name: Test
+name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - 'main'
+      - '*.*'
+    tags:
+      - 'v*'
   pull_request:
-    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.9', '3.10', '3.11']
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install -e .[test,docs]
-        python setup.py install
-    - name: Clone HYDRAD
-      uses: actions/checkout@v2
-      with:
-        repository: rice-solar-physics/HYDRAD
-        path: HYDRAD
-    - name: Test
-      run: |
-        pytest --hydrad-dir=$GITHUB_WORKSPACE/HYDRAD --cov=pydrad --cov-report=xml
-    - name: Report coverage
-      uses: codecov/codecov-action@v1
-      with:
-        fail_ci_if_error: true
-        verbose: true
-        file: ./coverage.xml
+  test:
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    with:
+      toxdeps: "'tox<4' tox-pypi-filter"
+      envs: |
+        - macos: py39
+        - macos: py311
+        - windows: py39
+        - windows: py311
+        - linux: py39
+        - linux: py310
+        - linux: py311
+      coverage: 'codecov'
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  precommit:
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    with:
+      toxdeps: tox-pypi-filter
+      envs: |
+        - linux: pre-commit
+  docs:
+    needs: [test]
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
+    with:
+      toxdeps: tox-pypi-filter
+      envs: |
+        - linux: build_docs
+          python-version: '3.11'
+  publish:
+    # Build wheels when pushing to any branch except main
+    # publish.yml will only publish if tagged ^v.*
+    if: |
+      (
+        github.event_name != 'pull_request' && (
+          github.ref_name != 'main' ||
+          github.event_name == 'workflow_dispatch'
+        )
+      ) || (
+        github.event_name == 'pull_request' &&
+        contains(github.event.pull_request.labels.*.name, 'Run publish')
+      )
+    needs: [test]
+    uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish_pure_python.yml@main
+    with:
+      test_extras: 'dev'
+      test_command: 'pytest -p no:warnings --doctest-rst --pyargs pydrad'
+      submodules: false
+      python-version: '3.11'
+    secrets:
+      pypi_token: ${{ secrets.PYPI_TOKEN }}

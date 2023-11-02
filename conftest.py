@@ -1,10 +1,11 @@
 """
 Test rendering of templates for configuration and header files
 """
-import pytest
 import astropy.units as u
+import pytest
 
 import pydrad.configure
+from pydrad.configure.util import get_clean_hydrad
 
 
 def pytest_addoption(parser):
@@ -12,8 +13,15 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture
-def hydrad_clean(request):
-    return request.config.getoption('--hydrad-dir')
+def hydrad_clean(tmp_path, request):
+    # Returns a local path to a copy of the HYDRAD code
+    # If a path is not passed as a command line argument to pytest,
+    # a new copy is cloned from GitHub
+    hydrad_dir = request.config.getoption('--hydrad-dir')
+    if hydrad_dir is None:
+        hydrad_dir = tmp_path / 'hydrad_tmp_clean'
+        get_clean_hydrad(hydrad_dir, base_path=None, from_github=True)
+    return hydrad_dir
 
 
 @pytest.fixture
@@ -112,13 +120,12 @@ def configuration(configuration_dict):
 
 @pytest.fixture
 def hydrad(tmp_path, configuration, hydrad_clean):
-    if hydrad_clean is None:
-        pytest.skip('Path to HYDRAD code not specified. Skipping those tests that require HYDRAD.')
-    else:
-        hydrad_tmp = tmp_path / 'hydrad_tmp'
-        configuration.setup_simulation(hydrad_tmp, hydrad_clean)
-        pydrad.configure.util.run_shell_command(
-            ['./HYDRAD.exe'],
-            hydrad_tmp,
-        )
-        return hydrad_tmp
+    # Run a HYDRAD simulation for the given configuration and return the path to the directory
+    # containing the results.
+    hydrad_tmp = tmp_path / 'hydrad_tmp'
+    configuration.setup_simulation(hydrad_tmp, hydrad_clean)
+    pydrad.configure.util.run_shell_command(
+        ['./HYDRAD.exe'],
+        hydrad_tmp,
+    )
+    return hydrad_tmp
