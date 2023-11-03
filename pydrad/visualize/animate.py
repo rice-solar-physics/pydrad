@@ -1,10 +1,10 @@
 """
 Animate evolution of hydrodynamic quantities
 """
-from matplotlib.animation import FuncAnimation
 import astropy.units as u
+from matplotlib.animation import FuncAnimation
 
-from .plot import _plot_profile, _setup_figure
+from pydrad.visualize.plot import _plot_profile, _setup_figure
 
 __all__ = ['animate_strand']
 
@@ -51,7 +51,7 @@ def animate_strand(strand, **kwargs):
         fig.suptitle(r'$t={:.0f}$ {}'.format(
             strand.time[i].value, strand.time[i].unit), y=0.905)
         return l1a, l1b, l2a, l2b, l3a, l3b, l4
-    
+
     return FuncAnimation(
         fig,
         update_plot,

@@ -3,10 +3,10 @@ Plotting methods to easily visualize HYDRAD results
 """
 import copy
 
-import numpy as np
 import astropy.units as u
-import matplotlib.pyplot as plt
 import matplotlib.colors
+import matplotlib.pyplot as plt
+import numpy as np
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 
 __all__ = ['plot_strand',

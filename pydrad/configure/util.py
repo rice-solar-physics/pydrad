@@ -1,13 +1,14 @@
 """
 Utilities for HYDRAD configuration
 """
-from distutils.dir_util import copy_tree
-import glob
 import os
+import pathlib
 import platform
 import shutil
+import stat
 import subprocess
 import tempfile
+from distutils.dir_util import copy_tree
 
 import astropy.units as u
 
@@ -16,7 +17,6 @@ from pydrad import log
 __all__ = ['MissingParameter',
            'HYDRADError',
            'run_shell_command',
-           'on_windows',
            'get_clean_hydrad',
            'get_equilibrium_heating_rate']
 
@@ -60,7 +60,7 @@ def run_shell_command(cmd, cwd, shell=True):
         initial conditions code.
     """
     # Remove "./" from commands if the user is working on Windows
-    if on_windows() and cmd[0][0:2] == './':
+    if platform.system().lower() == 'windows' and cmd[0][0:2] == './':
         cmd[0] = cmd[0][2:]
     cmd = subprocess.run(
         cmd,
@@ -74,20 +74,13 @@ def run_shell_command(cmd, cwd, shell=True):
     if stdout:
         log.info(stdout)
     if stderr:
-        log.warn(stderr)
+        log.warning(stderr)
     hydrad_error_messages = ['segmentation fault', 'abort', 'error']
     if any([e in s.lower() for s in [stderr, stdout] for e in hydrad_error_messages]):
         raise HYDRADError(f'{stderr}\n{stdout}')
 
 
-def on_windows():
-    """
-    Determine whether the user's operating system is Windows
-    """
-    return platform.system().lower() == 'windows'
-
-
-def get_clean_hydrad(output_path, base_path=None, from_github=False):
+def get_clean_hydrad(output_path, base_path=None, from_github=False, overwrite=False):
     """
     Create a clean copy of HYDRAD with only the files necessary to run the code.
     May be useful when making many copies.
@@ -101,10 +94,24 @@ def get_clean_hydrad(output_path, base_path=None, from_github=False):
     from_github : `bool`, optional
         If True, grab the latest copy of HYDRAD from GitHub. In this case,
         `base_path` is ignored. Note that this requires the GitPython package.
+    overwrite : `bool`, optional
+        If True, overwrite the directory at `output_path` if it exists. You may need
+        to set this to true of the path you are writing your clean copy to HYDRAD to
+        already exists, but is empty.
     """
+    # NOTE: This function is needed for handling permissions errors that occur on Windows
+    # when trying to remove files. See this GH issue comment for more information:
+    # https://github.com/python/cpython/issues/87823#issuecomment-1093908280
+    def _handle_readonly(func, path, exc_info):
+        if func not in (os.unlink, os.rmdir) or exc_info[1].winerror != 5:
+            raise exc_info[1]
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+
     # NOTE: this is all done in a temp directory and then copied over
     # so that if something fails, all the files are cleaned up
-    with tempfile.TemporaryDirectory() as tmpdir:
+    with tempfile.TemporaryDirectory() as _tmpdir:
+        tmpdir = pathlib.Path(_tmpdir)
         if from_github:
             import git
             git.Repo.clone_from('https://github.com/rice-solar-physics/HYDRAD',
@@ -126,21 +133,16 @@ def get_clean_hydrad(output_path, base_path=None, from_github=False):
             '.gitignore',
             'hydrad-logo.png',
         ]
-        # The name of the user guide PDF may change
-        user_guide = list(map(os.path.basename, glob.glob(
-            os.path.join(tmpdir, 'HYDRAD_User_Guide*.pdf'))))
-        rm_files += user_guide
+        # NOTE: Use glob because name of user guide PDF may change
+        rm_files += [f.name for f in tmpdir.glob('HYDRAD_User_Guide*.pdf')]
         for d in rm_dirs:
             try:
-                shutil.rmtree(os.path.join(tmpdir, d))
+                shutil.rmtree(pathlib.Path(tmpdir) / d, onerror=_handle_readonly)
             except FileNotFoundError:
-                log.warn(f'Cannot remove {d}. Directory not found.')
+                log.warning(f'Cannot remove {d}. Directory not found.')
         for f in rm_files:
-            try:
-                os.remove(os.path.join(tmpdir, f))
-            except FileNotFoundError:
-                log.warn(f'Cannot remove {f}. File not found.')
-        shutil.copytree(tmpdir, output_path)
+            (tmpdir / f).unlink(missing_ok=True)
+        shutil.copytree(tmpdir, output_path, dirs_exist_ok=overwrite)
 
 
 def get_equilibrium_heating_rate(root_dir):
@@ -152,7 +154,7 @@ def get_equilibrium_heating_rate(root_dir):
     root_dir : `str` or pathlike
         Path to HYDRAD directory
     """
-    filename = os.path.join(root_dir, 'Initial_Conditions/profiles/initial.amr.sol')
-    with open(filename, 'r') as f:
+    filename = pathlib.Path(root_dir) / 'Initial_Conditions' / 'profiles' / 'initial.amr.sol'
+    with filename.open() as f:
         equilibrium_heating_rate = float(f.readline()) * u.Unit('erg cm-3 s-1')
     return equilibrium_heating_rate

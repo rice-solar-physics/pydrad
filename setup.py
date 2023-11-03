@@ -1,20 +1,30 @@
-from distutils.core import setup
+#!/usr/bin/env python
+import os
+from itertools import chain
 
+from setuptools import setup
+from setuptools.config import read_configuration
+
+################################################################################
+# Programmatically generate some extras combos.
+################################################################################
+extras = read_configuration("setup.cfg")['options']['extras_require']
+
+# Dev is everything
+extras['dev'] = list(chain(*extras.values()))
+
+# All is everything but tests and docs
+exclude_keys = ("tests", "docs", "dev")
+ex_extras = dict(filter(lambda i: i[0] not in exclude_keys, extras.items()))
+# Concatenate all the values together for 'all'
+extras['all'] = list(chain.from_iterable(ex_extras.values()))
+
+################################################################################
+# Version configuration and setup call
+################################################################################
 setup(
-    name='pydrad',
-    license='MIT',
-    version='0.1',
-    author='Will Barnes',
-    url='https://github.com/rice-solar-physics/pydrad',
-    package_data={'pydrad': ['configure/templates/*',
-                             'configure/data/defaults.asdf']},
-    packages=[
-        'pydrad',
-        'pydrad.configure',
-        'pydrad.configure.data',
-        'pydrad.parse',
-        'pydrad.visualize',
-    ],
-    author_email='will.t.barnes@gmail.com',
-    description='Tools for configuring and parsing HYDRAD simulations'
+    extras_require=extras,
+    use_scm_version={
+        'write_to': os.path.join('pydrad', '_version.py'),
+    },
 )

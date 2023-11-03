@@ -2,9 +2,9 @@
 Data related to configuration
 """
 import copy
-import pkg_resources
 
 import asdf
+import pkg_resources
 
 
 def get_defaults():

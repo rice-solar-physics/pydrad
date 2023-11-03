@@ -14,8 +14,8 @@ import astropy.units as u
 from astropy.visualization import ImageNormalize, LogStretch
 
 from pydrad.configure import Configure
-from pydrad.configure.util import get_clean_hydrad, run_shell_command
 from pydrad.configure.data import get_defaults
+from pydrad.configure.util import get_clean_hydrad, run_shell_command
 from pydrad.parse import Strand
 
 tmpdir = tempfile.mkdtemp()  # Change to wherever you want to save your clean HYDRAD copy
@@ -29,7 +29,7 @@ tmpdir = tempfile.mkdtemp()  # Change to wherever you want to save your clean HY
 #
 # -  ``phy`` – main physics results file containing temperature, density,
 #    etc.
-# -  ``amr`` – data related to the adapative mesh
+# -  ``amr`` – data related to the adaptive mesh
 # -  ``trm`` – equation terms at each grid cell
 #
 # Parsing all of these files can be difficult. `pydrad` provides a

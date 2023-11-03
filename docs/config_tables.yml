@@ -160,7 +160,7 @@ Initial Conditions:
   - 'cm'
   - ''
   - 'erg cm\ :math:`^{-3}` s\ :math:`^{-1}`'
-  - 'erg cm\ :math:`^{-3}` s\ :math:`^{-1}`' 
+  - 'erg cm\ :math:`^{-3}` s\ :math:`^{-1}`'
   - ''
   - ''
   - ''
@@ -251,7 +251,7 @@ Heating_bg:
   - If true, use the heating parameters from the initial conditions and the computed equilibrium heating rate; if true, all other background heating parameters are ignored.
   - Location of the energy deposition
   - Spatial scale of the energy deposition
-  - Peak heating rate of the Gaussian heating profile              
+  - Peak heating rate of the Gaussian heating profile
   Type:
   - '``bool``'
   - '``float``'
@@ -281,7 +281,7 @@ Heating_events:
   - 'erg cm\ :math:`^{-3}` s\ :math:`^{-1}`'
 Grid:
   Name:
-  - adapt     
+  - adapt
   - adapt_every_n_time_steps
   - maximum_cell_width
   - maximum_refinement_level
@@ -311,7 +311,7 @@ Grid:
   - Minimum allowed difference (between 0 and 1) between adjacent cells
   - Maximum allowed difference (between 0 and 1) between adjacent cells
   - ''
-  - ''            
+  - ''
   Type:
   - '``bool``'
   - '``int``'
@@ -346,15 +346,15 @@ Grid:
   - ''
 Solver:
   Name:
-  - epsilon   
+  - epsilon
   - safety_radiation
   - safety_conduction
   - safety_advection
   - safety_atomic
   - safety_viscosity
   - cutoff_ion_fraction
-  - epsilon_d 
-  - epsilon_r           
+  - epsilon_d
+  - epsilon_r
   - timestep_increase_limit
   - relative_viscous_timescale
   - minimum_radiation_temperature

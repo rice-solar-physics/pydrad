@@ -1,24 +1,21 @@
 """
 Interface for easily parsing HYDRAD results
 """
-import os
 import glob
+import os
+import pathlib
 
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.interpolate import splev, splrep
 import astropy.units as u
-import plasmapy.particles
 import h5py
+import matplotlib.pyplot as plt
+import numpy as np
+import plasmapy.particles
+from scipy.interpolate import splev, splrep
 
 from pydrad import log
 from pydrad.configure import Configure
-from pydrad.visualize import (plot_strand,
-                              plot_profile,
-                              animate_strand,
-                              plot_time_distance,
-                              plot_histogram,
-                              plot_time_mesh)
+from pydrad.visualize import (animate_strand, plot_histogram, plot_profile,
+                              plot_strand, plot_time_distance, plot_time_mesh)
 
 __all__ = ['Strand', 'Profile', 'InitialProfile']
 
@@ -41,25 +38,26 @@ def get_master_time(hydrad_root, read_from_cfg=False):
     -------
     : `~astropy.units.Quantity`
     """
-    amr_files = sorted(glob.glob(os.path.join(hydrad_root, 'Results/profile*.amr')))
+    hydrad_root = pathlib.Path(hydrad_root)
+    amr_files = sorted((hydrad_root / 'Results').glob('profile*.amr'))
     if read_from_cfg:
         log.debug('Creating master time array from config files')
         # NOTE: Sometimes this file is capitalized and some OSes are sensitive to this
-        cfg_file = os.path.join(hydrad_root, 'HYDRAD/config/hydrad.cfg')
-        if not os.path.isfile(cfg_file):
+        cfg_file = hydrad_root / 'HYDRAD' / 'config' / 'hydrad.cfg'
+        if not cfg_file.is_file():
             log.debug('hydrad.cfg not found; trying HYDRAD.cfg')
-            cfg_file = os.path.join(hydrad_root, 'HYDRAD/config/HYDRAD.cfg')
-        with open(cfg_file, 'r') as f:
+            cfg_file = hydrad_root / 'HYDRAD' / 'config' / 'HYDRAD.cfg'
+        with cfg_file.open() as f:
             lines = f.readlines()
         cadence = float(lines[3])
-        with open(amr_files[0]) as f:
+        with amr_files[0].open() as f:
             start_time = float(f.readline())
         time = start_time + np.arange(len(amr_files)) * cadence
     else:
         log.debug('Reading master time array from all AMR files')
         time = np.zeros((len(amr_files),))
         for i, af in enumerate(amr_files):
-            with open(af, 'r') as f:
+            with af.open() as f:
                 time[i] = f.readline()
     return sorted(time) * u.s
 
@@ -70,7 +68,7 @@ class Strand(object):
 
     Parameters
     ----------
-    hydrad_root : `str` or path-like
+    hydrad_root : path-like
         Path to HYDRAD simulation directory
     read_from_cfg : `bool`, optional
         If True, create the time array from the cadence as specified in
@@ -81,7 +79,7 @@ class Strand(object):
     """
 
     def __init__(self, hydrad_root, **kwargs):
-        self.hydrad_root = hydrad_root
+        self.hydrad_root = pathlib.Path(hydrad_root)
         # This is different than time depending on the slicing. We allow this
         # to be passed as a kwarg to avoid repeatedly reading multiple files
         # when slicing.
@@ -146,7 +144,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         Configuration options. This will only work if the simuation was also
         configured by pydrad.
         """
-        return Configure.load_config(os.path.join(self.hydrad_root, 'pydrad_config.asdf'))
+        return Configure.load_config(self.hydrad_root / 'pydrad_config.asdf')
 
     @property
     @u.quantity_input
@@ -162,7 +160,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         """
         Footpoint-to-footpoint loop length
         """
-        with open(os.path.join(self.hydrad_root, 'Results/profile0.amr'), 'r') as f:
+        with (self.hydrad_root / 'Results' / 'profile0.amr').open() as f:
             tmp = f.readlines()
             loop_length = float(tmp[2])
         return loop_length * u.cm
@@ -234,7 +232,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         grid : `~astropy.units.Quantity`
             Spatial grid to interpolate onto
         order : `int`
-            Order of the spline interpolation. Defualt is 1.
+            Order of the spline interpolation. Default is 1.
         """
         q_uniform = np.zeros(self.time.shape+grid.shape)
         grid_cm = grid.to(u.cm).value
@@ -289,7 +287,7 @@ class Profile(object):
 
     @u.quantity_input
     def __init__(self, hydrad_root, time: u.s, **kwargs):
-        self.hydrad_root = hydrad_root
+        self.hydrad_root = pathlib.Path(hydrad_root)
         if time.shape:
             raise ValueError('time must be a scalar')
         self.time = time
@@ -309,28 +307,23 @@ class Profile(object):
 
     @property
     def _amr_filename(self):
-        return os.path.join(self.hydrad_root,
-                            f'Results/profile{self._index:d}.amr')
+        return self.hydrad_root / 'Results' / f'profile{self._index:d}.amr'
 
     @property
     def _phy_filename(self):
-        return os.path.join(self.hydrad_root,
-                            f'Results/profile{self._index:d}.phy')
+        return self.hydrad_root / 'Results' / f'profile{self._index:d}.phy'
 
     @property
     def _trm_filename(self):
-        return os.path.join(self.hydrad_root,
-                            f'Results/profile{self._index:d}.trm')
+        return self.hydrad_root / 'Results' / f'profile{self._index:d}.trm'
 
     @property
     def _ine_filename(self):
-        return os.path.join(self.hydrad_root,
-                            f'Results/profile{self._index:d}.ine')
+        return self.hydrad_root / 'Results' / f'profile{self._index:d}.ine'
 
     @property
     def _hstate_filename(self):
-        return os.path.join(self.hydrad_root,
-                            f'Results/profile{self._index:d}.Hstate')
+        return self.hydrad_root / 'Results' / f'profile{self._index:d}.Hstate'
 
     @property
     def _index(self):
@@ -353,7 +346,7 @@ Timestep #: {self._index}"""
         Parse the adaptive mesh grid file
         """
         # TODO: Read other quantities from .amr file
-        with open(self._amr_filename) as f:
+        with self._amr_filename.open() as f:
             lines = f.readlines()
             self._grid_centers = np.zeros((int(lines[3]),))
             self._grid_widths = np.zeros((int(lines[3]),))
@@ -367,7 +360,7 @@ Timestep #: {self._index}"""
         Parse the equation terms file
         """
         try:
-            with open(self._trm_filename, 'r') as f:
+            with self._trm_filename.open() as f:
                 lines = f.readlines()
         except FileNotFoundError:
             log.debug(f'{self._trm_filename} not found')
@@ -414,7 +407,7 @@ Timestep #: {self._index}"""
         # a lot of comments because the format of this file makes
         # the parsing code quite opaque
         try:
-            with open(self._ine_filename, 'r') as f:
+            with self._ine_filename.open() as f:
                 lines = f.readlines()
         except FileNotFoundError:
             log.debug(f'{self._ine_filename} not found')
@@ -523,7 +516,7 @@ Timestep #: {self._index}"""
 
     @u.quantity_input
     def column_emission_measure(self, bins: u.K = None, bounds: u.cm = None):
-        """
+        r"""
         Computes the column emission measure, where it is assumed that the loop
         is confined to a single pixel and oriented along the line of sight.
 
@@ -585,15 +578,11 @@ class InitialProfile(Profile):
 
     @property
     def _amr_filename(self):
-        return os.path.join(
-            self.hydrad_root,
-            'Initial_Conditions/profiles/initial.amr')
+        return self.hydrad_root / 'Initial_Conditions' / 'profiles' / 'initial.amr'
 
     @property
     def _phy_filename(self):
-        return os.path.join(
-            self.hydrad_root,
-            'Initial_Conditions/profiles/initial.amr.phy')
+        return self.hydrad_root / 'Initial_Conditions' / 'profiles' / 'initial.amr.phy'
 
 
 def add_property(name, attr, index, unit):

@@ -69,14 +69,14 @@ intersphinx_mapping = {
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
-import sphinx_rtd_theme
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme = 'sphinx_book_theme'
 
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# -- Sphinx Book Theme Options -----------------------------------------------------
+html_theme_options = {
+    "repository_url": 'https://github.com/rice-solar-physics/pydrad',
+    "use_repository_button": True,
+    "use_issues_button": True,
+}
 
 # -- Sphinx-gallery ----------------------------------------------------------
 extensions += [
@@ -94,13 +94,14 @@ sphinx_gallery_conf = {
 
 # -- Generate config parameter tables ------------------------------------------
 import io
+import pathlib
+
 import yaml
-from jinja2 import Environment
-from astropy.table import Table
 from astropy.io import ascii
+from astropy.table import Table
+from jinja2 import Environment
 
-
-with open('config_tables.yml', 'r') as f:
+with pathlib.Path('config_tables.yml').open() as f:
     config = yaml.safe_load(f)
 
 
@@ -124,7 +125,7 @@ page = """
     after each docs build.
 
 .. _configuration tables:
- 
+
 HYDRAD Configuration Parameters
 ================================
 
@@ -185,5 +186,5 @@ Grid
 {{ 'Grid' | render_rst_table }}
 """
 
-with open('config_tables.rst', 'w') as f:
+with pathlib.Path('config_tables.rst').open(mode='w') as f:
     f.write(env.from_string(page).render())

@@ -1,23 +1,30 @@
 """
 Test rendering of templates for configuration and header files
 """
-import pytest
 import astropy.units as u
+import pytest
 
 import pydrad.configure
+from pydrad.configure.util import get_clean_hydrad
 
 
 def pytest_addoption(parser):
     parser.addoption('--hydrad-dir', action='store', default=None)
 
 
-@pytest.fixture
-def hydrad_clean(request):
-    return request.config.getoption('--hydrad-dir')
+@pytest.fixture(scope='session')
+def hydrad_clean(tmpdir_factory, request):
+    # Returns a local path to a copy of the HYDRAD code
+    # If a path is not passed as a command line argument to pytest,
+    # a new copy is cloned from GitHub
+    hydrad_dir = request.config.getoption('--hydrad-dir')
+    if hydrad_dir is None:
+        hydrad_dir = tmpdir_factory.mktemp('hydrad_tmp_clean')
+        get_clean_hydrad(hydrad_dir, base_path=None, from_github=True, overwrite=True)
+    return hydrad_dir
 
 
-@pytest.fixture
-def configuration_dict():
+def get_configuration_dict():
     return {
         'general': {
             'footpoint_height': 5.e+08*u.cm,
@@ -105,20 +112,22 @@ def configuration_dict():
     }
 
 
-@pytest.fixture
-def configuration(configuration_dict):
-    return pydrad.configure.Configure(configuration_dict, freeze_date=True)
+@pytest.fixture(scope='function')
+def configuration():
+    return pydrad.configure.Configure(get_configuration_dict(), freeze_date=True)
 
 
-@pytest.fixture
-def hydrad(tmp_path, configuration, hydrad_clean):
-    if hydrad_clean is None:
-        pytest.skip('Path to HYDRAD code not specified. Skipping those tests that require HYDRAD.')
-    else:
-        hydrad_tmp = tmp_path / 'hydrad_tmp'
-        configuration.setup_simulation(hydrad_tmp, hydrad_clean)
-        pydrad.configure.util.run_shell_command(
-            ['./HYDRAD.exe'],
-            hydrad_tmp,
-        )
-        return hydrad_tmp
+@pytest.fixture(scope='session')
+def hydrad(tmpdir_factory, hydrad_clean):
+    # NOTE: purposefully reconstructing the configuration here, rather than using the fixture
+    # above in order to keep configuration at the function scope level
+    configuration = pydrad.configure.Configure(get_configuration_dict(), freeze_date=True)
+    # Run a HYDRAD simulation for the given configuration and return the path to the directory
+    # containing the results.
+    hydrad_tmp = tmpdir_factory.mktemp('hydrad_tmp')
+    configuration.setup_simulation(hydrad_tmp, hydrad_clean, overwrite=True)
+    pydrad.configure.util.run_shell_command(
+        ['./HYDRAD.exe'],
+        hydrad_tmp,
+    )
+    return hydrad_tmp

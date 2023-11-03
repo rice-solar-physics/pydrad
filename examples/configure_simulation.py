@@ -10,16 +10,17 @@ import os
 import tempfile
 
 import astropy.units as u
+
 from pydrad.configure import Configure
-from pydrad.configure.util import get_clean_hydrad
 from pydrad.configure.data import get_defaults
+from pydrad.configure.util import get_clean_hydrad
 
 #################################################################
 # HYDRAD requires setting many different configuration files, making it
 # difficult and tedious to configure a simulation by hand. Fortunately,
 # the ``pydrad`` package makes it easy to quickly configure a new
 # simulation using Python.
-# 
+#
 # Rather than editing each configuration file individually, an entire
 # simulation can be configured using a single Python `dict`.
 # Below is an example of a dictionary for configuring a simulation of a 80
@@ -157,7 +158,7 @@ c.setup_simulation(os.path.join(tmpdir, 'test-run'), hydrad_clean)
 # file <https://asdf.readthedocs.io>`__, a human-readable, structured
 # plain text file in the YAML format. These ASDF files are structured just
 # like the config directory and can be easily read and written.
-# 
+#
 # To save the configuration to disk and then load it back into a `dict`,
 asdf_config = os.path.join(tmpdir, 'test_config.asdf')
 c.save_config(asdf_config)
