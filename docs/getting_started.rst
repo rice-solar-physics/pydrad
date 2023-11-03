@@ -11,17 +11,11 @@ First, clone the repository,
    $ git clone https://github.com/rice-solar-physics/pydrad.git
    $ cd pydrad
 
-To install all of the needed dependencies,
+To install pydrad and all of the needed dependencies,
 
 .. code:: shell
 
-   $ pip install -r requirements/requirements/txt
-
-Finally, install the pydrad package,
-
-.. code:: shell
-
-   $ python setup.py install
+   $ pip install .
 
 Testing
 -------
@@ -31,21 +25,22 @@ development dependencies,
 
 .. code:: shell
 
-   $ pip install -r requirements/requirements-dev.txt
+   $ pip install -e .[tests,docs]
 
 and run the tests,
 
 .. code:: shell
 
-   $ pytest
+   $ pytest pydrad
 
-If you’d like to also run the tests that require a local copy of HYDRAD,
+If you would like to run the tests using a local copy of HYDRAD,
 
 .. code:: shell
 
    $ pytest --hydrad-dir=/path/to/hydrad
 
-Note that this step is not necessary to run the code.
+If you do not specify a path to a particular version of HYDRAD, it will be automatically downloaded from GitHub in order to run the tests.
+Note that running the tests is not necessary if you just want to use pydrad.
 
 Additional Resources
 --------------------

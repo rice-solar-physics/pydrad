@@ -12,17 +12,16 @@ To install the package and the needed dependencies,
 ```shell
 $ git clone https://github.com/rice-solar-physics/pydrad.git
 $ cd pydrad
-$ pip install -r requirements/requirements.txt
-$ python setup.py install
+$ pip install .
 ```
 
 If you'd like to run the tests and confirm that everything is working alright,
 ```shell
-$ pip install -r requirements/requirements-dev.txt
-$ pytest
+$ pip install -e .[tests]
+$ pytest pydrad
 ```
 
-See the [docs](https://rice-solar-physics.github.io/pydrad/) for more info. Additionally, **you will need access to the HYDRAD source code.**
+See the [docs](https://pydrad.readthedocs.io/en/latest) for more info.
 
 ## Help
 Create an issue if you run into any problems. Submit a PR if you would like to add any functionality.
