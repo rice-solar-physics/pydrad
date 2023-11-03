@@ -6,6 +6,7 @@ import datetime
 import os
 import pathlib
 import shutil
+import stat
 import tempfile
 from distutils.dir_util import copy_tree
 
@@ -15,7 +16,7 @@ import numpy as np
 from jinja2 import ChoiceLoader, DictLoader, Environment, PackageLoader
 
 from pydrad.configure import filters
-from pydrad.configure.util import (get_equilibrium_heating_rate, on_windows,
+from pydrad.configure.util import (get_equilibrium_heating_rate,
                                    run_shell_command)
 
 __all__ = ['Configure']
@@ -149,23 +150,17 @@ class Configure(object):
             with (root_dir / filename).open(mode='w') as f:
                 f.write(filestring)
         # NOTE: make sure we have needed permissions to run compile script
-        # Only do this on Unix-based systems
-        if not on_windows():
-            run_shell_command(
-                ['chmod', 'u+x', 'build_initial_conditions.bat'],
-                root_dir / 'Initial_Conditions' / 'build_scripts',
-                shell=False
-            )
+        os.chmod(
+            root_dir / 'Initial_Conditions' / 'build_scripts' / 'build_initial_conditions.bat',
+            mode=stat.S_IRWXU,
+        )
         run_shell_command(
             ['./build_initial_conditions.bat'],
             root_dir / 'Initial_Conditions' / 'build_scripts',
         )
         (root_dir / 'Initial_Conditions' / 'profiles').mkdir(parents=True, exist_ok=True)
         if execute:
-            run_shell_command(
-                ['./Initial_Conditions.exe'],
-                root_dir,
-            )
+            run_shell_command(['./Initial_Conditions.exe'], root_dir)
             if self.config['heating']['background'].get('use_initial_conditions', False):
                 self.equilibrium_heating_rate = get_equilibrium_heating_rate(root_dir)
 
@@ -213,17 +208,8 @@ class Configure(object):
         else:
             build_script = 'build_HYDRAD.bat'
         # NOTE: make sure we have needed permissions to run compile script
-        # Only do this on Unix-based systems (chmod not valid on Windows)
-        if not on_windows():
-            run_shell_command(
-                ['chmod', 'u+x', build_script],
-                root_dir / 'HYDRAD' / 'build_scripts',
-                shell=False,
-            )
-        run_shell_command(
-            [f'./{build_script}'],
-            root_dir / 'HYDRAD' / 'build_scripts',
-        )
+        os.chmod(root_dir / 'HYDRAD' / 'build_scripts' / build_script, mode=stat.S_IRWXU)
+        run_shell_command([f'./{build_script}'], root_dir / 'HYDRAD' / 'build_scripts')
         (root_dir / 'Results').mkdir(parents=True, exist_ok=True)
 
     @property
