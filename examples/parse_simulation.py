@@ -7,7 +7,7 @@ This example demonstrates how to configure a simple hydrad simulation and
 read in and visualize the outputs as a function of time and field-aligned
 spatial coordinate.
 """
-import os
+import pathlib
 import tempfile
 
 import astropy.units as u
@@ -18,7 +18,7 @@ from pydrad.configure.data import get_defaults
 from pydrad.configure.util import get_clean_hydrad, run_shell_command
 from pydrad.parse import Strand
 
-tmpdir = tempfile.mkdtemp()  # Change to wherever you want to save your clean HYDRAD copy
+tmpdir = pathlib.Path(tempfile.mkdtemp())  # Change to wherever you want to save your clean HYDRAD copy
 
 
 #################################################################
@@ -38,7 +38,7 @@ tmpdir = tempfile.mkdtemp()  # Change to wherever you want to save your clean HY
 #
 # First, we'll setup a simple HYDRAD run and run the simulation.
 # Grab a new copy of HYDRAD
-hydrad_clean = os.path.join(tmpdir, 'hydrad-clean')
+hydrad_clean = tmpdir / 'hydrad-clean'
 get_clean_hydrad(hydrad_clean, from_github=True)
 
 #################################################################
@@ -71,7 +71,7 @@ config['grid']['maximum_refinement_level'] = 6
 # directly from Python, but this is easily done via the command
 # line as well. This can take a few minutes.
 c = Configure(config)
-hydrad_results = os.path.join(tmpdir, 'steady-run')
+hydrad_results = tmpdir / 'steady-run'
 c.setup_simulation(hydrad_results, hydrad_clean)
 run_shell_command(hydrad_results / 'HYDRAD.exe')
 

@@ -6,7 +6,7 @@ Configure a Simulation
 This example demonstrates the various ways to configure a HYDRAD
 simulation.
 """
-import os
+import pathlib
 import tempfile
 
 import astropy.units as u
@@ -27,7 +27,7 @@ from pydrad.configure.util import get_clean_hydrad
 # Mm loop lasting 5000 s heated by a single 200 s nanoflare
 # solved on an adaptive grid.
 # A complete list of configuration parameters can be found in
-# the `configuration tables`_ page.
+# the `configuration-tables`_ page.
 config_dict = {
     'general': {
         'loop_length': 80*u.Mm,
@@ -139,8 +139,8 @@ print(c.hydrad_header)
 # copy of HYDRAD. You can use a copy you already have locally or
 # use the following convenience function to grab the most recent
 # version from GitHub
-tmpdir = tempfile.mkdtemp()  # Change this to wherever you want to save your clean HYDRAD copy
-hydrad_clean = os.path.join(tmpdir, 'hydrad-clean')
+tmpdir = pathlib.Path(tempfile.mkdtemp())  # Change this to wherever you want to save your clean HYDRAD copy
+hydrad_clean = tmpdir / 'hydrad-clean'
 get_clean_hydrad(hydrad_clean, from_github=True)
 
 #################################################################
@@ -150,7 +150,7 @@ get_clean_hydrad(hydrad_clean, from_github=True)
 # to our new simulation. This function will write all of the needed
 # aforementioned configuration files and run the hydrostatic solver which
 # will provide the initial conditions for the actual simulation.
-c.setup_simulation(os.path.join(tmpdir, 'test-run'), hydrad_clean)
+c.setup_simulation(tmpdir / 'test-run', hydrad_clean)
 
 #################################################################
 # To avoid having to repeatedly setup the configuration dictionary,
@@ -160,7 +160,7 @@ c.setup_simulation(os.path.join(tmpdir, 'test-run'), hydrad_clean)
 # like the config directory and can be easily read and written.
 #
 # To save the configuration to disk and then load it back into a `dict`,
-asdf_config = os.path.join(tmpdir, 'test_config.asdf')
+asdf_config = tmpdir / 'test_config.asdf'
 c.save_config(asdf_config)
 config_from_disk = Configure.load_config(asdf_config)
 print(config_from_disk)
