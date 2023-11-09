@@ -28,8 +28,8 @@ def test_beam_heating_run(tmpdir_factory, configuration, hydrad_clean):
     assert len(strand) == 6
 
 
-@pytest.mark.xfail(condition='darwin' in sys.platform(),
-                   reason='openmp not included by default on macOS')
+@pytest.mark.xfail(condition='darwin' in sys.platform,
+                   reason='OpenMP not included by default on macOS')
 def test_use_openmp(tmpdir_factory, configuration, hydrad_clean):
     omp_configuration = Configure(configuration.config)
     omp_configuration.config['general']['use_openmp'] = True
