@@ -1,0 +1,1 @@
+{{ compiler }} {{ flags | join(' ') }} {{ files | join(' ') }} -o {{ executable }}

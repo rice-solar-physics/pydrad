@@ -531,6 +531,7 @@ def test_radiation_header(configuration):
 #define EPSILON_D 0.1
 #define EPSILON_R 1.8649415311920072
 // **** End of Solver ****"""
+    assert_ignore_blanks(configuration.radiation_header, header)
 
 
 def test_radiation_config_equilibrium(configuration):

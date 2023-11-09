@@ -32,7 +32,7 @@
 #define EPSILON {{ solver.epsilon | is_required }}
 
 // **** Grid ****
-{% if grid.adapt -%}#define ADAPT{%- endif %}
+{% if grid.adapt %}#define ADAPT{% endif %}
 #define MIN_CELLS {{ minimum_cells | is_required }}
 #define MAX_CELLS {{ maximum_cells | is_required }}
 #define MAX_REFINEMENT_LEVEL {{ grid.maximum_refinement_level | is_required }}

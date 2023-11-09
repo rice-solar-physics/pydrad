@@ -41,3 +41,11 @@
 #define EPSILON_D {{ solver.epsilon_d | is_required }}
 #define EPSILON_R {{ solver.epsilon_r | is_required }}
 // **** End of Solver ****
+
+{% if heating.beam -%}
+// **** Heating ****
+// This needs to be here because the radiation model is needed when constructing the electron
+// beam and it is not imported anywhere else
+#define BEAM_HEATING
+{%- endif %}
+
