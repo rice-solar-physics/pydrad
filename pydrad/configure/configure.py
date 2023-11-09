@@ -30,8 +30,6 @@ class Configure(object):
     ----------
     config : `dict`
         All input parameters for configuring simulation
-    templates : `dict`
-        Templates to override defaults, optional
     """
 
     def __init__(self, config, **kwargs):
@@ -48,6 +46,9 @@ class Configure(object):
         self.env.filters['sort_elements'] = filters.sort_elements
         self.env.filters['is_required'] = filters.is_required
         self.env.filters['sci_notation'] = filters.sci_notation
+        # Compiler flags
+        self.optimization_flags = kwargs.get('optimization_flags')
+        self.compiler = kwargs.get('compiler', 'g++')
         # NOTE: Freeze the date at instantiation so that files can be compared
         # exactly for testing
         if kwargs.get('freeze_date', False):
@@ -123,17 +124,14 @@ class Configure(object):
             are only compiled. This is useful for debugging.
         """
         root_dir = pathlib.Path(root_dir)
+        build_script_filename = pathlib.Path('Initial_Conditions') / 'build_scripts' / 'build_script.bat'
         files = [
-            ('Initial_Conditions/source/config.h',
-             self.initial_conditions_header),
-            ('Initial_Conditions/config/initial_conditions.cfg',
-             self.initial_conditions_cfg),
-            ('Radiation_Model/source/config.h',
-             self.radiation_header),
-            ('Radiation_Model/config/elements_eq.cfg',
-             self.radiation_equilibrium_cfg),
-            ('Radiation_Model/config/elements_neq.cfg',
-             self.radiation_nonequilibrium_cfg),
+            ('Initial_Conditions/source/config.h', self.initial_conditions_header),
+            ('Initial_Conditions/config/initial_conditions.cfg', self.initial_conditions_cfg),
+            ('Radiation_Model/source/config.h', self.radiation_header),
+            ('Radiation_Model/config/elements_eq.cfg', self.radiation_equilibrium_cfg),
+            ('Radiation_Model/config/elements_neq.cfg', self.radiation_nonequilibrium_cfg),
+            (build_script_filename, self.initial_conditions_build_script),
         ]
         # NOTE: there are two options here so that the gravitational and
         # magnetic field polynomial fits can be applied just to the
@@ -150,17 +148,11 @@ class Configure(object):
             with (root_dir / filename).open(mode='w') as f:
                 f.write(filestring)
         # NOTE: make sure we have needed permissions to run compile script
-        os.chmod(
-            root_dir / 'Initial_Conditions' / 'build_scripts' / 'build_initial_conditions.bat',
-            mode=stat.S_IRWXU,
-        )
-        run_shell_command(
-            ['./build_initial_conditions.bat'],
-            root_dir / 'Initial_Conditions' / 'build_scripts',
-        )
+        os.chmod(root_dir / build_script_filename, mode=stat.S_IRWXU)
+        run_shell_command(root_dir / build_script_filename)
         (root_dir / 'Initial_Conditions' / 'profiles').mkdir(parents=True, exist_ok=True)
         if execute:
-            run_shell_command(['./Initial_Conditions.exe'], root_dir)
+            run_shell_command(root_dir / 'Initial_Conditions.exe')
             if self.config['heating']['background'].get('use_initial_conditions', False):
                 self.equilibrium_heating_rate = get_equilibrium_heating_rate(root_dir)
 
@@ -174,23 +166,17 @@ class Configure(object):
             Path to new HYDRAD copy
         """
         root_dir = pathlib.Path(root_dir)
+        build_script_filename = pathlib.Path('HYDRAD') / 'build_scripts' / 'build_script.bat'
         files = [
-            ('Radiation_Model/source/config.h',
-             self.radiation_header),
-            ('Radiation_Model/config/elements_eq.cfg',
-             self.radiation_equilibrium_cfg),
-            ('Radiation_Model/config/elements_neq.cfg',
-             self.radiation_nonequilibrium_cfg),
-            ('Heating_Model/source/config.h',
-             self.heating_header),
-            ('Heating_Model/config/heating_model.cfg',
-             self.heating_cfg),
-            ('HYDRAD/source/config.h',
-             self.hydrad_header),
-            ('HYDRAD/source/collisions.h',
-             self.collisions_header),
-            ('HYDRAD/config/hydrad.cfg',
-             self.hydrad_cfg),
+            ('Radiation_Model/source/config.h', self.radiation_header),
+            ('Radiation_Model/config/elements_eq.cfg', self.radiation_equilibrium_cfg),
+            ('Radiation_Model/config/elements_neq.cfg', self.radiation_nonequilibrium_cfg),
+            ('Heating_Model/source/config.h', self.heating_header),
+            ('Heating_Model/config/heating_model.cfg', self.heating_cfg),
+            ('HYDRAD/source/config.h', self.hydrad_header),
+            ('HYDRAD/source/collisions.h', self.collisions_header),
+            ('HYDRAD/config/hydrad.cfg', self.hydrad_cfg),
+            (build_script_filename, self.hydrad_build_script),
         ]
         if 'poly_fit_gravity' in self.config['general']:
             files += [('poly_fit.gravity', self.poly_fit_gravity)]
@@ -202,14 +188,9 @@ class Configure(object):
         for filename, filestring in files:
             with (root_dir / filename).open(mode='w') as f:
                 f.write(filestring)
-        # NOTE: using OpenMP requires an alternate compile script
-        if self.config['general'].get('use_openmp', False):
-            build_script = 'build_HYDRAD_OPENMP.bat'
-        else:
-            build_script = 'build_HYDRAD.bat'
         # NOTE: make sure we have needed permissions to run compile script
-        os.chmod(root_dir / 'HYDRAD' / 'build_scripts' / build_script, mode=stat.S_IRWXU)
-        run_shell_command([f'./{build_script}'], root_dir / 'HYDRAD' / 'build_scripts')
+        os.chmod(root_dir / build_script_filename, mode=stat.S_IRWXU)
+        run_shell_command(root_dir / build_script_filename)
         (root_dir / 'Results').mkdir(parents=True, exist_ok=True)
 
     @property
@@ -445,3 +426,69 @@ class Configure(object):
                 {self.config['general']['loop_length'].unit}''')
         return int(np.floor(
             2**self.config['grid']['maximum_refinement_level'] * n_min))
+
+    @property
+    def optimization_flags(self):
+        return self._optimization_flags
+
+    @optimization_flags.setter
+    def optimization_flags(self, value):
+        if value is None:
+            value = ['O3', 'flto', 'Wno-unused-variable', 'Wno-write-strings']
+        self._optimization_flags = [f'-{f}' for f in value]
+
+    @property
+    def initial_conditions_build_script(self):
+        files = [
+            '../source/main.cpp',
+            '../source/ode.cpp',
+            '../source/misc.cpp',
+            '../../Radiation_Model/source/element.cpp',
+            '../../Radiation_Model/source/radiation.cpp',
+            '../../Radiation_Model/source/OpticallyThick/OpticallyThickIon.cpp ',
+            '../../Radiation_Model/source/OpticallyThick/RadiativeRates.cpp ',
+            '../../Resources/source/gammabeta.cpp ',
+            '../../Resources/source/fitpoly.cpp ',
+            '../../Resources/Utils/generatePieceWiseFit/source/piecewisefit.cpp ',
+            '../../Resources/Utils/regPoly/regpoly.cpp ',
+            '../../Resources/Utils/regPoly/nrutil.cpp ',
+            '../../Resources/source/file.cpp',
+        ]
+        return self.env.get_template('build_script.bat').render(
+            compiler=self.compiler,
+            files=files,
+            flags=['-Wall',] + self.optimization_flags,
+            executable='../../Initial_Conditions.exe',
+        )
+
+    @property
+    def hydrad_build_script(self):
+        files = [
+            '../source/main.cpp',
+            '../source/cell.cpp',
+            '../source/mesh.cpp',
+            '../source/eqns.cpp',
+            '../../Kinetic_Model/source/kinetic.cpp',
+            '../../Kinetic_Model/source/gamma.cpp',
+            '../../Heating_Model/source/heat.cpp',
+            '../../Radiation_Model/source/ionfrac.cpp',
+            '../../Radiation_Model/source/element.cpp',
+            '../../Radiation_Model/source/radiation.cpp',
+            '../../Radiation_Model/source/OpticallyThick/OpticallyThickIon.cpp',
+            '../../Radiation_Model/source/OpticallyThick/RadiativeRates.cpp',
+            '../../Resources/source/gammabeta.cpp',
+            '../../Resources/source/fitpoly.cpp',
+            '../../Resources/Utils/generatePieceWiseFit/source/piecewisefit.cpp',
+            '../../Resources/Utils/regPoly/regpoly.cpp',
+            '../../Resources/Utils/regPoly/nrutil.cpp',
+            '../../Resources/source/file.cpp',
+        ]
+        flags = ['-Wall',] + self.optimization_flags
+        if self.config['general'].get('use_openmp', False):
+            flags += ['-fopenmp']
+        return self.env.get_template('build_script.bat').render(
+            compiler=self.compiler,
+            files=files,
+            flags=flags,
+            executable='../../HYDRAD.exe',
+        )

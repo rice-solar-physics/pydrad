@@ -73,7 +73,7 @@ config['grid']['maximum_refinement_level'] = 6
 c = Configure(config)
 hydrad_results = os.path.join(tmpdir, 'steady-run')
 c.setup_simulation(hydrad_results, hydrad_clean)
-run_shell_command(['./HYDRAD.exe'], hydrad_results)
+run_shell_command(hydrad_results / 'HYDRAD.exe')
 
 #################################################################
 # To parse the results of a simulation, we create a `~pydard.parse.Strand`
