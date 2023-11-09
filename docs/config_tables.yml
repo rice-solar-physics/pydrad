@@ -72,6 +72,7 @@ General:
   - '``float``'
   - '``bool``'
   - '``bool``'
+  - '``int``'
   - '``bool``'
   - '``bool``'
   Units:
@@ -93,6 +94,7 @@ General:
   - s
   - ''
   - s
+  - ''
   - ''
   - ''
   - ''
