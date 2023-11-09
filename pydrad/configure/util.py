@@ -35,7 +35,7 @@ class HYDRADError(Exception):
     pass
 
 
-def run_shell_command(cmd, cwd, shell=True):
+def run_shell_command(path, shell=True, **kwargs):
     """
     Wrapper function for running shell commands.
 
@@ -59,15 +59,16 @@ def run_shell_command(cmd, cwd, shell=True):
         fails to compile or if there is a runtime error in the
         initial conditions code.
     """
-    # Remove "./" from commands if the user is working on Windows
-    if platform.system().lower() == 'windows' and cmd[0][0:2] == './':
-        cmd[0] = cmd[0][2:]
+    path = pathlib.Path(path)
+    on_windows = platform.system().lower() == 'windows'
     cmd = subprocess.run(
-        cmd,
-        cwd=cwd,
+        path.name if on_windows else f'./{path.name}',
+        cwd=path.parent,
         shell=shell,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        env=os.environ,
+        **kwargs,
     )
     stdout = f"{cmd.stdout.decode('utf-8')}"
     stderr = f"{cmd.stderr.decode('utf-8')}"
@@ -75,7 +76,7 @@ def run_shell_command(cmd, cwd, shell=True):
         log.info(stdout)
     if stderr:
         log.warning(stderr)
-    hydrad_error_messages = ['segmentation fault', 'abort', 'error']
+    hydrad_error_messages = ['segmentation fault', 'abort', 'error', 'trace trap']
     if any([e in s.lower() for s in [stderr, stdout] for e in hydrad_error_messages]):
         raise HYDRADError(f'{stderr}\n{stdout}')
 

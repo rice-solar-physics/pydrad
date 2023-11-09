@@ -20,6 +20,7 @@ General:
   - minimum_collisional_coupling_timescale
   - force_single_fluid
   - use_openmp
+  - grid_cells_per_thread
   - open_field
   - force_symmetry
   Description:
@@ -47,6 +48,7 @@ General:
   - If true, force electron and ion quantities to be equal
   - If true, parallelize over threads with `OpenMP <https://www.openmp.org/>`__. This
     option is most useful when including a NLTE chromosphere.
+  - If using OpenMP parallelization, approximate number of grid cells assigned to each thread
   - If true, one footpoint is assumed to not connect to the surface
   - ''
   Type:
@@ -70,6 +72,7 @@ General:
   - '``float``'
   - '``bool``'
   - '``bool``'
+  - '``int``'
   - '``bool``'
   - '``bool``'
   Units:
@@ -91,6 +94,7 @@ General:
   - s
   - ''
   - s
+  - ''
   - ''
   - ''
   - ''

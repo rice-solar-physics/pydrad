@@ -36,7 +36,10 @@
 // **** End of Physics ****
 
 // **** Solver ****
-{% if general.use_openmp %}#define OPENMP{% endif %}
+{% if general.use_openmp -%}
+#define OPENMP
+#define CHUNK_SIZE {{ general.grid_cells_per_thread }}
+{%- endif %}
 #define SAFETY_RADIATION {{ solver.safety_radiation | is_required }}
 #define SAFETY_CONDUCTION {{ solver.safety_conduction | is_required }}
 #define SAFETY_ADVECTION {{ solver.safety_advection | is_required }}

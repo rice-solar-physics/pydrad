@@ -126,8 +126,5 @@ def hydrad(tmpdir_factory, hydrad_clean):
     # containing the results.
     hydrad_tmp = tmpdir_factory.mktemp('hydrad_tmp')
     configuration.setup_simulation(hydrad_tmp, hydrad_clean, overwrite=True)
-    pydrad.configure.util.run_shell_command(
-        ['./HYDRAD.exe'],
-        hydrad_tmp,
-    )
+    pydrad.configure.util.run_shell_command(hydrad_tmp / 'HYDRAD.exe')
     return hydrad_tmp
