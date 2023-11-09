@@ -26,7 +26,7 @@ def test_beam_heating_run(tmpdir_factory, configuration, hydrad_clean):
 
 
 def test_use_openmp(tmpdir_factory, configuration, hydrad_clean):
-    omp_configuration = Configure(configuration.config, compiler='$CXX')
+    omp_configuration = Configure(configuration.config)
     omp_configuration.config['general']['use_openmp'] = True
     omp_configuration.config['general']['grid_cells_per_thread'] = 10
     hydrad_tmp = tmpdir_factory.mktemp('hydrad_tmp')
