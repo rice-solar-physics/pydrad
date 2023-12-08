@@ -8,7 +8,6 @@ import shutil
 import stat
 import subprocess
 import tempfile
-from distutils.dir_util import copy_tree
 
 import astropy.units as u
 
@@ -118,7 +117,7 @@ def get_clean_hydrad(output_path, base_path=None, from_github=False, overwrite=F
             git.Repo.clone_from('https://github.com/rice-solar-physics/HYDRAD',
                                 tmpdir)
         elif base_path:
-            copy_tree(base_path, tmpdir)
+            shutil.copytree(base_path, tmpdir, dirs_exist_ok=True)
         else:
             raise ValueError('Specify local path to HYDRAD or clone from GitHub')
         rm_dirs = [
