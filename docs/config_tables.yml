@@ -279,7 +279,7 @@ Heating_events:
   - The starting time in the simulation of a given heating event
   - The duration it takes to increase from the background heating rate to peak heating rate
   - The duration it takes to decrease from peak heating rate back to the background heating rate
-  - The total duration of the heating event.  The code assumes trapezoidal shape, in general.
+  - The total duration of the heating event.  The time profile of the event is trapezoidal in shape.
   - The location along the loop where the heating event is centered.  Must have a value between 0 and the total loop length.
   - The spatial width (Gaussian) of the heating event.
   - The peak heating rate of the heating event
