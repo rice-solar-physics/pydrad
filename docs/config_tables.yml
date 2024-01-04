@@ -187,10 +187,10 @@ Radiation:
   Description:
   - If true, use piecewise power-law to calculate radiative losses
   - Path (relative to the root of the HYDRAD directory) to lookup table for radiative losses. Ignored unless use_power_law_radiative_losses is also set.
-  - If true, the non-equilibrium populationfractions are not fed back into the radiative loss   calculation. This option will be ignored unless a  list of elements is also  passed to ``elements_nonequilibrium``. If ``use_power_law_radiative_losses`` is false, the equilibrium population fractions will be used to calculate the  radiative losses.
-  - ''
+  - If true, the non-equilibrium population fractions are not fed back into the radiative loss   calculation. This option will be ignored unless a  list of elements is also  passed to ``elements_nonequilibrium``. If ``use_power_law_radiative_losses`` is false, the equilibrium population fractions will be used to calculate the  radiative losses.
+  - If true, uses density-dependent ionization/recombination rates from the ADAS database.
   - If true, include optically thick lines in radiative losses
-  - 'Treat the chromosphere as being in non-local thermal equilibrium. **NOTE: This may significantly increase the computation time.**'
+  - 'Treat the chromosphere as being in non-local thermodynamic equilibrium. **NOTE: This may significantly increase the computation time.**'
   - Density floor of the corona. This option is required if ``nlte_chromosphere`` is true.
   - Temperature and density ranges dataset
   - Name of emissivity dataset
@@ -275,6 +275,22 @@ Heating_events:
   - location
   - scale_height
   - rate
+  Description:
+  - The starting time in the simulation of a given heating event
+  - The duration it takes to increase from the background heating rate to peak heating rate
+  - The duration it takes to decrease from peak heating rate back to the background heating rate
+  - The total duration of the heating event.  The time profile of the event is trapezoidal in shape.
+  - The location along the loop where the heating event is centered.  Must have a value between 0 and the total loop length.
+  - The spatial width (Gaussian) of the heating event.
+  - The peak heating rate of the heating event
+  Type:
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
+  - '``float``'
   Units:
   - 's'
   - 's'
@@ -309,13 +325,13 @@ Grid:
   - 'Maximum allowed number of grid cells. If this is not set explicitly, :math:`n_{max}=\lfloor 2^{L_R}n_{min}\rfloor`, where :math:`L_R` is the maximum refinement level and :math:`n_{min}` is the minimum allowed number of grid cells.'
   - Smallest allowed grid cell width in the initial setup
   - ''
-  - ''
-  - ''
-  - ''
+  - Use spatial variations in density to adaptively refine the grid
+  - Use spatial variations in the electron energy to adaptively refine the grid
+  - Use spatial variations in the hydrogen energy to adaptively refine the grid
   - Minimum allowed difference (between 0 and 1) between adjacent cells
   - Maximum allowed difference (between 0 and 1) between adjacent cells
-  - ''
-  - ''
+  - Use linear interpolation only
+  - Check whether energy has been conserved (i.e. correct numerical errors)
   Type:
   - '``bool``'
   - '``int``'
@@ -368,11 +384,11 @@ Solver:
   - cutoff_temperature_fraction
   Description:
   - ''
-  - ''
-  - ''
-  - ''
-  - ''
-  - ''
+  - A multiplicative factor applied to the radiative timescale.  Should be strictly greater than 0 and less than or equal to 1.
+  - A multiplicative factor applied to the conductive timescale.  Should be strictly greater than 0 and less than or equal to 1.
+  - A multiplicative factor applied to the advective timescale.  Should be strictly greater than 0 and less than or equal to 1.
+  - A multiplicative factor applied to the atomic timescale.  Should be strictly greater than 0 and less than or equal to 1.
+  - A multiplicative factor applied to the viscous timescale.  Should be strictly greater than 0 and less than or equal to 1.
   - 'Population fractions below this value are set to 0'
   - 'Safety factor for ion population solver; see `B09 <http://doi.org/10.1051/0004-6361/200810735>`__'
   - 'Safety factor for ion population solver; see `B09 <http://doi.org/10.1051/0004-6361/200810735>`__'
@@ -380,7 +396,7 @@ Solver:
   - ''
   - ''
   - 'Temperature interval over which the chromospheric radiative losses are set to zero'
-  - ''
+  - Minimum allowed temperature in the grid
   - ''
   - 'Ratio between cutoff temperature and peak temperature. If set, use the method of             `JB19 <https://doi.org/10 .3847/2041-8213/ab0c1f>`__ to model the transition region.                   '
   Type:
