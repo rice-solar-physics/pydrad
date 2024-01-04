@@ -277,7 +277,7 @@ Heating_events:
   - rate
   Description:
   - The starting time in the simulation of a given heating event
-  - The duration it takes to increase from 0 heating rate to peak heating rate
+  - The duration it takes to increase from the background heating rate to peak heating rate
   - The duration it takes to decrease from peak heating rate to 0 heating rate
   - The total duration of the heating event.  The code assumes trapezoidal shape, in general.
   - The location along the loop where the heating event is centered.  Must have a value between 0 and the total loop length.
