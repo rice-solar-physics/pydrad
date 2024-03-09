@@ -367,7 +367,7 @@ Timestep #: {self._index}"""
             return
 
         n_elements = int(len(lines)/5)
-        self._trm_data = np.zeros([n_elements, 3])
+        self._trm_data = np.zeros([n_elements, 24])
 
         # The files come in sets of 5 rows
         #   -- Loop coordinate, and at each one:
@@ -375,25 +375,75 @@ Timestep #: {self._index}"""
         #   -- Terms of momentum equation
         #   -- Terms of electron energy equation
         #   -- Terms of hydrogen energy equation
-        # Right now, we only read 3 values from this:
-        #  the electron heating, hydrogen heating,
-        #  and bolometric radiative losses
         for i in range(len(lines)):
             j = int(i/5)
             line = lines[i].strip().split()
-            # Electron heating and radiative loss terms from the
-            # electron energy equation
-            if i % 5 == 3:
-                self._trm_data[j, 0] = float(line[5])
-                self._trm_data[j, 1] = float(line[6])
-            # Hydrogen heating term from the hydrogen energy
-            # equation
-            if i % 5 == 4:
-                self._trm_data[j, 2] = float(line[5])
 
-        properties = [('electron_heating_term', '_trm_data', 0, 'erg cm-3 s-1'),
-                      ('hydrogen_heating_term', '_trm_data', 2, 'erg cm-3 s-1'),
-                      ('radiative_loss_term', '_trm_data', 1, 'erg cm-3 s-1')]
+            # Terms from the mass equation
+            if i % 5 == 1:
+                self._trm_data[j, 0] = float(line[0])
+                self._trm_data[j, 1] = float(line[1])
+
+            # Terms from the momentum equation
+            if i % 5 == 2:
+                self._trm_data[j, 2] = float(line[0])
+                self._trm_data[j, 3] = float(line[1])
+                self._trm_data[j, 4] = float(line[2])
+                self._trm_data[j, 5] = float(line[3])
+                self._trm_data[j, 6] = float(line[4])
+                self._trm_data[j, 7] = float(line[5])
+
+            # Terms from the electron energy equation
+            if i % 5 == 3:
+                self._trm_data[j, 8] = float(line[0])
+                self._trm_data[j, 9] = float(line[1])
+                self._trm_data[j, 10] = float(line[2])
+                self._trm_data[j, 11] = float(line[4])
+                self._trm_data[j, 12] = float(line[5])
+                self._trm_data[j, 13] = float(line[6])
+                self._trm_data[j, 14] = float(line[7])
+                # N.B. gravity, viscosity, and numerical viscosity are always
+                # 0 for electrons, so we don't need to read them
+
+            # Terms from the hydrogen energy equation
+            if i % 5 == 4:
+                self._trm_data[j, 15] = float(line[0])
+                self._trm_data[j, 16] = float(line[1])
+                self._trm_data[j, 17] = float(line[2])
+                self._trm_data[j, 18] = float(line[3])
+                self._trm_data[j, 19] = float(line[4])
+                self._trm_data[j, 20] = float(line[5])
+                self._trm_data[j, 21] = float(line[7])
+                self._trm_data[j, 22] = float(line[8])
+                self._trm_data[j, 23] = float(line[9])
+                # N.B. radiation is always 0 for hydrogen, so we don't read it
+
+        properties = [
+                      ('mass_drhobydt', '_trm_data', 0, 'g cm-3 s-1'),
+                      ('mass_advection', '_trm_data', 1, 'g cm-3 s-1'),
+                      ('momentum_drho_vbydt', '_trm_data', 2, 'dyne cm-3 s-1'),
+                      ('momentum_advection', '_trm_data', 3, 'dyne cm-3 s-1'),
+                      ('momentum_pressure_gradient', '_trm_data', 4, 'dyne cm-3 s-1'),
+                      ('momentum_gravity', '_trm_data', 5, 'dyne cm-3 s-1'),
+                      ('momentum_viscous_stress', '_trm_data', 6, 'dyne cm-3 s-1'),
+                      ('momentum_numerical_viscosity', '_trm_data', 7, 'dyne cm-3 s-1'),
+                      ('electron_dTEKEbydt', '_trm_data', 8, 'erg cm-3 s-1'),
+                      ('electron_enthalpy', '_trm_data', 9, 'erg cm-3 s-1'),
+                      ('electron_conduction', '_trm_data', 10, 'erg cm-3 s-1'),
+                      ('electron_collisions', '_trm_data', 11, 'erg cm-3 s-1'),
+                      ('electron_heating', '_trm_data', 12, 'erg cm-3 s-1'),
+                      ('electron_radiative_loss', '_trm_data', 13, 'erg cm-3 s-1'),
+                      ('electron_electric_field', '_trm_data', 14, 'erg cm-3 s-1'),
+                      ('hydrogen_dTEKEbydt', '_trm_data', 15, 'erg cm-3 s-1'),
+                      ('hydrogen_enthalpy', '_trm_data', 16, 'erg cm-3 s-1'),
+                      ('hydrogen_conduction', '_trm_data', 17, 'erg cm-3 s-1'),
+                      ('hydrogen_gravity', '_trm_data', 18, 'erg cm-3 s-1'),
+                      ('hydrogen_collisions', '_trm_data', 19, 'erg cm-3 s-1'),
+                      ('hydrogen_heating', '_trm_data', 20, 'erg cm-3 s-1'),
+                      ('hydrogen_electric_field', '_trm_data', 21, 'erg cm-3 s-1'),
+                      ('hydrogen_viscous_stress', '_trm_data', 22, 'erg cm-3 s-1'),
+                      ('hydrogen_numerical_viscosity', '_trm_data', 23, 'erg cm-3 s-1'),
+                      ]
 
         for p in properties:
             add_property(*p)
@@ -609,8 +659,8 @@ properties = [
     ('ion_pressure', '_phy_data', 6, 'dyne cm-2'),
     ('electron_temperature', '_phy_data', 7, 'K'),
     ('ion_temperature', '_phy_data', 8, 'K'),
-    ('electron_conduction', '_phy_data', 9, 'erg s-1 cm-2'),
-    ('ion_conduction', '_phy_data', 10, 'erg s-1 cm-2'),
+    ('electron_heat_flux', '_phy_data', 9, 'erg s-1 cm-2'),
+    ('ion_heat_flux', '_phy_data', 10, 'erg s-1 cm-2'),
 ]
 properties += [(f'level_population_hydrogen_{i}', '_hstate_data', i, '') for i in range(1, 7)]
 for p in properties:
