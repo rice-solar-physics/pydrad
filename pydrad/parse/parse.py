@@ -406,7 +406,7 @@ Timestep #: {self._index}"""
                 # 0 for electrons, so we don't need to read them
 
             # Terms from the hydrogen energy equation
-            else:
+            elif i % 5 == 4:
                 self._trm_data[j, 15] = float(line[0])
                 self._trm_data[j, 16] = float(line[1])
                 self._trm_data[j, 17] = float(line[2])
