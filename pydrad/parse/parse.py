@@ -385,7 +385,7 @@ Timestep #: {self._index}"""
                 self._trm_data[j, 1] = float(line[1])
 
             # Terms from the momentum equation
-            if i % 5 == 2:
+            elif i % 5 == 2:
                 self._trm_data[j, 2] = float(line[0])
                 self._trm_data[j, 3] = float(line[1])
                 self._trm_data[j, 4] = float(line[2])
@@ -394,7 +394,7 @@ Timestep #: {self._index}"""
                 self._trm_data[j, 7] = float(line[5])
 
             # Terms from the electron energy equation
-            if i % 5 == 3:
+            elif i % 5 == 3:
                 self._trm_data[j, 8] = float(line[0])
                 self._trm_data[j, 9] = float(line[1])
                 self._trm_data[j, 10] = float(line[2])
@@ -406,7 +406,7 @@ Timestep #: {self._index}"""
                 # 0 for electrons, so we don't need to read them
 
             # Terms from the hydrogen energy equation
-            if i % 5 == 4:
+            else:
                 self._trm_data[j, 15] = float(line[0])
                 self._trm_data[j, 16] = float(line[1])
                 self._trm_data[j, 17] = float(line[2])
