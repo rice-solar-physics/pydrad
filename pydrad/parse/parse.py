@@ -410,11 +410,11 @@ Timestep #: {self._index}"""
             for j in range(n_mass):
                 self._trm_data[i,j] = mass_terms[mass_columns[j]][i]
             for j in range(n_momentum):
-                self._trm_data[i,j-offsets[0]] = momentum_terms[momentum_columns[j]][i]
+                self._trm_data[i,j+offsets[0]] = momentum_terms[momentum_columns[j]][i]
             for j in range(n_electron):
-                self._trm_data[i,j-offsets[1]] = electron_terms[electron_columns[j]][i]
+                self._trm_data[i,j+offsets[1]] = electron_terms[electron_columns[j]][i]
             for j in range(n_hydrogen):
-                self._trm_data[i,j-offsets[2]] = hydrogen_terms[hydrogen_columns[j]][i]
+                self._trm_data[i,j+offsets[2]] = hydrogen_terms[hydrogen_columns[j]][i]
 
         properties = []
         for i in range(n_mass):
