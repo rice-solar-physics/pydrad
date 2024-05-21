@@ -100,9 +100,9 @@ def test_term_file_output(strand):
                         np.zeros_like(p.electron_numerical_viscosity),
                         rtol=0.0, atol=1e-8*u.erg/u.s/u.cm**3,
                         )
-        # The hydrogen energy equation's gravity term is never 0:
+        # The hydrogen energy equation's collision rate is never 0 at all positions:
         assert not u.allclose(p.hydrogen_gravity,
-                            np.zeros_like(p.hydrogen_gravity),
+                            np.zeros_like(p.hydrogen_collisions),
                             rtol=0.0, atol=1e-8*u.erg/u.s/u.cm**3,
                         )
 
