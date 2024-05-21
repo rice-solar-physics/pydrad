@@ -379,6 +379,11 @@ Timestep #: {self._index}"""
         'hydrogen_electric_field','hydrogen_viscous_stress','hydrogen_numerical_viscosity',
         'hydrogen_ionization']
 
+        n_mass = len(mass_columns)
+        n_momentum = len(momentum_columns)
+        n_electron = len(electron_columns)
+        n_hydrogen = len(hydrogen_columns)
+
         # Terms from the mass equation:
         mass_terms = read_csv(self._trm_filename, sep='\t', header=None, names=mass_columns,
                                 skiprows=lambda x: x % 5 != 1 )
@@ -393,32 +398,32 @@ Timestep #: {self._index}"""
         hydrogen_terms = read_csv(self._trm_filename, sep='\t', header=None, names=hydrogen_columns,
                                 skiprows=lambda x: x % 5 != 4 )
 
-        offsets = [len(mass_columns),
-                   len(mass_columns)+len(momentum_columns),
-                   len(mass_columns)+len(momentum_columns)+len(electron_columns)
-                   ]
+        offsets = [n_mass,
+                   n_mass+n_momentum,
+                   n_mass+n_momentum+n_electron
+                  ]
 
         n_elements = len(mass_terms)
-        self._trm_data = np.zeros([n_elements, offsets[2]+len(hydrogen_columns)])
+        self._trm_data = np.zeros([n_elements, offsets[2]+n_hydrogen])
 
         for i in range(n_elements):
-            for j in range(len(mass_columns)):
+            for j in range(n_mass):
                 self._trm_data[i,j] = mass_terms[mass_columns[j]][i]
-            for j in range(len(momentum_columns)):
+            for j in range(n_momentum):
                 self._trm_data[i,j-offsets[0]] = momentum_terms[momentum_columns[j]][i]
-            for j in range(len(electron_columns)):
+            for j in range(n_electron):
                 self._trm_data[i,j-offsets[1]] = electron_terms[electron_columns[j]][i]
-            for j in range(len(hydrogen_columns)):
+            for j in range(n_hydrogen):
                 self._trm_data[i,j-offsets[2]] = hydrogen_terms[hydrogen_columns[j]][i]
 
         properties = []
-        for i in range(len(mass_columns)):
+        for i in range(n_mass):
             properties += [(mass_columns[i], '_trm_data', i, 'g cm-3 s-1')]
-        for i in range(len(momentum_columns)):
+        for i in range(n_momentum):
             properties += [(momentum_columns[i], '_trm_data', i+offsets[0], 'dyne cm-3 s-1')]
-        for i in range(len(electron_columns)):
+        for i in range(n_electron):
             properties += [(electron_columns[i], '_trm_data', i+offsets[1], 'erg cm-3 s-1')]
-        for i in range(len(hydrogen_columns)):
+        for i in range(n_hydrogen):
             properties += [(hydrogen_columns[i], '_trm_data', i+offsets[2], 'erg cm-3 s-1')]
 
         for p in properties:
