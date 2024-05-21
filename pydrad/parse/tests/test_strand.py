@@ -98,12 +98,12 @@ def test_term_file_output(strand):
         # The electron energy equation's numerical viscosity term is always 0:
         assert u.allclose(p.electron_numerical_viscosity,
                         np.zeros_like(p.electron_numerical_viscosity),
-                        rtol=0.0, atol=1e-8*u.erg/u.s/u.cm**3,
+                        rtol=0.0,
                         )
         # The hydrogen energy equation's collision rate is never 0 at all positions:
         assert not u.allclose(p.hydrogen_collisions,
                             np.zeros_like(p.hydrogen_collisions),
-                            rtol=0.0, atol=1e-8*u.erg/u.s/u.cm**3,
+                            rtol=0.0,
                         )
 
 def test_term_file_units(strand):
