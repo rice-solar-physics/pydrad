@@ -37,6 +37,7 @@ VAR_NAMES = [
     'electron_heating',
     'electron_radiative_loss',
     'electron_electric_field',
+    'electron_ionization',
     'hydrogen_dTEKEbydt',
     'hydrogen_enthalpy',
     'hydrogen_conduction',
@@ -91,3 +92,20 @@ def test_emission_measure(strand):
     assert isinstance(em, u.Quantity)
     assert isinstance(bins, u.Quantity)
     assert len(bins) == len(em) + 1
+
+def test_term_file_output(strand):
+    # The electron energy equation's numerical viscosity term is always 0
+    assert u.allclose(strand.electron_numerical_viscosity,
+                      np.zeros_like(strand.electron_numerical_viscosity)
+                    )
+
+    # The hydrogen energy equation's gravity term is never 0
+    assert not u.allclose(strand.hydrogen_gravity,
+                        np.zeros_like(strand.hydrogen_gravity)
+                      )
+
+def test_term_file_units(strand):
+    assert strand.mass_advection.unit == u.Unit('g s-1 cm-3')
+    assert strand.momentum_gravity.unit == u.Unit('dyne s-1 cm-3')
+    assert strand.electron_viscous_stress.unit == u.Unit('erg s-1 cm-3')
+    assert strand.hydrogen_collisions.unit == u.Unit('erg s-1 cm-3')
