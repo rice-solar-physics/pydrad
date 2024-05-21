@@ -10,6 +10,7 @@ import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 import plasmapy.particles
+from pandas import read_csv
 from scipy.interpolate import splev, splrep
 
 from pydrad import log
@@ -358,92 +359,67 @@ Timestep #: {self._index}"""
     def _read_trm(self):
         """
         Parse the equation terms file
+
+        The files come in sets of 5 rows with variable number of columns:
+            -- Loop coordinate (1 column), and at each position:
+            -- Terms of mass equation (2 columns)
+            -- Terms of momentum equation (6 columns)
+            -- Terms of electron energy equation (11 columns)
+            -- Terms of hydrogen energy equation (11 columns)
         """
-        try:
-            with self._trm_filename.open() as f:
-                lines = f.readlines()
-        except FileNotFoundError:
-            log.debug(f'{self._trm_filename} not found')
-            return
+        mass_columns = ['mass_drhobydt','mass_advection']
+        momentum_columns = ['momentum_drho_vbydt','momentum_advection','momentum_pressure_gradient',
+        'momentum_gravity','momentum_viscous_stress','momentum_numerical_viscosity']
+        electron_columns = ['electron_dTEKEbydt','electron_enthalpy','electron_conduction',
+        'electron_gravity','electron_collisions','electron_heating','electron_radiative_loss',
+        'electron_electric_field','electron_viscous_stress','electron_numerical_viscosity',
+        'electron_ionization']
+        hydrogen_columns = ['hydrogen_dTEKEbydt','hydrogen_enthalpy','hydrogen_conduction',
+        'hydrogen_gravity','hydrogen_collisions','hydrogen_heating','hydrogen_radiative_loss',
+        'hydrogen_electric_field','hydrogen_viscous_stress','hydrogen_numerical_viscosity',
+        'hydrogen_ionization']
 
-        n_elements = int(len(lines)/5)
-        self._trm_data = np.zeros([n_elements, 24])
+        # Terms from the mass equation:
+        mass_terms = read_csv(self._trm_filename, sep='\t', header=None, names=mass_columns,
+                                skiprows=lambda x: x % 5 != 1 )
+        # Terms from the momentum equation:
+        momentum_terms = read_csv(self._trm_filename, sep='\t', header=None, names=momentum_columns,
+                                skiprows=lambda x: x % 5 != 2 )
+        # Terms from the electron energy equation:
+        electron_terms = read_csv(self._trm_filename, sep='\t', header=None, names=electron_columns,
+                                skiprows=lambda x: x % 5 != 3 )
 
-        # The files come in sets of 5 rows
-        #   -- Loop coordinate, and at each one:
-        #   -- Terms of mass equation
-        #   -- Terms of momentum equation
-        #   -- Terms of electron energy equation
-        #   -- Terms of hydrogen energy equation
-        for i in range(len(lines)):
-            j = int(i/5)
-            line = lines[i].strip().split()
+        # Terms from the hydrogen energy equation:
+        hydrogen_terms = read_csv(self._trm_filename, sep='\t', header=None, names=hydrogen_columns,
+                                skiprows=lambda x: x % 5 != 4 )
 
-            # Terms from the mass equation
-            if i % 5 == 1:
-                self._trm_data[j, 0] = float(line[0])
-                self._trm_data[j, 1] = float(line[1])
+        offsets = [len(mass_columns),
+                   len(mass_columns)+len(momentum_columns),
+                   len(mass_columns)+len(momentum_columns)+len(electron_columns)
+                   ]
 
-            # Terms from the momentum equation
-            elif i % 5 == 2:
-                self._trm_data[j, 2] = float(line[0])
-                self._trm_data[j, 3] = float(line[1])
-                self._trm_data[j, 4] = float(line[2])
-                self._trm_data[j, 5] = float(line[3])
-                self._trm_data[j, 6] = float(line[4])
-                self._trm_data[j, 7] = float(line[5])
+        n_elements = len(mass_terms)
+        self._trm_data = np.zeros([n_elements, offsets[2]+len(hydrogen_columns)])
 
-            # Terms from the electron energy equation
-            elif i % 5 == 3:
-                self._trm_data[j, 8] = float(line[0])
-                self._trm_data[j, 9] = float(line[1])
-                self._trm_data[j, 10] = float(line[2])
-                self._trm_data[j, 11] = float(line[4])
-                self._trm_data[j, 12] = float(line[5])
-                self._trm_data[j, 13] = float(line[6])
-                self._trm_data[j, 14] = float(line[7])
-                # N.B. gravity, viscosity, and numerical viscosity are always
-                # 0 for electrons, so we don't need to read them
+        for i in range(n_elements):
+            for j in range(len(mass_columns)):
+                self._trm_data[i,j] = mass_terms[mass_columns[j]][i]
+            for j in range(len(momentum_columns)):
+                self._trm_data[i,j-offsets[0]] = momentum_terms[momentum_columns[j]][i]
+            for j in range(len(electron_columns)):
+                self._trm_data[i,j-offsets[1]] = electron_terms[electron_columns[j]][i]
+            for j in range(len(hydrogen_columns)):
+                self._trm_data[i,j-offsets[2]] = hydrogen_terms[hydrogen_columns[j]][i]
 
-            # Terms from the hydrogen energy equation
-            elif i % 5 == 4:
-                self._trm_data[j, 15] = float(line[0])
-                self._trm_data[j, 16] = float(line[1])
-                self._trm_data[j, 17] = float(line[2])
-                self._trm_data[j, 18] = float(line[3])
-                self._trm_data[j, 19] = float(line[4])
-                self._trm_data[j, 20] = float(line[5])
-                self._trm_data[j, 21] = float(line[7])
-                self._trm_data[j, 22] = float(line[8])
-                self._trm_data[j, 23] = float(line[9])
-                # N.B. radiation is always 0 for hydrogen, so we don't read it
-
-        properties = [
-                      ('mass_drhobydt', '_trm_data', 0, 'g cm-3 s-1'),
-                      ('mass_advection', '_trm_data', 1, 'g cm-3 s-1'),
-                      ('momentum_drho_vbydt', '_trm_data', 2, 'dyne cm-3 s-1'),
-                      ('momentum_advection', '_trm_data', 3, 'dyne cm-3 s-1'),
-                      ('momentum_pressure_gradient', '_trm_data', 4, 'dyne cm-3 s-1'),
-                      ('momentum_gravity', '_trm_data', 5, 'dyne cm-3 s-1'),
-                      ('momentum_viscous_stress', '_trm_data', 6, 'dyne cm-3 s-1'),
-                      ('momentum_numerical_viscosity', '_trm_data', 7, 'dyne cm-3 s-1'),
-                      ('electron_dTEKEbydt', '_trm_data', 8, 'erg cm-3 s-1'),
-                      ('electron_enthalpy', '_trm_data', 9, 'erg cm-3 s-1'),
-                      ('electron_conduction', '_trm_data', 10, 'erg cm-3 s-1'),
-                      ('electron_collisions', '_trm_data', 11, 'erg cm-3 s-1'),
-                      ('electron_heating', '_trm_data', 12, 'erg cm-3 s-1'),
-                      ('electron_radiative_loss', '_trm_data', 13, 'erg cm-3 s-1'),
-                      ('electron_electric_field', '_trm_data', 14, 'erg cm-3 s-1'),
-                      ('hydrogen_dTEKEbydt', '_trm_data', 15, 'erg cm-3 s-1'),
-                      ('hydrogen_enthalpy', '_trm_data', 16, 'erg cm-3 s-1'),
-                      ('hydrogen_conduction', '_trm_data', 17, 'erg cm-3 s-1'),
-                      ('hydrogen_gravity', '_trm_data', 18, 'erg cm-3 s-1'),
-                      ('hydrogen_collisions', '_trm_data', 19, 'erg cm-3 s-1'),
-                      ('hydrogen_heating', '_trm_data', 20, 'erg cm-3 s-1'),
-                      ('hydrogen_electric_field', '_trm_data', 21, 'erg cm-3 s-1'),
-                      ('hydrogen_viscous_stress', '_trm_data', 22, 'erg cm-3 s-1'),
-                      ('hydrogen_numerical_viscosity', '_trm_data', 23, 'erg cm-3 s-1'),
-                      ]
+        properties = []
+        for i in range(len(mass_columns)):
+            properties += [(mass_columns[i], '_trm_data', i, 'g cm-3 s-1')]
+        for i in range(len(momentum_columns)):
+            properties += [(momentum_columns[i], '_trm_data', i+offsets[0], 'dyne cm-3 s-1')]
+        for i in range(len(electron_columns)):
+            properties += [(electron_columns[i], '_trm_data', i+offsets[1], 'erg cm-3 s-1')]
+        for i in range(len(hydrogen_columns)):
+            properties += [(hydrogen_columns[i], '_trm_data', i+offsets[2], 'erg cm-3 s-1')]
 
         for p in properties:
             add_property(*p)
