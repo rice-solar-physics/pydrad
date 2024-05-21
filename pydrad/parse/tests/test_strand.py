@@ -3,6 +3,7 @@ Test parsing HYDRAD results
 """
 import astropy.units as u
 import h5py
+import numpy as np
 import pytest
 
 from pydrad.parse import Strand
