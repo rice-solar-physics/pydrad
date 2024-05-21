@@ -54,7 +54,6 @@ VAR_NAMES = [
 def strand(hydrad):
     return Strand(hydrad)
 
-
 def test_parse_initial_conditions(strand):
     assert hasattr(strand, 'initial_conditions')
 
@@ -94,18 +93,18 @@ def test_emission_measure(strand):
     assert len(bins) == len(em) + 1
 
 def test_term_file_output(strand):
-    # The electron energy equation's numerical viscosity term is always 0
-    assert u.allclose(strand.electron_numerical_viscosity,
-                      np.zeros_like(strand.electron_numerical_viscosity)
-                    )
-
-    # The hydrogen energy equation's gravity term is never 0
-    assert not u.allclose(strand.hydrogen_gravity,
-                        np.zeros_like(strand.hydrogen_gravity)
-                      )
+    for p in strand:
+        # The electron energy equation's numerical viscosity term is always 0:
+        assert u.allclose(p.electron_numerical_viscosity,
+                        np.zeros_like(p.electron_numerical_viscosity)
+                        )
+        # The hydrogen energy equation's gravity term is never 0:
+        assert not u.allclose(p.hydrogen_gravity,
+                            np.zeros_like(p.hydrogen_gravity)
+                        )
 
 def test_term_file_units(strand):
-    assert strand.mass_advection.unit == u.Unit('g s-1 cm-3')
-    assert strand.momentum_gravity.unit == u.Unit('dyne s-1 cm-3')
-    assert strand.electron_viscous_stress.unit == u.Unit('erg s-1 cm-3')
-    assert strand.hydrogen_collisions.unit == u.Unit('erg s-1 cm-3')
+    assert strand[0].mass_advection.unit == u.Unit('g s-1 cm-3')
+    assert strand[0].momentum_gravity.unit == u.Unit('dyne s-1 cm-3')
+    assert strand[0].electron_viscous_stress.unit == u.Unit('erg s-1 cm-3')
+    assert strand[0].hydrogen_collisions.unit == u.Unit('erg s-1 cm-3')
