@@ -3,6 +3,7 @@ Test parsing HYDRAD results
 """
 import astropy.units as u
 import h5py
+import numpy as np
 import pytest
 
 from pydrad.parse import Strand
@@ -19,19 +20,40 @@ VAR_NAMES = [
     'electron_pressure',
     'ion_pressure',
     'velocity',
-    'electron_heating_term',
-    'hydrogen_heating_term',
-    'radiative_loss_term',
     'sound_speed',
+    'electron_heat_flux',
+    'ion_heat_flux',
+    'mass_drhobydt',
+    'mass_advection',
+    'momentum_drho_vbydt',
+    'momentum_advection',
+    'momentum_pressure_gradient',
+    'momentum_gravity',
+    'momentum_viscous_stress',
+    'momentum_numerical_viscosity',
+    'electron_dTEKEbydt',
+    'electron_enthalpy',
     'electron_conduction',
-    'ion_conduction',
+    'electron_collisions',
+    'electron_heating',
+    'electron_radiative_loss',
+    'electron_electric_field',
+    'electron_ionization',
+    'hydrogen_dTEKEbydt',
+    'hydrogen_enthalpy',
+    'hydrogen_conduction',
+    'hydrogen_gravity',
+    'hydrogen_collisions',
+    'hydrogen_heating',
+    'hydrogen_electric_field',
+    'hydrogen_viscous_stress',
+    'hydrogen_numerical_viscosity',
 ]
 
 
 @pytest.fixture
 def strand(hydrad):
     return Strand(hydrad)
-
 
 def test_parse_initial_conditions(strand):
     assert hasattr(strand, 'initial_conditions')
@@ -70,3 +92,22 @@ def test_emission_measure(strand):
     assert isinstance(em, u.Quantity)
     assert isinstance(bins, u.Quantity)
     assert len(bins) == len(em) + 1
+
+def test_term_file_output(strand):
+    for p in strand:
+        # The electron energy equation's numerical viscosity term is always 0:
+        assert u.allclose(p.electron_numerical_viscosity,
+                        np.zeros_like(p.electron_numerical_viscosity),
+                        rtol=0.0,
+                        )
+        # The hydrogen energy equation's collision rate is never 0 at all positions:
+        assert not u.allclose(p.hydrogen_collisions,
+                            np.zeros_like(p.hydrogen_collisions),
+                            rtol=0.0,
+                        )
+
+def test_term_file_units(strand):
+    assert strand[0].mass_advection.unit == u.Unit('g s-1 cm-3')
+    assert strand[0].momentum_gravity.unit == u.Unit('dyne s-1 cm-3')
+    assert strand[0].electron_viscous_stress.unit == u.Unit('erg s-1 cm-3')
+    assert strand[0].hydrogen_collisions.unit == u.Unit('erg s-1 cm-3')
