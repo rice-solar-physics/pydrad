@@ -367,67 +367,77 @@ Timestep #: {self._index}"""
             -- Terms of electron energy equation (11 columns)
             -- Terms of hydrogen energy equation (11 columns)
         """
-        mass_columns = ['mass_drhobydt','mass_advection']
-        momentum_columns = ['momentum_drho_vbydt','momentum_advection','momentum_pressure_gradient',
-        'momentum_gravity','momentum_viscous_stress','momentum_numerical_viscosity']
-        electron_columns = ['electron_dTEKEbydt','electron_enthalpy','electron_conduction',
-        'electron_gravity','electron_collisions','electron_heating','electron_radiative_loss',
-        'electron_electric_field','electron_viscous_stress','electron_numerical_viscosity',
-        'electron_ionization']
-        hydrogen_columns = ['hydrogen_dTEKEbydt','hydrogen_enthalpy','hydrogen_conduction',
-        'hydrogen_gravity','hydrogen_collisions','hydrogen_heating','hydrogen_radiative_loss',
-        'hydrogen_electric_field','hydrogen_viscous_stress','hydrogen_numerical_viscosity',
-        'hydrogen_ionization']
-
-        n_mass = len(mass_columns)
-        n_momentum = len(momentum_columns)
-        n_electron = len(electron_columns)
-        n_hydrogen = len(hydrogen_columns)
-
-        # Terms from the mass equation:
-        mass_terms = read_csv(self._trm_filename, sep='\t', header=None, names=mass_columns,
-                                skiprows=lambda x: x % 5 != 1 )
-        # Terms from the momentum equation:
-        momentum_terms = read_csv(self._trm_filename, sep='\t', header=None, names=momentum_columns,
-                                skiprows=lambda x: x % 5 != 2 )
-        # Terms from the electron energy equation:
-        electron_terms = read_csv(self._trm_filename, sep='\t', header=None, names=electron_columns,
-                                skiprows=lambda x: x % 5 != 3 )
-
-        # Terms from the hydrogen energy equation:
-        hydrogen_terms = read_csv(self._trm_filename, sep='\t', header=None, names=hydrogen_columns,
-                                skiprows=lambda x: x % 5 != 4 )
-
-        offsets = [n_mass,
-                   n_mass+n_momentum,
-                   n_mass+n_momentum+n_electron
-                  ]
-
-        n_elements = len(mass_terms)
-        self._trm_data = np.zeros([n_elements, offsets[2]+n_hydrogen])
-
+        units = {
+            'mass': 'g cm-3 s-1',
+            'momentum': 'dyne cm-3 s-1',
+            'electrons': 'erg cm-3 s-1',
+            'hydrogen': 'erg cm-3 s-1',
+        }
+        columns = {
+            'mass': [
+                'mass_drhobydt',
+                'mass_advection',
+            ],
+            'momentum': [
+                'momentum_drho_vbydt',
+                'momentum_advection',
+                'momentum_pressure_gradient',
+                'momentum_gravity',
+                'momentum_viscous_stress',
+                'momentum_numerical_viscosity',
+            ],
+            'electrons': [
+                'electron_dTEKEbydt',
+                'electron_enthalpy',
+                'electron_conduction',
+                'electron_gravity',
+                'electron_collisions',
+                'electron_heating',
+                'electron_radiative_loss',
+                'electron_electric_field',
+                'electron_viscous_stress',
+                'electron_numerical_viscosity',
+                'electron_ionization'
+            ],
+            'hydrogen': [
+                'hydrogen_dTEKEbydt',
+                'hydrogen_enthalpy',
+                'hydrogen_conduction',
+                'hydrogen_gravity',
+                'hydrogen_collisions',
+                'hydrogen_heating',
+                'hydrogen_radiative_loss',
+                'hydrogen_electric_field',
+                'hydrogen_viscous_stress',
+                'hydrogen_numerical_viscosity',
+                'hydrogen_ionization',
+            ]
+        }
+        offsets = {
+            'mass': 0,
+            'momentum': len(columns['mass']),
+            'electron': len(columns['mass'])+len(columns['momentum']),
+            'hydrogen': len(columns['mass'])+len(columns['momentum'])+len(columns['electron']),
+        }
+        # Read data from file into table per term category
+        terms = {}
+        for i,(k,v) in enumerate(columns.items()):
+            terms[k] = read_csv(self._trm_filename,
+                                sep='\t',
+                                header=None,
+                                names=v,
+                                skiprows=lambda x: x % 5 != (i+1))
+        # Read into single matrix
+        n_elements = len(terms['mass'])
+        self._trm_data = np.zeros([n_elements, offsets['hydrogen']+len(columns['hydrogen'])])
         for i in range(n_elements):
-            for j in range(n_mass):
-                self._trm_data[i,j] = mass_terms[mass_columns[j]][i]
-            for j in range(n_momentum):
-                self._trm_data[i,j+offsets[0]] = momentum_terms[momentum_columns[j]][i]
-            for j in range(n_electron):
-                self._trm_data[i,j+offsets[1]] = electron_terms[electron_columns[j]][i]
-            for j in range(n_hydrogen):
-                self._trm_data[i,j+offsets[2]] = hydrogen_terms[hydrogen_columns[j]][i]
-
-        properties = []
-        for i in range(n_mass):
-            properties += [(mass_columns[i], '_trm_data', i, 'g cm-3 s-1')]
-        for i in range(n_momentum):
-            properties += [(momentum_columns[i], '_trm_data', i+offsets[0], 'dyne cm-3 s-1')]
-        for i in range(n_electron):
-            properties += [(electron_columns[i], '_trm_data', i+offsets[1], 'erg cm-3 s-1')]
-        for i in range(n_hydrogen):
-            properties += [(hydrogen_columns[i], '_trm_data', i+offsets[2], 'erg cm-3 s-1')]
-
-        for p in properties:
-            add_property(*p)
+            for k,v in columns.items():
+                for j in range(len(v)):
+                    self._trm_data[i,j+offsets[k]] = terms[k][v[j]][i]
+        # Add individual property for each term
+        for k,v in columns.items():
+            for i in range(len(v)):
+                add_property(v[i], '_trm_data', i+offsets[k], units[k])
 
     def _read_ine(self):
         """
