@@ -405,7 +405,7 @@ class Configure(object):
         n_min = L / self.config['grid']['maximum_cell_width']
         if n_min.decompose().unit != u.dimensionless_unscaled:
             raise u.UnitConversionError(f'''Maximum cell width must be able to be converted to {L.unit}''')
-        return int(np.round(n_min.decompose()))
+        return int(np.ceil(n_min.decompose()))
 
     @property
     def maximum_cells(self):
