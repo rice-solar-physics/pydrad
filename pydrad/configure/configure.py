@@ -202,7 +202,7 @@ class Configure(object):
         if hasattr(self, '_freeze_date') and self._freeze_date:
             return self._date
         else:
-            return datetime.datetime.now(datetime.UTC).strftime('%Y-%m-%d_%H.%M.%S UTC')
+            return datetime.datetime.utcnow().strftime('%Y-%m-%d_%H.%M.%S UTC')
 
     @property
     def templates(self,):
