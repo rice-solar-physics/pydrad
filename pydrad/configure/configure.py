@@ -353,11 +353,8 @@ class Configure(object):
         expansion
         """
         fit_results = self._fit_poly_domains(
-            self.config['general']['poly_fit_magnetic_field']['x'],
-            self.config['general']['poly_fit_magnetic_field']['y'],
-            self.config['general']['poly_fit_magnetic_field']['domains'],
-            self.config['general']['poly_fit_magnetic_field']['order'],
-            'G',
+            **self.config['general']['poly_fit_magnetic_field'],
+            target_unit='G',
         )
         return self.env.get_template('coefficients.cfg').render(
             date=self.date,
@@ -371,11 +368,8 @@ class Configure(object):
         acceleration
         """
         fit_results = self._fit_poly_domains(
-            self.config['general']['poly_fit_gravity']['x'],
-            self.config['general']['poly_fit_gravity']['y'],
-            self.config['general']['poly_fit_gravity']['domains'],
-            self.config['general']['poly_fit_gravity']['order'],
-            'cm s-2',
+            **self.config['general']['poly_fit_gravity'],
+            target_unit='cm s-2'
         )
         return self.env.get_template('coefficients.cfg').render(
             date=self.date,
@@ -431,7 +425,8 @@ class Configure(object):
         refinement level and :math:`n_{min}` is the minimum allowed number of
         grid cells. Optionally, if the maximum number of cells is specified
         in ``config['grid']['maximum_cells']``, this value will take
-        precedence.
+        precedence. In general, it is better to set this value explicitly to a sufficiently
+        large value.
         """
         if 'maximum_cells' in self.config['grid']:
             return int(self.config['grid']['maximum_cells'])
