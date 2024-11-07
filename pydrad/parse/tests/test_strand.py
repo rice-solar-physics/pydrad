@@ -55,6 +55,15 @@ VAR_NAMES = [
 def strand(hydrad):
     return Strand(hydrad)
 
+@pytest.fixture
+def strand_only_amr(hydrad):
+    return Strand(hydrad,
+                  read_phy=False,
+                  read_ine=False,
+                  read_trm=False,
+                  read_hstate=False)
+
+
 def test_parse_initial_conditions(strand):
     assert hasattr(strand, 'initial_conditions')
 
@@ -62,6 +71,23 @@ def test_parse_initial_conditions(strand):
 @pytest.mark.parametrize('quantity', VAR_NAMES)
 def test_has_quantity(strand, quantity):
     for p in strand:
+        assert hasattr(p, quantity)
+        assert isinstance(getattr(p, quantity), u.Quantity)
+
+
+@pytest.mark.parametrize('quantity', [
+    'electron_temperature',
+    'ion_temperature',
+    'electron_density',
+    'ion_density',
+    'electron_pressure',
+    'ion_pressure',
+    'velocity',
+])
+def test_no_amr_run_has_quantity(strand_only_amr, quantity):
+    # check that Strand falls back to deriving thermodynamic quantities from
+    # conserved quantities when we do not read the phy files
+    for p in strand_only_amr:
         assert hasattr(p, quantity)
         assert isinstance(getattr(p, quantity), u.Quantity)
 
