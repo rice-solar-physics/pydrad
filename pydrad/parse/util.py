@@ -34,8 +34,6 @@ def read_amr_file(filename):
         'electron_energy_density',
         'ion_energy_density',
     ]
-    # FIXME: Get actual names for these additional columns
-    columns += [f'col{i}' for i in range(6,19)]
     units = {
         'grid_centers': 'cm',
         'grid_widths': 'cm',
@@ -44,13 +42,21 @@ def read_amr_file(filename):
         'electron_energy_density': 'erg cm-3',
         'ion_energy_density': 'erg cm-3',
     }
-    return astropy.table.QTable.read(
+    table = astropy.table.QTable.read(
         filename,
         format='ascii',
         data_start=4,
-        names=columns,
-        units=units,
     )
+    # NOTE: This is done after creating the table because the
+    # remaining number of columns can be variable and thus we
+    # cannot assign all of the column names at once.
+    table.rename_columns(
+        table.colnames[:len(columns)],
+        columns,
+    )
+    for column in columns:
+        table[column].unit = units[column]
+    return table
 
 
 def read_phy_file(filename):
