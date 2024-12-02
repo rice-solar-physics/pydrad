@@ -222,11 +222,6 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
             0, self.loop_length.to(u.cm).value, delta_s.to(u.cm).value)*u.cm
 
     @u.quantity_input
-    def get_unique_grid(self) -> u.cm:
-        all_coordinates = [p.coordinate.to(u.cm).value for p in self]
-        return np.unique(np.concatenate(all_coordinates).ravel()) * u.cm
-
-    @u.quantity_input
     def to_constant_grid(self, name, grid: u.cm, order=1):
         """
         Interpolate a given quantity onto a spatial grid that is the same at
@@ -444,7 +439,9 @@ Timestep #: {self._index}"""
     @u.quantity_input
     def coordinate(self) -> u.cm:
         """
-        Spatial coordinate in the field-aligned direction
+        Spatial coordinate, :math:`s`, in the field-aligned direction.
+
+        An alias for `~pydrad.parse.Profile.grid_centers`.
         """
         return self.grid_centers
 
@@ -462,26 +459,49 @@ Timestep #: {self._index}"""
     @property
     @u.quantity_input
     def mass_density(self) -> u.Unit('g cm-3'):
+        r"""
+        Mass density, :math:`\rho`, as a function of :math:`s`.
+
+        .. note:: This is a conserved quantity in HYDRAD.
+        """
         return self._amr_data['mass_density']
 
     @property
     @u.quantity_input
     def momentum_density(self) -> u.Unit('g cm-2 s-1'):
+        r"""
+        Momentum density, :math:`\rho v`, as a function of :math:`s`.
+
+        .. note:: This is a conserved quantity in HYDRAD.
+        """
         return self._amr_data['momentum_density']
 
     @property
     @u.quantity_input
     def electron_energy_density(self) -> u.Unit('erg cm-3'):
+        r"""
+        Electron energy density, :math:`E_e`, as a function of :math:`s`.
+
+        .. note:: This is a conserved quantity in HYDRAD.
+        """
         return self._amr_data['electron_energy_density']
 
     @property
     @u.quantity_input
     def hydrogen_energy_density(self) -> u.Unit('erg cm-3'):
+        r"""
+        Hydrogen energy density, :math:`E_H`, as a function of :math:`s`.
+
+        .. note:: This is a conserved quantity in HYDRAD.
+        """
         return self._amr_data['hydrogen_energy_density']
 
     @property
     @u.quantity_input
     def velocity(self) -> u.cm/u.s:
+        r"""
+        Bulk velocity, :math:`v`, as a function of :math:`s`.
+        """
         if hasattr(self, '_phy_data'):
             return self._phy_data['velocity']
         return self.momentum_density / self.mass_density
@@ -489,6 +509,10 @@ Timestep #: {self._index}"""
     @property
     @u.quantity_input
     def hydrogen_density(self) -> u.Unit('cm-3'):
+        r"""
+        Hydrogen density, :math:`n_H=\rho/\bar{m_i}`, as a function of :math:`s`,
+        where :math:`\bar{m_i} is the average ion mass of a H-He plasma.
+        """
         if hasattr(self, '_phy_data'):
             return self._phy_data['hydrogen_density']
         return self.mass_density / pydrad.util.constants.m_avg_ion
@@ -496,6 +520,10 @@ Timestep #: {self._index}"""
     @property
     @u.quantity_input
     def electron_density(self) -> u.Unit('cm-3'):
+        r"""
+        Electron density, :math:`n_e`, as a function of :math:`s`.
+        In nearly all cases, this is equal to `~pydrad.parse.Profile.hydrogen_density`.
+        """
         if hasattr(self, '_phy_data'):
             return self._phy_data['electron_density']
         # FIXME: If this exists as a separate column in the .amr file then
@@ -506,6 +534,9 @@ Timestep #: {self._index}"""
     @property
     @u.quantity_input
     def electron_pressure(self) -> u.Unit('dyne cm-2'):
+        r"""
+        Electron pressure, :math:`P_e=(\gamma - 1)E_e`, as a function of :math:`s`.
+        """
         if hasattr(self, '_phy_data'):
             return self._phy_data['electron_pressure']
         return self.electron_energy_density / (pydrad.util.constants.gamma - 1)
@@ -513,21 +544,30 @@ Timestep #: {self._index}"""
     @property
     @u.quantity_input
     def hydrogen_pressure(self) -> u.Unit('dyne cm-2'):
+        r"""
+        Hydrogen pressure, :math:`P_H = (\gamma - 1)(E_H - \rho v^2/2)`, as a function of :math:`s`.
+        """
         if hasattr(self, '_phy_data'):
             return self._phy_data['hydrogen_pressure']
         return (
             self.hydrogen_energy_density
             - self.momentum_density**2/(2*self.mass_density)
-        )/(pydrad.util.constants.gamma - 1)
+        )*(pydrad.util.constants.gamma - 1)
 
     @property
     @u.quantity_input
     def total_pressure(self) -> u.Unit('dyne cm-2'):
+        r"""
+        Total pressure, :math:`P = P_e + P_H`, as a function of :math:`s`.
+        """
         return self.electron_pressure + self.hydrogen_pressure
 
     @property
     @u.quantity_input
     def electron_temperature(self) -> u.Unit('K'):
+        r"""
+        Electron temperature, :math:`T_e = P_e / (k_B n_e)`, as a function of :math:`s`.
+        """
         if hasattr(self, '_phy_data'):
             return self._phy_data['electron_temperature']
         return self.electron_pressure / (const.k_B*self.electron_density)
@@ -535,6 +575,9 @@ Timestep #: {self._index}"""
     @property
     @u.quantity_input
     def hydrogen_temperature(self) -> u.Unit('K'):
+        r"""
+        Hydrogen temperature, :math:`T_H = P_H / (k_B n_H)`, as a function of :math:`s`.
+        """
         if hasattr(self, '_phy_data'):
             return self._phy_data['hydrogen_temperature']
         return self.hydrogen_pressure / (const.k_B*self.hydrogen_density)
