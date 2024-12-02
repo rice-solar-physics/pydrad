@@ -425,8 +425,8 @@ class Configure(object):
         refinement level and :math:`n_{min}` is the minimum allowed number of
         grid cells. Optionally, if the maximum number of cells is specified
         in ``config['grid']['maximum_cells']``, this value will take
-        precedence. In general, it is better to set this value explicitly to a sufficiently
-        large value.
+        precedence. Alternatively, using a value of 30000 will be sufficiently large for
+        any amount of refinement used in HYDRAD.
         """
         if 'maximum_cells' in self.config['grid']:
             return int(self.config['grid']['maximum_cells'])

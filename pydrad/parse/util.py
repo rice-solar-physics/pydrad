@@ -19,8 +19,11 @@ __all__ = [
 
 def read_amr_file(filename):
     """
-    Parse ``.amr`` files containing grid parameters and conserved quantities as
-    a function of position
+    Parse the adaptive mesh refinement ``.amr`` files containing grid parameters
+    and conserved quantities as a function of position.
+
+    .. note:: This is not intended for direct use. Use the `pydrad.parse.Strand`
+              object instead.
     """
     # TODO: Account for possible presence of both electron
     # and ion mass densities. If the electron mass density
@@ -29,18 +32,18 @@ def read_amr_file(filename):
     columns = [
         'grid_centers',
         'grid_widths',
-        'ion_mass_density',
+        'mass_density',
         'momentum_density',
         'electron_energy_density',
-        'ion_energy_density',
+        'hydrogen_energy_density',
     ]
     units = {
         'grid_centers': 'cm',
         'grid_widths': 'cm',
-        'ion_mass_density': 'g cm-3',
+        'mass_density': 'g cm-3',
         'momentum_density': 'g cm-2 s-1',
         'electron_energy_density': 'erg cm-3',
-        'ion_energy_density': 'erg cm-3',
+        'hydrogen_energy_density': 'erg cm-3',
     }
     table = astropy.table.QTable.read(
         filename,
@@ -61,33 +64,37 @@ def read_amr_file(filename):
 
 def read_phy_file(filename):
     """
-    Parse ``.phy`` files containing thermodynamic quantities as a function of position.
+    Parse physical variables ``.phy`` files containing thermodynamic
+    quantities as a function of position.
+
+    .. note:: This is not intended for direct use. Use the `pydrad.parse.Strand`
+              object instead.
     """
     columns = [
         'coordinate',
         'velocity',
         'sound_speed',
         'electron_density',
-        'ion_density',
+        'hydrogen_density',
         'electron_pressure',
-        'ion_pressure',
+        'hydrogen_pressure',
         'electron_temperature',
-        'ion_temperature',
+        'hydrogen_temperature',
         'electron_heat_flux',
-        'ion_heat_flux',
+        'hydrogen_heat_flux',
     ]
     units = {
         'coordinate': 'cm',
         'velocity': 'cm / s',
         'sound_speed': 'cm / s',
         'electron_density': 'cm-3',
-        'ion_density': 'cm-3',
+        'hydrogen_density': 'cm-3',
         'electron_pressure': 'dyne cm-2',
-        'ion_pressure': 'dyne cm-2',
+        'hydrogen_pressure': 'dyne cm-2',
         'electron_temperature': 'K',
-        'ion_temperature': 'K',
+        'hydrogen_temperature': 'K',
         'electron_heat_flux': 'erg s-1 cm-2',
-        'ion_heat_flux': 'erg s-1 cm-2',
+        'hydrogen_heat_flux': 'erg s-1 cm-2',
     }
     return astropy.table.QTable.read(
         filename,
@@ -99,7 +106,8 @@ def read_phy_file(filename):
 
 def read_ine_file(filename, n_s):
     """
-    Parse ``.ine`` files containing ionization fraction as a function of position
+    Parse the ionization non-equilibrium ``.ine`` files containing
+    ionization fraction as a function of position.
 
     .. note:: This is not intended for direct use. Use the `pydrad.parse.Strand`
               object instead.
@@ -220,7 +228,7 @@ def read_hstate_file(filename):
     """
     Parse the ``.hstate`` files containing the hydrogen level populations as a function of position
     """
-    columns = [f'level_population_hydrogen_{i}' for i in range(1,7)]
+    columns = [f'hydrogen_I_level_{i}' for i in range(1,6)] + ['hydrogen_II_fraction']
     return astropy.table.QTable.read(
         filename,
         format='ascii',
