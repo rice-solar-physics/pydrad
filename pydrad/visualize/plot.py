@@ -252,7 +252,7 @@ def _plot_profile(profile, axes, **kwargs):
     )
     line1b, = axes[0, 0].plot(
         profile.coordinate.to(u.Mm),
-        profile.ion_temperature.to(u.MK),
+        profile.hydrogen_temperature.to(u.MK),
         **kwargs,
         ls='--'
     )
@@ -264,7 +264,7 @@ def _plot_profile(profile, axes, **kwargs):
     )
     line2b, = axes[0, 1].plot(
         profile.coordinate.to(u.Mm),
-        profile.ion_density.to(u.cm**(-3)),
+        profile.hydrogen_density.to(u.cm**(-3)),
         **kwargs,
         ls='--'
     )
@@ -276,7 +276,7 @@ def _plot_profile(profile, axes, **kwargs):
     )
     line3b, = axes[1, 0].plot(
         profile.coordinate.to(u.Mm),
-        profile.ion_pressure.to(u.dyne / (u.cm**2)),
+        profile.hydrogen_pressure.to(u.dyne / (u.cm**2)),
         **kwargs,
         ls='--'
     )

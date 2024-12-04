@@ -103,7 +103,7 @@ print(p)
 # grid. Note that each profile is a `~astropy.units.Quantity` and can
 # be easily converted to any compatible unit.
 print(p.electron_temperature)
-print(p.ion_density)
+print(p.hydrogen_density)
 print(p.velocity)
 
 #################################################################
@@ -125,7 +125,7 @@ print(s[::2])
 # single time step as a function of field-aligned coordinate.
 # The `~pydrad.parse.Profile` object provides a simple quicklook
 # method for this,
-s[0].peek()
+p.peek()
 
 #################################################################
 # Similarly, we can call this method on a `~pydrad.parse.Strand` to

@@ -3,6 +3,7 @@ site/
 docs/api/*
 docs/config_tables.rst
 docs/generated
+docs/sg_execution_times.rst
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

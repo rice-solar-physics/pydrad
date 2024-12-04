@@ -1,20 +1,20 @@
 """
 Interface for easily parsing HYDRAD results
 """
-import glob
-import os
 import pathlib
 
+import astropy.constants as const
 import astropy.units as u
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
-import plasmapy.particles
-from pandas import read_csv
 from scipy.interpolate import splev, splrep
 
+import pydrad.util.constants
 from pydrad import log
 from pydrad.configure import Configure
+from pydrad.parse.util import (read_amr_file, read_hstate_file, read_ine_file,
+                               read_phy_file, read_trm_file)
 from pydrad.visualize import (animate_strand, plot_histogram, plot_profile,
                               plot_strand, plot_time_distance, plot_time_mesh)
 
@@ -172,10 +172,15 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         `~pydrad.parse.Profile` for the solutions to the hydrostatic
         equations used as initial conditions.
         """
+        profile_kwargs = self._profile_kwargs.copy()
+        # NOTE: These files do not exist for the initial conditions
+        profile_kwargs['read_hstate'] = False
+        profile_kwargs['read_ine'] = False
+        profile_kwargs['read_trm'] = False
         return InitialProfile(self.hydrad_root,
                               0*u.s,
                               master_time=[0]*u.s,
-                              **self._profile_kwargs)
+                              **profile_kwargs)
 
     def peek(self, **kwargs):
         """
@@ -215,11 +220,6 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         """
         return np.arange(
             0, self.loop_length.to(u.cm).value, delta_s.to(u.cm).value)*u.cm
-
-    @u.quantity_input
-    def get_unique_grid(self) -> u.cm:
-        all_coordinates = [p.coordinate.to(u.cm).value for p in self]
-        return np.unique(np.concatenate(all_coordinates).ravel()) * u.cm
 
     @u.quantity_input
     def to_constant_grid(self, name, grid: u.cm, order=1):
@@ -280,7 +280,7 @@ class Profile(object):
 
     Parameters
     ----------
-    hydrad_root : `str`
+    hydrad_root : path-like
         Path to HYDRAD directory
     time : `~astropy.units.Quantity`
         Timestep corresponding to the profile of interest
@@ -297,12 +297,13 @@ class Profile(object):
             self._master_time = get_master_time(self.hydrad_root,
                                                 read_from_cfg=kwargs.get('read_from_cfg', False))
         # Read results files
-        self._read_phy()
         self._read_amr()
-        if kwargs.get('read_hstate', True):
-            self._read_hstate()
+        if kwargs.get('read_phy', True):
+            self._read_phy()
         if kwargs.get('read_ine', True):
             self._read_ine()
+        if kwargs.get('read_hstate', True):
+            self._read_hstate()
         if kwargs.get('read_trm', True):
             self._read_trm()
 
@@ -336,152 +337,61 @@ class Profile(object):
 Filename: {self._phy_filename}
 Timestep #: {self._index}"""
 
-    def _read_phy(self):
-        """
-        Parse the hydrodynamics results file
-        """
-        self._phy_data = np.loadtxt(self._phy_filename)
-
     def _read_amr(self):
         """
-        Parse the adaptive mesh grid file
+        Parse the adaptive mesh refinement (``.amr``) file
         """
-        # TODO: Read other quantities from .amr file
-        with self._amr_filename.open() as f:
-            lines = f.readlines()
-            self._grid_centers = np.zeros((int(lines[3]),))
-            self._grid_widths = np.zeros((int(lines[3]),))
-            for i, l in enumerate(lines[4:]):
-                tmp = np.array(l.split(), dtype=float)
-                self._grid_centers[i] = tmp[0]
-                self._grid_widths[i] = tmp[1]
+        self._amr_data = read_amr_file(self._amr_filename)
+
+    def _read_phy(self):
+        """
+        Parse the physical variables (``.phy``) file and set attributes
+        for relevant quantities.
+        """
+        if not self._phy_filename.is_file():
+            log.warning(f'{self._phy_filename} not found. Skipping parsing of .phy files. Set read_phy=False to suppress this warning.')
+            return
+        self._phy_data = read_phy_file(self._phy_filename)
+        # NOTE: only adding three columns in this manner as the remaining columns are dealt with explicitly
+        # below because of the overlap with the derived quantities from the .amr files.
+        for column in ['sound_speed', 'electron_heat_flux', 'hydrogen_heat_flux']:
+            _add_property(column, '_phy_data')
 
     def _read_trm(self):
         """
-        Parse the equation terms file
-
-        The files come in sets of 5 rows with variable number of columns:
-            -- Loop coordinate (1 column), and at each position:
-            -- Terms of mass equation (2 columns)
-            -- Terms of momentum equation (6 columns)
-            -- Terms of electron energy equation (11 columns)
-            -- Terms of hydrogen energy equation (11 columns)
+        Parse the equation terms (``.trm``) file and set attributes
+        for relevant quantities.
         """
-        mass_columns = ['mass_drhobydt','mass_advection']
-        momentum_columns = ['momentum_drho_vbydt','momentum_advection','momentum_pressure_gradient',
-        'momentum_gravity','momentum_viscous_stress','momentum_numerical_viscosity']
-        electron_columns = ['electron_dTEKEbydt','electron_enthalpy','electron_conduction',
-        'electron_gravity','electron_collisions','electron_heating','electron_radiative_loss',
-        'electron_electric_field','electron_viscous_stress','electron_numerical_viscosity',
-        'electron_ionization']
-        hydrogen_columns = ['hydrogen_dTEKEbydt','hydrogen_enthalpy','hydrogen_conduction',
-        'hydrogen_gravity','hydrogen_collisions','hydrogen_heating','hydrogen_radiative_loss',
-        'hydrogen_electric_field','hydrogen_viscous_stress','hydrogen_numerical_viscosity',
-        'hydrogen_ionization']
-
-        n_mass = len(mass_columns)
-        n_momentum = len(momentum_columns)
-        n_electron = len(electron_columns)
-        n_hydrogen = len(hydrogen_columns)
-
-        # Terms from the mass equation:
-        mass_terms = read_csv(self._trm_filename, sep='\t', header=None, names=mass_columns,
-                                skiprows=lambda x: x % 5 != 1 )
-        # Terms from the momentum equation:
-        momentum_terms = read_csv(self._trm_filename, sep='\t', header=None, names=momentum_columns,
-                                skiprows=lambda x: x % 5 != 2 )
-        # Terms from the electron energy equation:
-        electron_terms = read_csv(self._trm_filename, sep='\t', header=None, names=electron_columns,
-                                skiprows=lambda x: x % 5 != 3 )
-
-        # Terms from the hydrogen energy equation:
-        hydrogen_terms = read_csv(self._trm_filename, sep='\t', header=None, names=hydrogen_columns,
-                                skiprows=lambda x: x % 5 != 4 )
-
-        offsets = [n_mass,
-                   n_mass+n_momentum,
-                   n_mass+n_momentum+n_electron
-                  ]
-
-        n_elements = len(mass_terms)
-        self._trm_data = np.zeros([n_elements, offsets[2]+n_hydrogen])
-
-        for i in range(n_elements):
-            for j in range(n_mass):
-                self._trm_data[i,j] = mass_terms[mass_columns[j]][i]
-            for j in range(n_momentum):
-                self._trm_data[i,j+offsets[0]] = momentum_terms[momentum_columns[j]][i]
-            for j in range(n_electron):
-                self._trm_data[i,j+offsets[1]] = electron_terms[electron_columns[j]][i]
-            for j in range(n_hydrogen):
-                self._trm_data[i,j+offsets[2]] = hydrogen_terms[hydrogen_columns[j]][i]
-
-        properties = []
-        for i in range(n_mass):
-            properties += [(mass_columns[i], '_trm_data', i, 'g cm-3 s-1')]
-        for i in range(n_momentum):
-            properties += [(momentum_columns[i], '_trm_data', i+offsets[0], 'dyne cm-3 s-1')]
-        for i in range(n_electron):
-            properties += [(electron_columns[i], '_trm_data', i+offsets[1], 'erg cm-3 s-1')]
-        for i in range(n_hydrogen):
-            properties += [(hydrogen_columns[i], '_trm_data', i+offsets[2], 'erg cm-3 s-1')]
-
-        for p in properties:
-            add_property(*p)
+        if not self._trm_filename.is_file():
+            log.warning(f'{self._trm_filename} not found. Skipping parsing of .trm files. Set read_trm=False to suppress this warning.')
+            return
+        self._trm_data = read_trm_file(self._trm_filename)
+        for col in self._trm_data.colnames:
+            _add_property(col, '_trm_data')
 
     def _read_ine(self):
         """
-        Parse non-equilibrium ionization population fraction files
+        Parse non-equilibrium ionization population fraction (``.ine``) file
         and set attributes for relevant quantities
         """
-        # TODO: clean this up somehow? I've purposefully included
-        # a lot of comments because the format of this file makes
-        # the parsing code quite opaque
-        try:
-            with self._ine_filename.open() as f:
-                lines = f.readlines()
-        except FileNotFoundError:
-            log.debug(f'{self._ine_filename} not found')
+        if not self._ine_filename.is_file():
+            log.warning(f'{self._ine_filename} not found. Skipping parsing of .ine files. Set read_ine=False to suppress this warning.')
             return
-        # First parse all of the population fraction arrays
-        n_s = self.coordinate.shape[0]
-        # NOTE: Have to calculate the number of elements we have
-        # computed population fractions for as we do not necessarily
-        # know this ahead of time
-        n_e = int(len(lines)/n_s - 1)
-        # The file is arranged in n_s groups of n_e+1 lines each where the first
-        # line is the coordinate and the subsequent lines are the population fraction
-        # for each element, with each column corresponding to an ion of that element
-        # First, separate by coordinate
-        pop_lists = [lines[i*(n_e+1)+1:(i+1)*(n_e+1)] for i in range(n_s)]
-        # Convert each row of each group into a floating point array
-        pop_lists = [[np.array(l.split(), dtype=float) for l in p] for p in pop_lists]
-        # NOTE: each row has Z+2 entries as the first entry is the atomic number Z
-        # Get these from just the first group as the number of elements is the same
-        # for each
-        Z = np.array([p[0] for p in pop_lists[0]], dtype=int)
-        pop_arrays = [np.zeros((n_s, z+1))for z in Z]
-        for i, p in enumerate(pop_lists):
-            for j, l in enumerate(p):
-                pop_arrays[j][i, :] = l[1:]  # Skip first entry, it is the atomic number
-
-        # Then set attributes for each ion of each element
-        for z, p in zip(Z, pop_arrays):
-            name = plasmapy.particles.element_name(z)
-            attr = f'_population_fraction_{name}'
-            setattr(self, attr, p)
-            for p in [(f'{attr[1:]}_{i+1}', attr, i, '') for i in range(z+1)]:
-                add_property(*p)
+        self._ine_data = read_ine_file(self._ine_filename, self.coordinate.shape[0])
+        for col in self._ine_data.colnames:
+            _add_property(col, '_ine_data')
 
     def _read_hstate(self):
         """
-        Parse the hydrogen energy level populations file
+        Parse the hydrogen energy level populations (``.hstate``) file and set
+        the relevant attributes.
         """
-        try:
-            self._hstate_data = np.loadtxt(self._hstate_filename)
-        except OSError:
-            log.debug(f'{self._hstate_filename} not found')
-            self._hstate_data = None
+        if not self._hstate_filename.is_file():
+            log.warning(f'{self._hstate_filename} not found. Skipping parsing of .hstate files. Set read_hstate=False to suppress this warning.')
+            return
+        self._hstate_data = read_hstate_file(self._hstate_filename)
+        for col in self._hstate_data.colnames:
+            _add_property(col, '_hstate_data')
 
     @property
     @u.quantity_input
@@ -489,7 +399,7 @@ Timestep #: {self._index}"""
         """
         Spatial location of the grid centers
         """
-        return u.Quantity(self._grid_centers, 'cm')
+        return self._amr_data['grid_centers']
 
     @property
     @u.quantity_input
@@ -497,7 +407,7 @@ Timestep #: {self._index}"""
         """
         Spatial width of each grid cell
         """
-        return u.Quantity(self._grid_widths, 'cm')
+        return self._amr_data['grid_widths']
 
     @property
     @u.quantity_input
@@ -524,6 +434,153 @@ Timestep #: {self._index}"""
         Spatial location of the right edge of each grid cell
         """
         return self.grid_edges[1:]
+
+    @property
+    @u.quantity_input
+    def coordinate(self) -> u.cm:
+        """
+        Spatial coordinate, :math:`s`, in the field-aligned direction.
+
+        An alias for `~pydrad.parse.Profile.grid_centers`.
+        """
+        return self.grid_centers
+
+    @property
+    @u.quantity_input
+    def electron_mass_density(self) -> u.Unit('g cm-3'):
+        # TODO: Account for possible presence of both electron
+        # and ion mass densities. If the electron mass density
+        # is present in this file, it will shift all of the
+        # indices in the .amr file by one.
+        if 'electron_mass_density' in self._amr_data.colnames:
+            return self._amr_data['electron_mass_density']
+        return self.mass_density
+
+    @property
+    @u.quantity_input
+    def mass_density(self) -> u.Unit('g cm-3'):
+        r"""
+        Mass density, :math:`\rho`, as a function of :math:`s`.
+
+        .. note:: This is a conserved quantity in HYDRAD.
+        """
+        return self._amr_data['mass_density']
+
+    @property
+    @u.quantity_input
+    def momentum_density(self) -> u.Unit('g cm-2 s-1'):
+        r"""
+        Momentum density, :math:`\rho v`, as a function of :math:`s`.
+
+        .. note:: This is a conserved quantity in HYDRAD.
+        """
+        return self._amr_data['momentum_density']
+
+    @property
+    @u.quantity_input
+    def electron_energy_density(self) -> u.Unit('erg cm-3'):
+        r"""
+        Electron energy density, :math:`E_e`, as a function of :math:`s`.
+
+        .. note:: This is a conserved quantity in HYDRAD.
+        """
+        return self._amr_data['electron_energy_density']
+
+    @property
+    @u.quantity_input
+    def hydrogen_energy_density(self) -> u.Unit('erg cm-3'):
+        r"""
+        Hydrogen energy density, :math:`E_H`, as a function of :math:`s`.
+
+        .. note:: This is a conserved quantity in HYDRAD.
+        """
+        return self._amr_data['hydrogen_energy_density']
+
+    @property
+    @u.quantity_input
+    def velocity(self) -> u.cm/u.s:
+        r"""
+        Bulk velocity, :math:`v`, as a function of :math:`s`.
+        """
+        if hasattr(self, '_phy_data'):
+            return self._phy_data['velocity']
+        return self.momentum_density / self.mass_density
+
+    @property
+    @u.quantity_input
+    def hydrogen_density(self) -> u.Unit('cm-3'):
+        r"""
+        Hydrogen density, :math:`n_H=\rho/\bar{m_i}`, as a function of :math:`s`,
+        where :math:`\bar{m_i} is the average ion mass of a H-He plasma.
+        """
+        if hasattr(self, '_phy_data'):
+            return self._phy_data['hydrogen_density']
+        return self.mass_density / pydrad.util.constants.m_avg_ion
+
+    @property
+    @u.quantity_input
+    def electron_density(self) -> u.Unit('cm-3'):
+        r"""
+        Electron density, :math:`n_e`, as a function of :math:`s`.
+        In nearly all cases, this is equal to `~pydrad.parse.Profile.hydrogen_density`.
+        """
+        if hasattr(self, '_phy_data'):
+            return self._phy_data['electron_density']
+        # FIXME: If this exists as a separate column in the .amr file then
+        # choose that. Otherwise, the electron and ion densities are assumed
+        # to be the same.
+        return self.hydrogen_density
+
+    @property
+    @u.quantity_input
+    def electron_pressure(self) -> u.Unit('dyne cm-2'):
+        r"""
+        Electron pressure, :math:`P_e=(\gamma - 1)E_e`, as a function of :math:`s`.
+        """
+        if hasattr(self, '_phy_data'):
+            return self._phy_data['electron_pressure']
+        return self.electron_energy_density / (pydrad.util.constants.gamma - 1)
+
+    @property
+    @u.quantity_input
+    def hydrogen_pressure(self) -> u.Unit('dyne cm-2'):
+        r"""
+        Hydrogen pressure, :math:`P_H = (\gamma - 1)(E_H - \rho v^2/2)`, as a function of :math:`s`.
+        """
+        if hasattr(self, '_phy_data'):
+            return self._phy_data['hydrogen_pressure']
+        return (
+            self.hydrogen_energy_density
+            - self.momentum_density**2/(2*self.mass_density)
+        )*(pydrad.util.constants.gamma - 1)
+
+    @property
+    @u.quantity_input
+    def total_pressure(self) -> u.Unit('dyne cm-2'):
+        r"""
+        Total pressure, :math:`P = P_e + P_H`, as a function of :math:`s`.
+        """
+        return self.electron_pressure + self.hydrogen_pressure
+
+    @property
+    @u.quantity_input
+    def electron_temperature(self) -> u.Unit('K'):
+        r"""
+        Electron temperature, :math:`T_e = P_e / (k_B n_e)`, as a function of :math:`s`.
+        """
+        if hasattr(self, '_phy_data'):
+            return self._phy_data['electron_temperature']
+        return self.electron_pressure / (const.k_B*self.electron_density)
+
+    @property
+    @u.quantity_input
+    def hydrogen_temperature(self) -> u.Unit('K'):
+        r"""
+        Hydrogen temperature, :math:`T_H = P_H / (k_B n_H)`, as a function of :math:`s`.
+        """
+        if hasattr(self, '_phy_data'):
+            return self._phy_data['hydrogen_temperature']
+        return self.hydrogen_pressure / (const.k_B*self.hydrogen_density)
 
     def spatial_average(self, quantity, bounds=None):
         """
@@ -570,7 +627,7 @@ Timestep #: {self._index}"""
             bins = 10.0**(np.arange(3.0, 8.0, 0.05)) * u.K
         if bounds is None:
             bounds = self.grid_edges[[0, -1]]
-        weights = self.electron_density * self.ion_density * self.grid_widths
+        weights = self.electron_density * self.hydrogen_density * self.grid_widths
         H, _, _ = np.histogram2d(self.grid_centers, self.electron_temperature,
                                  bins=(bounds, bins), weights=weights)
         return H.squeeze(), bins
@@ -616,7 +673,7 @@ class InitialProfile(Profile):
         return self.hydrad_root / 'Initial_Conditions' / 'profiles' / 'initial.amr.phy'
 
 
-def add_property(name, attr, index, unit):
+def _add_property(name, attr,):
     """
     Auto-generate properties for various pieces of data
     """
@@ -624,25 +681,7 @@ def add_property(name, attr, index, unit):
         data = getattr(self, attr)
         if data is None:
             raise ValueError(f'No data available for {name}')
-        return u.Quantity(data[:, index], unit)
+        return u.Quantity(data[name])
     property_template.__doc__ = f'{" ".join(name.split("_")).capitalize()} as a function of :math:`s`'
     property_template.__name__ = name
     setattr(Profile, property_template.__name__, property(property_template))
-
-
-properties = [
-    ('coordinate', '_phy_data', 0, 'cm'),
-    ('velocity', '_phy_data', 1, 'cm / s'),
-    ('sound_speed', '_phy_data', 2, 'cm / s'),
-    ('electron_density', '_phy_data', 3, 'cm-3'),
-    ('ion_density', '_phy_data', 4, 'cm-3'),
-    ('electron_pressure', '_phy_data', 5, 'dyne cm-2'),
-    ('ion_pressure', '_phy_data', 6, 'dyne cm-2'),
-    ('electron_temperature', '_phy_data', 7, 'K'),
-    ('ion_temperature', '_phy_data', 8, 'K'),
-    ('electron_heat_flux', '_phy_data', 9, 'erg s-1 cm-2'),
-    ('ion_heat_flux', '_phy_data', 10, 'erg s-1 cm-2'),
-]
-properties += [(f'level_population_hydrogen_{i}', '_hstate_data', i, '') for i in range(1, 7)]
-for p in properties:
-    add_property(*p)

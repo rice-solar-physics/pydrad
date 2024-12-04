@@ -42,11 +42,11 @@ def animate_strand(strand, **kwargs):
     def update_plot(i):
         p = strand[i]
         l1a.set_data(p.coordinate.to(u.Mm), p.electron_temperature.to(u.MK))
-        l1b.set_data(p.coordinate.to(u.Mm), p.ion_temperature.to(u.MK))
+        l1b.set_data(p.coordinate.to(u.Mm), p.hydrogen_temperature.to(u.MK))
         l2a.set_data(p.coordinate.to(u.Mm), p.electron_density.to(u.cm**(-3)))
-        l2b.set_data(p.coordinate.to(u.Mm), p.ion_density.to(u.cm**(-3)))
+        l2b.set_data(p.coordinate.to(u.Mm), p.hydrogen_density.to(u.cm**(-3)))
         l3a.set_data(p.coordinate.to(u.Mm), p.electron_pressure.to(u.dyne/(u.cm**2)))
-        l3b.set_data(p.coordinate.to(u.Mm), p.ion_pressure.to(u.dyne/(u.cm**2)))
+        l3b.set_data(p.coordinate.to(u.Mm), p.hydrogen_pressure.to(u.dyne/(u.cm**2)))
         l4.set_data(p.coordinate.to(u.Mm), p.velocity.to(u.km/u.s))
         fig.suptitle(r'$t={:.0f}$ {}'.format(
             strand.time[i].value, strand.time[i].unit), y=0.905)
