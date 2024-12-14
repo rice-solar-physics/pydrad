@@ -14,15 +14,15 @@ VAR_NAMES = [
     'grid_widths',
     'grid_centers',
     'electron_temperature',
-    'ion_temperature',
+    'hydrogen_temperature',
     'electron_density',
-    'ion_density',
+    'hydrogen_density',
     'electron_pressure',
-    'ion_pressure',
+    'hydrogen_pressure',
     'velocity',
     'sound_speed',
     'electron_heat_flux',
-    'ion_heat_flux',
+    'hydrogen_heat_flux',
     'mass_drhobydt',
     'mass_advection',
     'momentum_drho_vbydt',
@@ -55,6 +55,15 @@ VAR_NAMES = [
 def strand(hydrad):
     return Strand(hydrad)
 
+@pytest.fixture
+def strand_only_amr(hydrad):
+    return Strand(hydrad,
+                  read_phy=False,
+                  read_ine=False,
+                  read_trm=False,
+                  read_hstate=False)
+
+
 def test_parse_initial_conditions(strand):
     assert hasattr(strand, 'initial_conditions')
 
@@ -62,6 +71,23 @@ def test_parse_initial_conditions(strand):
 @pytest.mark.parametrize('quantity', VAR_NAMES)
 def test_has_quantity(strand, quantity):
     for p in strand:
+        assert hasattr(p, quantity)
+        assert isinstance(getattr(p, quantity), u.Quantity)
+
+
+@pytest.mark.parametrize('quantity', [
+    'electron_temperature',
+    'hydrogen_temperature',
+    'electron_density',
+    'hydrogen_density',
+    'electron_pressure',
+    'hydrogen_pressure',
+    'velocity',
+])
+def test_no_amr_run_has_quantity(strand_only_amr, quantity):
+    # check that Strand falls back to deriving thermodynamic quantities from
+    # conserved quantities when we do not read the phy files
+    for p in strand_only_amr:
         assert hasattr(p, quantity)
         assert isinstance(getattr(p, quantity), u.Quantity)
 
@@ -96,15 +122,17 @@ def test_emission_measure(strand):
 def test_term_file_output(strand):
     for p in strand:
         # The electron energy equation's numerical viscosity term is always 0:
-        assert u.allclose(p.electron_numerical_viscosity,
-                        np.zeros_like(p.electron_numerical_viscosity),
-                        rtol=0.0,
-                        )
+        assert u.allclose(
+            p.electron_numerical_viscosity,
+            np.zeros_like(p.electron_numerical_viscosity),
+            rtol=0.0,
+        )
         # The hydrogen energy equation's collision rate is never 0 at all positions:
-        assert not u.allclose(p.hydrogen_collisions,
-                            np.zeros_like(p.hydrogen_collisions),
-                            rtol=0.0,
-                        )
+        assert not u.allclose(
+            p.hydrogen_collisions,
+            np.zeros_like(p.hydrogen_collisions),
+            rtol=0.0,
+        )
 
 def test_term_file_units(strand):
     assert strand[0].mass_advection.unit == u.Unit('g s-1 cm-3')

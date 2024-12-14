@@ -352,10 +352,13 @@ class Configure(object):
         Sixth-order polynomial fit coefficients for computing flux tube
         expansion
         """
-        fit = self._fit_poly_domains('poly_fit_magnetic_field', 'G')
+        fit_results = self._fit_poly_domains(
+            **self.config['general']['poly_fit_magnetic_field'],
+            target_unit='G',
+        )
         return self.env.get_template('coefficients.cfg').render(
             date=self.date,
-            **fit,
+            **fit_results,
         )
 
     @property
@@ -364,30 +367,37 @@ class Configure(object):
         Sixth-order polynomial fit coefficients for computing gravitational
         acceleration
         """
-        fit = self._fit_poly_domains('poly_fit_gravity', 'cm s-2')
+        fit_results = self._fit_poly_domains(
+            **self.config['general']['poly_fit_gravity'],
+            target_unit='cm s-2'
+        )
         return self.env.get_template('coefficients.cfg').render(
             date=self.date,
-            **fit,
+            **fit_results,
         )
 
-    def _fit_poly_domains(self, name, unit):
+    def _fit_poly_domains(self, x, y, domains, order, target_unit):
         """
         Perform polynomial fit to quantity as a function of field aligned coordinate
         over multiple domains and return fitting coefficients.
         """
-        # TODO: refactor to be independent of dictionary
-        fit = copy.deepcopy(self.config['general'][name])
-        x = (fit['x'] / self.config['general']['loop_length']).decompose().to(u.dimensionless_unscaled).value
-        y = fit['y'].to(unit).value
+        x /= self.config['general']['loop_length']
+        x = x.decompose().to_value(u.dimensionless_unscaled)
+        y = y.to_value(target_unit)
         coefficients = []
         minmax = []
-        for i in range(len(fit['domains'])-1):
-            i_d = np.where(np.logical_and(x>=fit['domains'][i], x<=fit['domains'][i+1]))
-            coefficients.append(np.polyfit(x[i_d], y[i_d], fit['order'])[::-1])
+        for i in range(len(domains)-1):
+            i_d = np.where(np.logical_and(x>=domains[i], x<=domains[i+1]))
+            # NOTE: The order is reversed because HYDRAD expects the opposite order of
+            # what NumPy outputs
+            coefficients.append(np.polyfit(x[i_d], y[i_d], order)[::-1])
             minmax.append([y[i_d].min(), y[i_d].max()])
-        fit['minmax'] = minmax
-        fit['coefficients'] = coefficients
-        return fit
+        return {
+            'domains': domains,
+            'order': order,
+            'minmax': minmax,
+            'coefficients': coefficients,
+        }
 
     @property
     def minimum_cells(self):
@@ -415,7 +425,8 @@ class Configure(object):
         refinement level and :math:`n_{min}` is the minimum allowed number of
         grid cells. Optionally, if the maximum number of cells is specified
         in ``config['grid']['maximum_cells']``, this value will take
-        precedence.
+        precedence. Alternatively, using a value of 30000 will be sufficiently large for
+        any amount of refinement used in HYDRAD.
         """
         if 'maximum_cells' in self.config['grid']:
             return int(self.config['grid']['maximum_cells'])

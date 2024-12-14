@@ -10,12 +10,6 @@ from pydrad.version import version as __version__
 
 
 def _init_log():
-    """
-    Initializes the SunPy log.
-    In most circumstances this is called automatically when importing
-    SunPy. This code is based on that provided by Astropy see
-    "licenses/ASTROPY.rst".
-    """
     orig_logger_cls = logging.getLoggerClass()
     logging.setLoggerClass(AstropyLogger)
     try:

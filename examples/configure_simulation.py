@@ -27,7 +27,7 @@ from pydrad.configure.util import get_clean_hydrad
 # Mm loop lasting 5000 s heated by a single 200 s nanoflare
 # solved on an adaptive grid.
 # A complete list of configuration parameters can be found in
-# the `configuration-tables`_ page.
+# the :ref:`configuration-tables` page.
 config_dict = {
     'general': {
         'loop_length': 80*u.Mm,
