@@ -173,6 +173,10 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         equations used as initial conditions.
         """
         profile_kwargs = self._profile_kwargs.copy()
+        # NOTE: Ensures that all results are only derived from the AMR file
+        # as the quantities in the phy file for the initial conditions can potentially
+        # have a different shape compared to those from the AMR file.
+        profile_kwargs['read_phy'] = False
         # NOTE: These files do not exist for the initial conditions
         profile_kwargs['read_hstate'] = False
         profile_kwargs['read_ine'] = False
@@ -667,10 +671,6 @@ class InitialProfile(Profile):
     @property
     def _amr_filename(self):
         return self.hydrad_root / 'Initial_Conditions' / 'profiles' / 'initial.amr'
-
-    @property
-    def _phy_filename(self):
-        return self.hydrad_root / 'Initial_Conditions' / 'profiles' / 'initial.amr.phy'
 
 
 def _add_property(name, attr,):

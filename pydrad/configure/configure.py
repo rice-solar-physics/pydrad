@@ -381,8 +381,7 @@ class Configure(object):
         Perform polynomial fit to quantity as a function of field aligned coordinate
         over multiple domains and return fitting coefficients.
         """
-        x /= self.config['general']['loop_length']
-        x = x.decompose().to_value(u.dimensionless_unscaled)
+        x = (x/self.config['general']['loop_length']).to_value(u.dimensionless_unscaled)
         y = y.to_value(target_unit)
         coefficients = []
         minmax = []
