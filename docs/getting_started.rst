@@ -48,7 +48,7 @@ Additional Resources
 A description of the HYDRAD code is available on its Github repository,
 
 -  `HYDRAD user's guide
-   <https://github.com/rice-solar-physics/HYDRAD/blob/master/HYDRAD_User_Guide(03_20_2021).pdf>`__
+   <https://github.com/rice-solar-physics/HYDRAD/blob/6344b8e3e14ba7d3d470f9a5d57b0adc16421731/HYDRAD_User_Guide(03_20_2021).pdf>`__
 
 Below are a few papers describing the HYDRAD code,
 
