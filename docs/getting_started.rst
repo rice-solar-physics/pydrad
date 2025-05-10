@@ -45,6 +45,11 @@ Note that running the tests is not necessary if you just want to use pydrad.
 Additional Resources
 --------------------
 
+A description of the HYDRAD code is available on its Github repository,
+
+-  `HYDRAD user's guide
+   <https://github.com/rice-solar-physics/HYDRAD/blob/6344b8e3e14ba7d3d470f9a5d57b0adc16421731/HYDRAD_User_Guide(03_20_2021).pdf>`__
+
 Below are a few papers describing the HYDRAD code,
 
 -  `Bradshaw and Mason
@@ -55,3 +60,5 @@ Below are a few papers describing the HYDRAD code,
    (2011) <http://adsabs.harvard.edu/abs/2011ApJS..194...26B>`__
 -  `Bradshaw and Cargill
    (2013) <http://adsabs.harvard.edu/abs/2013ApJ...770...12B>`__
+-  `Reep et al.
+   (2019) <https://adsabs.harvard.edu/abs/2019ApJ...871...18R>`__
