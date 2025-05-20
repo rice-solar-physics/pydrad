@@ -404,9 +404,9 @@ Timestep #: {self._index}"""
             _add_property(col, '_hstate_data')
 
     def _read_scl(self):
-    """
-    Parse the time-scale (``.scl``) file and set the relevant attributes.
-    """
+        """
+        Parse the time-scale (``.scl``) file and set the relevant attributes.
+        """
         if not self._scl_filename.is_file():
             log.warning(f'{self._scl_filename} not found.  Skipping parsing of .scl files.  Set read_scl=False to suppress this warning.')
         self._scl_data = read_scl_file(self._scl_filename)

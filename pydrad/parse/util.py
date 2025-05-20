@@ -14,6 +14,7 @@ __all__ = [
     'read_ine_file',
     'read_trm_file',
     'read_hstate_file',
+    'read_scl_file',
 ]
 
 
