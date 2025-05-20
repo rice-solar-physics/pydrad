@@ -234,3 +234,33 @@ def read_hstate_file(filename):
         format='ascii',
         names=columns,
     )
+
+def read_scl_file(filename):
+    """
+    Parse the ``.scl`` files containing the time-scales as a function of position
+    """
+    columns = [
+        'coordinate',
+        'grid_widths',
+        'advective_timescale',
+        'electron_conductive_timescale',
+        'ion_conductive_timescale',
+        'viscous_timescale',
+        'collisional_timescale',
+        'radiative_timescale',
+    ]
+    units = {
+        'coordinate': 'cm',
+        'grid_widths': 'cm',
+        'advective_timescale': 's',
+        'electron_conductive_timescale': 's',
+        'ion_conductive_timescale': 's',
+        'viscous_timescale': 's',
+        'collisional_timescale': 's',
+        'radiative_timescale': 's',
+    }
+    return astropy.table.QTable.read(
+        filename,
+        format='ascii',
+        names=columns
+    )
