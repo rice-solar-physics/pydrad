@@ -276,7 +276,7 @@ def read_scl_file(filename):
         columns[:n_columns],
     )
 
-    for i in np.arange(n_columns):
-        table[i].unit = units[i]
+    for column in columns[:n_columns]:
+        table[column].unit = units[column]
 
     return table
