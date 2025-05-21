@@ -151,11 +151,11 @@ def test_term_file_units(strand):
 def test_scale_file_output(strand):
     for p in strand:
         # all time-scales should be strictly greater than 0
-        assert p.radiative_timescale > (0.0 * u.s)
-        assert p.collisional_timescale > (0.0 * u.s)
-        assert p.ion_conductive_timescale > (0.0 * u.s)
+        assert all(t > (0.0 * u.s) for t in p.radiative_timescale)
+        assert all(t > (0.0 * u.s) for t in p.collisional_timescale)
+        assert all(t > (0.0 * u.s) for t in p.ion_conductive_timescale)
 
 def test_scale_file_units(strand):
-    assert strand[0].advective_timescale.unit == u.unit('s')
-    assert strand[0].electron_conductive_timescale.unit == u.unit('s')
-    assert strand[0].collisional_timescale.unit == u.unit('s')
+    assert strand[0].advective_timescale.unit == u.Unit('s')
+    assert strand[0].electron_conductive_timescale.unit == u.Unit('s')
+    assert strand[0].collisional_timescale.unit == u.Unit('s')
