@@ -61,7 +61,9 @@ def strand_only_amr(hydrad):
                   read_phy=False,
                   read_ine=False,
                   read_trm=False,
-                  read_hstate=False)
+                  read_hstate=False,
+                  read_scl=False,
+                  )
 
 
 def test_parse_initial_conditions(strand):
