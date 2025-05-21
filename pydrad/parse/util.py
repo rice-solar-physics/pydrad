@@ -267,9 +267,9 @@ def read_scl_file(filename):
         format='ascii',
     )
 
-    # NOTE: This is done after creating the table because the
-    # number of columns is variable depending on whether
-    # non-equilibrium ionization was switched on in the simulation.
+    # NOTE: This is done after creating the table because there
+    # is an extra column (the free-bound or bound-free timescale)
+    # when non-equilibrium ionization is switched on.
     n_columns = len(table.colnames)
     table.rename_columns(
         table.colnames[:n_columns],

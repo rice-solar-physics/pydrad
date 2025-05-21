@@ -409,6 +409,7 @@ Timestep #: {self._index}"""
         """
         if not self._scl_filename.is_file():
             log.warning(f'{self._scl_filename} not found.  Skipping parsing of .scl files.  Set read_scl=False to suppress this warning.')
+            return
         self._scl_data = read_scl_file(self._scl_filename)
 
         for column in self._scl_data.colnames[2:len(self._scl_data.colnames)]:
