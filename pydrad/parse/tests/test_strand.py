@@ -48,6 +48,12 @@ VAR_NAMES = [
     'hydrogen_electric_field',
     'hydrogen_viscous_stress',
     'hydrogen_numerical_viscosity',
+    'advective_timescale',
+    'electron_conductive_timescale',
+    'ion_conductive_timescale',
+    'viscous_timescale',
+    'collisional_timescale',
+    'radiative_timescale',
 ]
 
 
@@ -141,3 +147,15 @@ def test_term_file_units(strand):
     assert strand[0].momentum_gravity.unit == u.Unit('dyne s-1 cm-3')
     assert strand[0].electron_viscous_stress.unit == u.Unit('erg s-1 cm-3')
     assert strand[0].hydrogen_collisions.unit == u.Unit('erg s-1 cm-3')
+
+def test_scale_file_output(strand):
+    for p in strand:
+        # all time-scales should be strictly greater than 0
+        assert p.radiative_timescale > (0.0 * u.s)
+        assert p.collisional_timescale > (0.0 * u.s)
+        assert p.ion_conductive_timescale > (0.0 * u.s)
+
+def test_scale_file_units(strand):
+    assert strand[0].advective_timescale.unit == u.unit('s')
+    assert strand[0].electron_conductive_timescale.unit == u.unit('s')
+    assert strand[0].collisional_timescale.unit == u.unit('s')
