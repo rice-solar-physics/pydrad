@@ -249,6 +249,7 @@ def read_scl_file(filename):
         'viscous_timescale',
         'collisional_timescale',
         'radiative_timescale',
+        'free_bound_timescale',
     ]
     units = {
         'coordinate': 'cm',
@@ -259,9 +260,23 @@ def read_scl_file(filename):
         'viscous_timescale': 's',
         'collisional_timescale': 's',
         'radiative_timescale': 's',
+        'free_bound_timescale': 's',
     }
-    return astropy.table.QTable.read(
+    table = astropy.table.QTable.read(
         filename,
         format='ascii',
-        names=columns
     )
+
+    # NOTE: This is done after creating the table because the
+    # number of columns is variable depending on whether
+    # non-equilibrium ionization was switched on in the simulation.
+    n_columns = len(table.colnames)
+    table.rename_columns(
+        table.colnames[:n_columns],
+        columns[:n_columns],
+    )
+
+    for i in np.arange(n_columns):
+        table[i].unit = units[i]
+
+    return table
