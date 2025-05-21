@@ -410,17 +410,8 @@ Timestep #: {self._index}"""
         if not self._scl_filename.is_file():
             log.warning(f'{self._scl_filename} not found.  Skipping parsing of .scl files.  Set read_scl=False to suppress this warning.')
         self._scl_data = read_scl_file(self._scl_filename)
-        # NOTE: only adding three columns in this manner as the remaining columns are dealt with explicitly
-        # below because of the overlap with the derived quantities from the .amr files.
-        selected_columns = [
-            'advective_timescale',
-            'electron_conductive_timescale',
-            'ion_conductive_timescale',
-            'viscous_timescale',
-            'collisional_timescale',
-            'radiative_timescale',
-        ]
-        for column in selected_columns:
+
+        for column in self._scl_data.colnames[2:len(self._scl_data.colnames)]:
             _add_property(column, '_scl_data')
 
     @property
