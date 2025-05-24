@@ -73,11 +73,11 @@ radiation:
   density_dependent_rates: false
   elements_equilibrium: []
   elements_nonequilibrium: []
-  emissivity_dataset: chianti_v7
+  emissivity_dataset: chianti_v10
   nlte_chromosphere: false
   optically_thick_radiation: false
   ranges_dataset: ranges
-  rates_dataset: chianti_v7
+  rates_dataset: chianti_v10
   use_power_law_radiative_losses: true
 solver:
   cutoff_ion_fraction: 1.0e-15
