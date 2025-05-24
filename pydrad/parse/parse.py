@@ -14,7 +14,7 @@ import pydrad.util.constants
 from pydrad import log
 from pydrad.configure import Configure
 from pydrad.parse.util import (read_amr_file, read_hstate_file, read_ine_file,
-                               read_phy_file, read_trm_file)
+                               read_phy_file, read_scl_file, read_trm_file)
 from pydrad.visualize import (animate_strand, plot_histogram, plot_profile,
                               plot_strand, plot_time_distance, plot_time_mesh)
 
@@ -310,6 +310,8 @@ class Profile(object):
             self._read_hstate()
         if kwargs.get('read_trm', True):
             self._read_trm()
+        if kwargs.get('read_scl', True):
+            self._read_scl()
 
     @property
     def _amr_filename(self):
@@ -330,6 +332,10 @@ class Profile(object):
     @property
     def _hstate_filename(self):
         return self.hydrad_root / 'Results' / f'profile{self._index:d}.Hstate'
+
+    @property
+    def _scl_filename(self):
+        return self.hydrad_root / 'Results' / f'profile{self._index:d}.scl'
 
     @property
     def _index(self):
@@ -396,6 +402,18 @@ Timestep #: {self._index}"""
         self._hstate_data = read_hstate_file(self._hstate_filename)
         for col in self._hstate_data.colnames:
             _add_property(col, '_hstate_data')
+
+    def _read_scl(self):
+        """
+        Parse the time-scale (``.scl``) file and set the relevant attributes.
+        """
+        if not self._scl_filename.is_file():
+            log.warning(f'{self._scl_filename} not found.  Skipping parsing of .scl files.  Set read_scl=False to suppress this warning.')
+            return
+        self._scl_data = read_scl_file(self._scl_filename)
+
+        for column in self._scl_data.colnames[2:len(self._scl_data.colnames)]:
+            _add_property(column, '_scl_data')
 
     @property
     @u.quantity_input

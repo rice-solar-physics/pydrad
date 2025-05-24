@@ -48,6 +48,12 @@ VAR_NAMES = [
     'hydrogen_electric_field',
     'hydrogen_viscous_stress',
     'hydrogen_numerical_viscosity',
+    'advective_timescale',
+    'electron_conductive_timescale',
+    'ion_conductive_timescale',
+    'viscous_timescale',
+    'collisional_timescale',
+    'radiative_timescale',
 ]
 
 
@@ -61,7 +67,9 @@ def strand_only_amr(hydrad):
                   read_phy=False,
                   read_ine=False,
                   read_trm=False,
-                  read_hstate=False)
+                  read_hstate=False,
+                  read_scl=False,
+                  )
 
 
 def test_parse_initial_conditions(strand):
@@ -139,3 +147,15 @@ def test_term_file_units(strand):
     assert strand[0].momentum_gravity.unit == u.Unit('dyne s-1 cm-3')
     assert strand[0].electron_viscous_stress.unit == u.Unit('erg s-1 cm-3')
     assert strand[0].hydrogen_collisions.unit == u.Unit('erg s-1 cm-3')
+
+def test_scale_file_output(strand):
+    for p in strand:
+        # all time-scales should be strictly greater than 0
+        assert all(t > (0.0 * u.s) for t in p.radiative_timescale)
+        assert all(t > (0.0 * u.s) for t in p.collisional_timescale)
+        assert all(t > (0.0 * u.s) for t in p.ion_conductive_timescale)
+
+def test_scale_file_units(strand):
+    assert strand[0].advective_timescale.unit == u.Unit('s')
+    assert strand[0].electron_conductive_timescale.unit == u.Unit('s')
+    assert strand[0].collisional_timescale.unit == u.Unit('s')

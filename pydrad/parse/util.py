@@ -14,6 +14,7 @@ __all__ = [
     'read_ine_file',
     'read_trm_file',
     'read_hstate_file',
+    'read_scl_file',
 ]
 
 
@@ -234,3 +235,48 @@ def read_hstate_file(filename):
         format='ascii',
         names=columns,
     )
+
+def read_scl_file(filename):
+    """
+    Parse the ``.scl`` files containing the time-scales as a function of position
+    """
+    columns = [
+        'coordinate',
+        'grid_widths',
+        'advective_timescale',
+        'electron_conductive_timescale',
+        'ion_conductive_timescale',
+        'viscous_timescale',
+        'collisional_timescale',
+        'radiative_timescale',
+        'free_bound_timescale',
+    ]
+    units = {
+        'coordinate': 'cm',
+        'grid_widths': 'cm',
+        'advective_timescale': 's',
+        'electron_conductive_timescale': 's',
+        'ion_conductive_timescale': 's',
+        'viscous_timescale': 's',
+        'collisional_timescale': 's',
+        'radiative_timescale': 's',
+        'free_bound_timescale': 's',
+    }
+    table = astropy.table.QTable.read(
+        filename,
+        format='ascii',
+    )
+
+    # NOTE: This is done after creating the table because there
+    # is an extra column (the free-bound or bound-free timescale)
+    # when non-equilibrium ionization is switched on.
+    n_columns = len(table.colnames)
+    table.rename_columns(
+        table.colnames[:n_columns],
+        columns[:n_columns],
+    )
+
+    for column in columns[:n_columns]:
+        table[column].unit = units[column]
+
+    return table
