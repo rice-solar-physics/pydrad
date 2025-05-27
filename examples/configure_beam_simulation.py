@@ -18,7 +18,7 @@ from pydrad.configure.util import get_clean_hydrad
 #################################################################
 # HYDRAD can be used for simulations of solar flares, in addition
 # to active region loops.  Since flares have significantly stronger
-# energy release, however, some of the parameters need to be set 
+# energy release, however, some of the parameters need to be set
 # more stringently than might be done for e.g. nanoflare heating.
 # This example will show how to set up a reasonable flare simulation.
 #
@@ -34,19 +34,19 @@ config['general']['total_time'] = 3600 * u.s
 # where electrons are accelerated to tens of keV in energy in the corona,
 # and stream towards the chromosphere, where they deposit that energy.
 #
-# With beam heating, we typically want to use a slightly more detailed 
-# chromosphere (rather than assuming constant temperature).  
-# This is for two reasons: (1) it needs to be dense enough to stop the 
+# With beam heating, we typically want to use a slightly more detailed
+# chromosphere (rather than assuming constant temperature).
+# This is for two reasons: (1) it needs to be dense enough to stop the
 # beam, and (2) the energy deposition will produce a more realistic
-# chromospheric evaporation.  
+# chromospheric evaporation.
 # To do this, we turn on optically thick radiation, which will calculate
-# optically thick radiative losses in the chromosphere, produced by 
-# hydrogen, magnesium, and calcium (based on the formulation by 
-# Carlsson & Leenaarts 2012).  
+# optically thick radiative losses in the chromosphere, produced by
+# hydrogen, magnesium, and calcium (based on the formulation by
+# Carlsson & Leenaarts 2012).
 config['radiation']['optically_thick_radiation'] = True
 
 # This will set the chromospheric temperature profile to the so-called
-# VAL C model.  For consistency with that model, we also 
+# VAL C model.  For consistency with that model, we also
 # need to set a few boundary conditions
 config['general']['footpoint_height'] = 2.26 * u.Mm
 config['initial_conditions']['footpoint_temperature'] = 24000 * u.K
@@ -55,7 +55,7 @@ config['solver']['minimum_radiation_temperature'] = 24000 * u.K
 config['solver']['minimum_temperature'] = 4170 * u.K
 
 # There is one further option for the chromosphere.  It is not generally
-# recommended, but produces more accurate electron densities.  This will 
+# recommended, but produces more accurate electron densities.  This will
 # solve an approximation to radiative transfer for hydrogen, but the caveat is
 # that it will slow the code by well over an order of magnitude.  It is most
 # useful for users who wish to synthesize chromospheric line profiles.
@@ -99,7 +99,7 @@ config['solver']['initial_refinement_level'] = 12
 config['solver']['maximum_refinement_level'] = 12
 
 # Finally, we change a few parameters from their defaults, only for stability
-config['solver']['enforce_conservation'] = False 
+config['solver']['enforce_conservation'] = False
 config['solver']['refine_on_hydrogen_energy'] = False
 
 
@@ -115,8 +115,7 @@ c.setup_simulation(tmpdir / 'test-run', hydrad_clean)
 # Let's finally save the configuration, in case we want to reuse it.
 asdf_config = tmpdir / 'beam_config.asdf'
 
-# This will have set up the simulation, which can now be run!  Since 
+# This will have set up the simulation, which can now be run!  Since
 # beam heating simulations can be somewhat slower, it is recommended
-# to run this by hand in a terminal.  Also, if using Mac, be sure to 
+# to run this by hand in a terminal.  Also, if using Mac, be sure to
 # use the "caffeinate" command to keep the computer from sleeping.
-
