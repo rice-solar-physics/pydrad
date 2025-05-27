@@ -68,9 +68,9 @@ config['radiation']['nlte_chromosphere'] = False
 config['radiation']['use_power_law_radiative_losses'] = False
 config['radiation']['elements_equilibrium'] = ['H','He','C','N','O','Ne','Na','Mg','Al','Si','S','Ar','Ca','Fe','Ni']
 
-# We still need to set up the electron beam parameters itself.
+# We still need to set up the electron beam itself.
 # Let's assume a constant heating for 10 seconds, using a moderate
-# energy flux, typical low energy cut-off, and typical spectral index.
+# energy flux, typical low energy cut-off of 15 keV, and typical spectral index of 5.
 config['heating']['beam'] = [
             {'time_start': 10.0*u.s,
             'flux': 3e10*u.erg/(u.cm**2)/u.s,
@@ -78,7 +78,7 @@ config['heating']['beam'] = [
             'index': 5.0},
     ]
 
-# Finally, let's set up parameters to ensure the simulation runs smoothly.
+# Finally, let's set parameters to ensure the simulation runs smoothly.
 # There are a lot of numerical parameters, so we'll explain what these mean.
 #
 # First, let's consider the time-stepping.  HYDRAD solves its equations explicitly,
@@ -94,12 +94,17 @@ config['solver']['safety_conduction'] = 0.1
 config['general']['heat_flux_timestep_limit'] = 1e-6 * u.s
 
 # Next, we want to make sure that the grid is spatially resolved
+# We are telling the code to refine the grid every time step, and that
+# any grid cell can be refined up to 12 times.  For extremely strong heating events,
+# you might consider increasing this to 14.
 config['solver']['adapt_every_n_time_steps'] = 1
 config['solver']['initial_refinement_level'] = 12
 config['solver']['maximum_refinement_level'] = 12
 
 # Finally, we change a few parameters from their defaults, only for stability
+#   Do not check for numerical precision errors in the conservation of energy:
 config['solver']['enforce_conservation'] = False
+#   Do not refine the grid on hydrogen energy:
 config['solver']['refine_on_hydrogen_energy'] = False
 
 
@@ -107,12 +112,12 @@ config['solver']['refine_on_hydrogen_energy'] = False
 # As in the basic tutorial, we now use the configuration defined here
 # to set up the simulation by writing configuration files.
 c = Configure(config)
-tmpdir = pathlib.Path(tempfile.mkdtemp())  # Change this to wherever you want to save your clean HYDRAD copy
+tmpdir = pathlib.Path(tempfile.mkdtemp())  # Change this to wherever you want to save the unedited HYDRAD copy
 hydrad_clean = tmpdir / 'hydrad-clean'
 get_clean_hydrad(hydrad_clean, from_github=True)
-c.setup_simulation(tmpdir / 'test-run', hydrad_clean)
+c.setup_simulation(tmpdir / 'test-run', hydrad_clean)  # The location of the simulation itself
 
-# Let's finally save the configuration, in case we want to reuse it.
+# Let's finally save the configuration, in case we want to reuse it or modify it later.
 asdf_config = tmpdir / 'beam_config.asdf'
 
 # This will have set up the simulation, which can now be run!  Since
