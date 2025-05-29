@@ -56,8 +56,8 @@ config['solver']['minimum_temperature'] = 4170 * u.K
 
 # There is one further option for the chromosphere.  It is not generally
 # recommended, but produces more accurate electron densities.  This will
-# solve an approximation to radiative transfer for hydrogen, but the caveat is
-# that it will slow the code by well over an order of magnitude.  It is most
+# solve an approximation to radiative transfer for hydrogen with the caveat that
+# it will slow the code by well over an order of magnitude.  It is most
 # useful for users who wish to synthesize chromospheric line profiles.
 # Change the value to True if you would like to try using it.
 config['radiation']['nlte_chromosphere'] = False
