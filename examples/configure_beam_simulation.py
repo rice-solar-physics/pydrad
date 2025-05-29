@@ -28,7 +28,7 @@ config = get_defaults()
 # Configure the basic parameters of the simulation first.  Let's assume a
 # loop length of 50 Mm, and run the simulation for one hour of simulation time.
 config['general']['loop_length'] = 50 * u.Mm
-config['general']['total_time'] = 3600 * u.s
+config['general']['total_time'] = 1 * u.h
 
 # We typically assume that the loop is heated by electron beam heating,
 # where electrons are accelerated to tens of keV in energy in the corona,
