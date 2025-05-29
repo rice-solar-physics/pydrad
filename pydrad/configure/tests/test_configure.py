@@ -5,6 +5,8 @@ import pathlib
 
 import pytest
 
+from pydrad.configure.data import get_defaults
+
 
 @pytest.mark.parametrize(
     'filename',
@@ -17,3 +19,9 @@ import pytest
 def test_generated_files_exist(hydrad, filename):
     generated_file = pathlib.Path(hydrad / filename)
     assert generated_file.is_file()
+
+def test_default_config():
+    default_config = get_defaults()
+    assert default_config['radiation']['abundance_dataset'] == 'asplund'
+    assert default_config['initial_conditions']['isothermal'] == False
+    assert default_config['general']['write_file_physical'] == True
