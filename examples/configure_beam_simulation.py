@@ -83,7 +83,7 @@ config['heating']['beam'] = [
 #
 # First, let's consider the time-stepping.  HYDRAD solves its equations explicitly,
 # meaning that the CFL condition must be met at all times for numerical stability.
-# This means that the time-step, dt, must always be sufficiently small to produce
+# This means that the time-step, :math:`dt`, must always be sufficiently small to produce
 # an accurate numerical solution.
 #
 # Let's first set "safety" parameters for the radiation and conduction time-scales,
