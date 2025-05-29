@@ -104,7 +104,7 @@ config['solver']['maximum_refinement_level'] = 12
 # Finally, we change a few parameters from their defaults, only for stability
 # Do not check for numerical precision errors in the conservation of energy:
 config['solver']['enforce_conservation'] = False
-#   Do not refine the grid on hydrogen energy:
+# Do not refine the grid on hydrogen energy:
 config['solver']['refine_on_hydrogen_energy'] = False
 
 
