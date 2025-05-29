@@ -87,7 +87,7 @@ config['heating']['beam'] = [
 # an accurate numerical solution.
 #
 # Let's first set "safety" parameters for the radiation and conduction time-scales,
-# which simply reduces their values to make it more likely that the CFL condition is met.
+# which simply reduce their values to make it more likely that the CFL condition is met.
 config['solver']['safety_radiation'] = 0.1
 config['solver']['safety_conduction'] = 0.1
 # Since conduction can be extremely limiting, we also set an effective floor:
