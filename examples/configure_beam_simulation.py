@@ -72,11 +72,11 @@ config['radiation']['elements_equilibrium'] = ['H','He','C','N','O','Ne','Na','M
 # Let's assume a constant heating for 10 seconds, using a moderate
 # energy flux, typical low energy cut-off of 15 keV, and typical spectral index of 5.
 config['heating']['beam'] = [
-            {'time_start': 10.0*u.s,
-            'flux': 3e10*u.erg/(u.cm**2)/u.s,
-            'cut_off': 15.0*u.keV,
-            'index': 5.0},
-    ]
+    {'time_start': 10.0*u.s,
+     'flux': 3e10*u.erg/(u.cm**2)/u.s,
+     'cut_off': 15.0*u.keV,
+     'index': 5.0},
+]
 
 # Finally, let's set parameters to ensure the simulation runs smoothly.
 # There are a lot of numerical parameters, so we'll explain what these mean.
