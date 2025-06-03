@@ -43,9 +43,9 @@ config['general']['total_time'] = 1 * u.h
 # chromospheric evaporation.
 # To do this, we turn on optically thick radiation, which will calculate
 # optically thick radiative losses in the chromosphere, produced by
-# hydrogen, magnesium, and calcium (based on the formulation by
-# Carlsson & Leenaarts 2012).  This will also set the chromospheric
-# temperature profile to the so-called VAL C model.
+# hydrogen, magnesium, and calcium, based on the formulation by
+# :cite:t:`carlsson_radiation_2012`.  This will also set the chromospheric
+# temperature profile to the so-called VAL C model :cite:p:`vernazza_VAL_1981`.
 config['radiation']['optically_thick_radiation'] = True
 
 #################################################################
@@ -62,6 +62,7 @@ config['solver']['minimum_temperature'] = 4170 * u.K
 # solve an approximation to radiative transfer for hydrogen with the caveat that
 # it will slow the code by well over an order of magnitude.  It is most
 # useful for users who wish to synthesize chromospheric line profiles.
+# The full description is found in :cite:t:`reep_NLTE_2019`.
 # Change the value to True if you would like to try using it.
 config['radiation']['nlte_chromosphere'] = False
 
