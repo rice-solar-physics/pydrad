@@ -54,6 +54,7 @@ all = ["pydrad"]
 
 docs =[
   "pydrad[all]",
+  "pydata-sphinx-theme",
   "sphinx-automodapi",
   "sphinx-design",
   "sphinx-gallery",
