@@ -52,6 +52,16 @@ Issues = "https://github.com/rice-solar-physics/pydrad/issues/"
 [project.optional-dependencies]
 all = ["pydrad"]
 
+test = [
+  "pydrad[all]",
+  "asdf-astropy",
+  "asdf>=3.1",
+  "matplotlib",
+  "pytest-astropy",
+  "pytest-cov",
+  "pytest",
+]
+
 docs =[
   "pydrad[all]",
   "pydata-sphinx-theme",
