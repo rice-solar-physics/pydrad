@@ -5,3 +5,12 @@ requires = ["setuptools",
             "wheel"]
 
 build-backend = 'setuptools.build_meta'
+
+[project.optional-dependencies]
+docs =[
+  "sphinx-automodapi",
+  "sphinx-design",
+  "sphinx-gallery",
+  "sphinx",
+  "sphinxcontrib-bibtex",
+]

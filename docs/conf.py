@@ -80,6 +80,9 @@ html_theme_options = {
     "use_issues_button": True,
 }
 
+# Set path for BibTeX file for all of our references
+bibtex_bibfiles = ['references.bib']
+
 # -- Sphinx-gallery ----------------------------------------------------------
 extensions += [
     'sphinx_gallery.gen_gallery',
