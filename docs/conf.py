@@ -52,6 +52,12 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+source_suffix = '.rst'
+master_doc = 'index'
+default_role = 'obj'
+napoleon_use_rtype = False
+napoleon_google_docstring = False
+
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/',
                (None, 'http://data.astropy.org/intersphinx/python3.inv')),
