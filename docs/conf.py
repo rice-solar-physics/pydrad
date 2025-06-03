@@ -30,7 +30,6 @@ master_doc = 'index'  # Needed for older versions of sphinx
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinxcontrib.bibtex',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
@@ -52,12 +51,6 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-source_suffix = '.rst'
-master_doc = 'index'
-default_role = 'obj'
-napoleon_use_rtype = False
-napoleon_google_docstring = False
-
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/',
                (None, 'http://data.astropy.org/intersphinx/python3.inv')),
@@ -68,7 +61,6 @@ intersphinx_mapping = {
     'matplotlib': ('https://matplotlib.org/',
                    (None, 'http://data.astropy.org/intersphinx/matplotlib.inv')),
     'astropy': ('http://docs.astropy.org/en/stable/', None),
-    'asdf': ("https://asdf.readthedocs.io/en/stable/", None),
 }
 
 
@@ -77,7 +69,7 @@ intersphinx_mapping = {
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'pydata_sphinx_theme'
+html_theme = 'sphinx_book_theme'
 
 # -- Sphinx Book Theme Options -----------------------------------------------------
 html_theme_options = {
@@ -85,9 +77,6 @@ html_theme_options = {
     "use_repository_button": True,
     "use_issues_button": True,
 }
-
-# Set path for BibTeX file for all of our references
-bibtex_bibfiles = ['references.bib']
 
 # -- Sphinx-gallery ----------------------------------------------------------
 extensions += [
