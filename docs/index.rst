@@ -16,4 +16,5 @@ code for modeling the field-aligned dynamics of coronal loops.
    getting_started
    generated/gallery/index
    config_tables
+   citation
    code_ref/index
