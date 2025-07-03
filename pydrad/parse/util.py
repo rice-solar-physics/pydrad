@@ -26,13 +26,10 @@ def read_amr_file(filename):
     .. note:: This is not intended for direct use. Use the `pydrad.parse.Strand`
               object instead.
     """
-    # TODO: Account for possible presence of both electron
-    # and ion mass densities. If the electron mass density
-    # is present in this file, it will shift all of the
-    # columns from the index=2 position to the right.
     columns = [
         'grid_centers',
         'grid_widths',
+        'electron_mass_density',
         'mass_density',
         'momentum_density',
         'electron_energy_density',
@@ -41,6 +38,7 @@ def read_amr_file(filename):
     units = {
         'grid_centers': 'cm',
         'grid_widths': 'cm',
+        'electron_mass_density': 'g cm-3',
         'mass_density': 'g cm-3',
         'momentum_density': 'g cm-2 s-1',
         'electron_energy_density': 'erg cm-3',
@@ -54,6 +52,9 @@ def read_amr_file(filename):
     # NOTE: This is done after creating the table because the
     # remaining number of columns can be variable and thus we
     # cannot assign all of the column names at once.
+    if table.dtype[len(columns)-1] == np.int64:
+        columns.remove('electron_mass_density')
+        del units['electron_mass_density']
     table.rename_columns(
         table.colnames[:len(columns)],
         columns,
@@ -61,7 +62,6 @@ def read_amr_file(filename):
     for column in columns:
         table[column].unit = units[column]
     return table
-
 
 def read_phy_file(filename):
     """
@@ -229,12 +229,15 @@ def read_hstate_file(filename):
     """
     Parse the ``.hstate`` files containing the hydrogen level populations as a function of position
     """
-    columns = [f'hydrogen_I_level_{i}' for i in range(1,6)] + ['hydrogen_II_fraction']
-    return astropy.table.QTable.read(
+    columns = ['coordinate'] + [f'hydrogen_I_level_{i}' for i in range(1,6)] + ['hydrogen_II_fraction']
+    table = astropy.table.QTable.read(
         filename,
-        format='ascii',
+        format='ascii.no_header',
+        delimiter='\t',
         names=columns,
     )
+    table.remove_column('coordinate')
+    return table
 
 def read_scl_file(filename):
     """

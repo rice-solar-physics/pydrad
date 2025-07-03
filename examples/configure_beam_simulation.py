@@ -52,7 +52,7 @@ config['radiation']['optically_thick_radiation'] = True
 # For consistency with VAL C, we also need to set a few boundary conditions:
 config['general']['footpoint_height'] = 2.26 * u.Mm
 config['initial_conditions']['footpoint_temperature'] = 24000 * u.K
-config['initial_conditions']['footpoint_density'] = 4.2489e9 * u.cm**(-3)
+config['initial_conditions']['footpoint_density'] = 4.2486e9 * u.cm**(-3)
 config['solver']['minimum_radiation_temperature'] = 24000 * u.K
 config['solver']['minimum_temperature'] = 4170 * u.K
 
@@ -62,8 +62,10 @@ config['solver']['minimum_temperature'] = 4170 * u.K
 # solve an approximation to radiative transfer for hydrogen with the caveat that
 # it will slow the code by well over an order of magnitude.  It is most
 # useful for users who wish to synthesize chromospheric line profiles.
-# Change the value to True if you would like to try using it.
+# Change the value to True if you would like to try using it, and add
+# the minimum_density_limit parameter.
 config['radiation']['nlte_chromosphere'] = False
+config['radiation']['minimum_density_limit'] = 4.2486e9*u.cm**(-3)
 
 #################################################################
 # This takes care of the chromosphere, but we should also set up the radiation
