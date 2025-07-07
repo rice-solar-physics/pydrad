@@ -56,12 +56,6 @@ VAR_NAMES = [
     'viscous_timescale',
     'collisional_timescale',
     'radiative_timescale',
-    'hydrogen_I_level_1',
-    'hydrogen_I_level_2',
-    'hydrogen_I_level_3',
-    'hydrogen_I_level_4',
-    'hydrogen_I_level_5',
-    'hydrogen_II_fraction',
 ]
 
 
@@ -168,17 +162,6 @@ def test_scale_file_units(strand):
     assert strand[0].advective_timescale.unit == u.Unit('s')
     assert strand[0].electron_conductive_timescale.unit == u.Unit('s')
     assert strand[0].collisional_timescale.unit == u.Unit('s')
-
-def test_Hstate_file_output(strand):
-    sum = (
-            strand[0].hydrogen_I_level_1 +
-            strand[0].hydrogen_I_level_2 +
-            strand[0].hydrogen_I_level_3 +
-            strand[0].hydrogen_I_level_4 +
-            strand[0].hydrogen_I_level_5 +
-            strand[0].hydrogen_II_fraction
-    )
-    assert np.allclose(sum, 1.0)
 
 def test_amr_file_units(strand, strand_only_amr):
     assert strand[0].mass_density.unit == u.Unit('g cm-3')

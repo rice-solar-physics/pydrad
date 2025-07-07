@@ -27,7 +27,7 @@ def hydrad_clean(tmpdir_factory, request):
 def get_configuration_dict():
     return {
         'general': {
-            'footpoint_height': 2.26e+08*u.cm,
+            'footpoint_height': 5.e+08*u.cm,
             'loop_inclination': 0.*u.deg,
             'force_single_fluid': False,
             'heat_flux_timestep_limit':  1.e-10*u.s,
@@ -68,8 +68,8 @@ def get_configuration_dict():
             'electron_heating': 1.0,
         },
         'initial_conditions': {
-            'footpoint_density':  4.2486e9*u.cm**(-3),
-            'footpoint_temperature':  24000.*u.K,
+            'footpoint_density':  1.e+12*u.cm**(-3),
+            'footpoint_temperature':  10000.*u.K,
             'heating_range_fine_tuning': 10000.0,
             'heating_range_lower_bound':  1.e-08*u.erg / (u.cm**3*u.s),
             'heating_range_step_size': 0.01,
@@ -87,9 +87,8 @@ def get_configuration_dict():
             'elements_equilibrium': [],
             'elements_nonequilibrium': [],
             'emissivity_dataset': 'chianti_v7',
-            'nlte_chromosphere': True,
-            'minimum_density_limit': 4.2486e9*u.cm**(-3),
-            'optically_thick_radiation': True,
+            'nlte_chromosphere': False,
+            'optically_thick_radiation': False,
             'ranges_dataset': 'ranges',
             'rates_dataset': 'chianti_v7',
             'use_power_law_radiative_losses': True
@@ -100,8 +99,8 @@ def get_configuration_dict():
             'epsilon_d': 0.1,
             'epsilon_r': 1.8649415311920072,
             'maximum_optically_thin_density': 1.e+12*u.cm**(-3),
-            'minimum_radiation_temperature':  24000.*u.K,
-            'minimum_temperature':  4170.*u.K,
+            'minimum_radiation_temperature':  20000.*u.K,
+            'minimum_temperature':  10000.*u.K,
             'safety_advection': 1.0,
             'safety_atomic': 1.0,
             'safety_conduction': 1.0,

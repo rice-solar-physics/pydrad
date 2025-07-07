@@ -474,7 +474,7 @@ Timestep #: {self._index}"""
             return self._amr_data['electron_mass_density']
         if hasattr(self, '_phy_data'):
             return self._phy_data['electron_density'] * const.m_e
-        return (mass_density / pydrad.util.constants.m_avg_ion) * const.m_e
+        return (self.mass_density / pydrad.util.constants.m_avg_ion) * const.m_e
 
     @property
     @u.quantity_input
