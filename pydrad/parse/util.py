@@ -52,6 +52,12 @@ def read_amr_file(filename):
     # NOTE: This is done after creating the table because the
     # remaining number of columns can be variable and thus we
     # cannot assign all of the column names at once.
+
+    # The columns we care about are doubles in HYDRAD, while the
+    # other columns are integers with information about the
+    # refinement level of the grid cell.  As a result, if electron
+    # mass density is not present in the .amr file, then the
+    # seventh column is an integer.
     if table.dtype[len(columns)-1] == np.int64:
         columns.remove('electron_mass_density')
         del units['electron_mass_density']
@@ -236,6 +242,8 @@ def read_hstate_file(filename):
         delimiter='\t',
         names=columns,
     )
+    # The coordinate is already stored from the .amr file, so we don't need to save it.
+    # However, we need to parse the correct number of columns.
     table.remove_column('coordinate')
     return table
 
