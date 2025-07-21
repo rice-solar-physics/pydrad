@@ -63,19 +63,20 @@ jobs:
     secrets:
       pypi_token: ${{ secrets.PYPI_TOKEN }}
 
-jobs:
   windows_cygwin_test:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Cygwin with gcc, g++, make, python3.12
+        shell: pwsh
         run: |
           curl -L -o setup-x86_64.exe https://cygwin.com/setup-x86_64.exe
-          ./setup-x86_64.exe -qn -R C:\cygwin64 -s http://cygwin.mirror.constant.com -P gcc-g++,make,python312,python312-pip,python312-setuptools || \
+          ./setup-x86_64.exe -qn -R C:\cygwin64 -s http://cygwin.mirror.constant.com -P gcc-g++,make,python312,python312-pip,python312-setuptools || `
           ./setup-x86_64.exe -qn -R C:\cygwin64 -s http://cygwin.mirror.constant.com -P gcc-g++,make,python39,python39-pip,python39-setuptools
 
       - name: Add Cygwin to PATH
+        shell: pwsh
         run: echo "C:\\cygwin64\\bin" >> $env:GITHUB_PATH
 
       - name: Verify Cygwin Python and GCC
