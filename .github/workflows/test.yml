@@ -88,10 +88,12 @@ jobs:
       - name: Install Python dependencies
         shell: bash
         run: |
+          cd /cygdrive/c/Users/runneradmin/work/pydrad/pydrad
           python3 -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Run tests with pytest
         shell: bash
         run: |
+          cd /cygdrive/c/Users/runneradmin/work/pydrad/pydrad
           pytest
