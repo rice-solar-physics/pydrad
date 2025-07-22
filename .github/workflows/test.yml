@@ -63,6 +63,33 @@ jobs:
     secrets:
       pypi_token: ${{ secrets.PYPI_TOKEN }}
 
+  cygwin_debug:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Cygwin basics
+        shell: pwsh
+        run: |
+          curl -L -o setup-x86_64.exe https://cygwin.com/setup-x86_64.exe
+          ./setup-x86_64.exe -qn -R C:\cygwin64 -s http://cygwin.mirror.constant.com -P python312
+
+      - name: Add Cygwin to PATH
+        shell: pwsh
+        run: echo "C:\\cygwin64\\bin" >> $env:GITHUB_PATH
+
+      - name: Show GITHUB_WORKSPACE (Windows & Cygwin)
+        shell: pwsh
+        run: echo $Env:GITHUB_WORKSPACE
+
+      - name: Debug Cygwin environment
+        shell: bash
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "GITHUB_WORKSPACE (Windows): $GITHUB_WORKSPACE"
+          echo "GITHUB_WORKSPACE (Cygwin): $(cygpath "$GITHUB_WORKSPACE")"
+          ls -l "$(cygpath "$GITHUB_WORKSPACE")"
+
   windows_cygwin_test:
     runs-on: windows-latest
     steps:
