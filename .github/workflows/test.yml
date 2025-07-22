@@ -72,35 +72,34 @@ jobs:
         shell: pwsh
         run: |
           curl -L -o setup-x86_64.exe https://cygwin.com/setup-x86_64.exe
-          ./setup-x86_64.exe -qn -R C:\cygwin64 -s http://cygwin.mirror.constant.com -P gcc-g++,make,python312,python312-pip,python312-setuptools > cygwin_install.log 2>&1
-          cat cygwin_install.log
-          if ($LASTEXITCODE -ne 0) { throw "Cygwin install failed" }
+          Start-Process -Wait -FilePath ./setup-x86_64.exe -ArgumentList `
+            "-qn", `
+            "-R", "C:\cygwin64", `
+            "-s", "http://cygwin.mirror.constant.com", `
+            "-P", "gcc-g++,make,python312,python312-pip,python312-setuptools"
+          if (-Not (Test-Path "C:\cygwin64\bin\bash.exe")) {
+            throw "Cygwin install failed — bash.exe not found"
+          }
 
-      - name: Add Cygwin to PATH
-        shell: pwsh
-        run: echo "C:\\cygwin64\\bin" >> $env:GITHUB_PATH
-
-      - name: Verify Cygwin Python and GCC
+      - name: Verify Python and GCC inside Cygwin
         shell: pwsh
         run: |
-          C:\cygwin64\bin\bash.exe -lc "
-            python3 --version
-            g++ --version
-          "
+          & "C:\cygwin64\bin\bash.exe" -lc `
+            "which python3 && \
+             python3 --version && \
+             g++ --version"
 
       - name: Install Python dependencies
         shell: pwsh
         run: |
-          C:\cygwin64\bin\bash.exe -lc "
-            cd '$(cygpath \"$GITHUB_WORKSPACE\")'
-            python3 -m pip install --upgrade pip
-            python3 -m pip install -e .
-          "
+          & "C:\cygwin64\bin\bash.exe" -lc `
+            "cd \"$(cygpath -u '${{ github.workspace }}')\" && \
+             python3 -m pip install --upgrade pip && \
+             pip install -e ."
 
       - name: Run tests with pytest
         shell: pwsh
         run: |
-          C:\cygwin64\bin\bash.exe -lc "
-            cd '$(cygpath \"$GITHUB_WORKSPACE\")'
-            pytest
-          "
+          & "C:\cygwin64\bin\bash.exe" -lc `
+            "cd \"$(cygpath -u '${{ github.workspace }}')\" && \
+             pytest"
