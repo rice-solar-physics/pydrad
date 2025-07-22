@@ -81,21 +81,26 @@ jobs:
         run: echo "C:\\cygwin64\\bin" >> $env:GITHUB_PATH
 
       - name: Verify Cygwin Python and GCC
-        shell: bash
+        shell: pwsh
         run: |
-          which python3
-          /usr/bin/python3 --version
-          g++ --version
+          C:\cygwin64\bin\bash.exe -lc "
+            python3 --version
+            g++ --version
+          "
 
       - name: Install Python dependencies
-        shell: bash
+        shell: pwsh
         run: |
-          cd "$(cygpath "$GITHUB_WORKSPACE")"
-          /usr/bin/python3 -m pip install --upgrade pip
-          /usr/bin/python3 -m pip install -e .
+          C:\cygwin64\bin\bash.exe -lc "
+            cd '$(cygpath \"$GITHUB_WORKSPACE\")'
+            python3 -m pip install --upgrade pip
+            python3 -m pip install -e .
+          "
 
       - name: Run tests with pytest
-        shell: bash
+        shell: pwsh
         run: |
-          cd "$(cygpath "$GITHUB_WORKSPACE")"
-          pytest
+          C:\cygwin64\bin\bash.exe -lc "
+            cd '$(cygpath \"$GITHUB_WORKSPACE\")'
+            pytest
+          "
