@@ -100,7 +100,7 @@ jobs:
       - name: Install Python dependencies
         shell: pwsh
         run: |
-          & "C:\cygwin64\bin\bash.exe" -lc "cd '${{ github.workspace }}' && python3 -m pip install --upgrade pip && pip install -e ."
+          & "C:\cygwin64\bin\bash.exe" -lc "export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_PYDRAD=0.0.0 && cd '${{ github.workspace }}' && python3 -m pip install --upgrade pip && pip install -e ."
 
       - name: Run tests with pytest
         shell: pwsh
