@@ -87,21 +87,17 @@ jobs:
           $command = "which python3 && python3 --version && g++ --version"
           & "C:\cygwin64\bin\bash.exe" -lc $command
 
+      - name: Debug Check current directory
+        shell: pwsh
+        run: |
+          & "C:\cygwin64\bin\bash.exe" -lc "cd '${{ github.workspace }}' && pwd && ls -la"
+
       - name: Install Python dependencies
         shell: pwsh
         run: |
-          $command = @"
-          cd "$(cygpath -u '${{ github.workspace }}')"
-          python3 -m pip install --upgrade pip
-          pip install -e .
-          "@
-          & "C:\cygwin64\bin\bash.exe" -lc $command
+          & "C:\cygwin64\bin\bash.exe" -lc "cd '${{ github.workspace }}' && python3 -m pip install --upgrade pip && pip install -e ."
 
       - name: Run tests with pytest
         shell: pwsh
         run: |
-          $command = @"
-          cd "$(cygpath -u '${{ github.workspace }}')"
-          pytest -v
-          "@
-          & "C:\cygwin64\bin\bash.exe" -lc $command
+          & "C:\cygwin64\bin\bash.exe" -lc "cd '${{ github.workspace }}' && pytest -v"
