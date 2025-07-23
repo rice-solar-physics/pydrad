@@ -67,6 +67,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Cygwin with gcc, g++, make, python3.12
         shell: pwsh
