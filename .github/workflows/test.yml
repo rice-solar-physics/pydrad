@@ -91,17 +91,17 @@ jobs:
         shell: pwsh
         run: |
           $command = @"
-            cd "$(cygpath -u '${{ github.workspace }}')"
-            python3 -m pip install --upgrade pip
-            pip install -e .
-            "@
+          cd "$(cygpath -u '${{ github.workspace }}')"
+          python3 -m pip install --upgrade pip
+          pip install -e .
+          "@
           & "C:\cygwin64\bin\bash.exe" -lc $command
 
       - name: Run tests with pytest
         shell: pwsh
         run: |
           $command = @"
-            cd "$(cygpath -u '${{ github.workspace }}')"
-            pytest -v
-            "@
+          cd "$(cygpath -u '${{ github.workspace }}')"
+          pytest -v
+          "@
           & "C:\cygwin64\bin\bash.exe" -lc $command
