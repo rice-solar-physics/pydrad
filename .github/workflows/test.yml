@@ -100,8 +100,7 @@ jobs:
       - name: Install Python dependencies and build tools
         shell: pwsh
         run: |
-          & "C:\cygwin64\bin\bash.exe" -lc "python3 -m pip install --upgrade pip meson ninja"
-          & "C:\cygwin64\bin\bash.exe" -lc "export SETUPTOOLS_SCM_PRETEND_VERSION_FOR_PYDRAD=0.0.0 && cd '${{ github.workspace }}' && pip install -e ."
+          & "C:\cygwin64\bin\bash.exe" -lc "export CC=gcc CXX=g++ PATH=/usr/bin:$PATH SETUPTOOLS_SCM_PRETEND_VERSION_FOR_PYDRAD=0.0.0 && cd '${{ github.workspace }}' && python3 -m pip install --upgrade pip meson ninja && pip install -e ."
 
       - name: Run tests with pytest
         shell: pwsh
