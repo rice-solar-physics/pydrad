@@ -13,6 +13,8 @@ VAR_NAMES = [
     'grid_edges',
     'grid_widths',
     'grid_centers',
+    'electron_mass_density',
+    'mass_density',
     'electron_temperature',
     'hydrogen_temperature',
     'electron_density',
@@ -91,6 +93,7 @@ def test_has_quantity(strand, quantity):
     'electron_pressure',
     'hydrogen_pressure',
     'velocity',
+    'electron_mass_density',
 ])
 def test_no_amr_run_has_quantity(strand_only_amr, quantity):
     # check that Strand falls back to deriving thermodynamic quantities from
@@ -159,3 +162,9 @@ def test_scale_file_units(strand):
     assert strand[0].advective_timescale.unit == u.Unit('s')
     assert strand[0].electron_conductive_timescale.unit == u.Unit('s')
     assert strand[0].collisional_timescale.unit == u.Unit('s')
+
+def test_amr_file_units(strand, strand_only_amr):
+    assert strand[0].mass_density.unit == u.Unit('g cm-3')
+    assert strand_only_amr[0].mass_density.unit == u.Unit('g cm-3')
+    assert strand[0].electron_mass_density.unit == u.Unit('g cm-3')
+    assert strand_only_amr[0].electron_mass_density.unit == u.Unit('g cm-3')

@@ -470,13 +470,11 @@ Timestep #: {self._index}"""
     @property
     @u.quantity_input
     def electron_mass_density(self) -> u.Unit('g cm-3'):
-        # TODO: Account for possible presence of both electron
-        # and ion mass densities. If the electron mass density
-        # is present in this file, it will shift all of the
-        # indices in the .amr file by one.
         if 'electron_mass_density' in self._amr_data.colnames:
             return self._amr_data['electron_mass_density']
-        return self.mass_density
+        if hasattr(self, '_phy_data'):
+            return self._phy_data['electron_density'] * const.m_e
+        return (self.mass_density / pydrad.util.constants.m_avg_ion) * const.m_e
 
     @property
     @u.quantity_input
@@ -548,9 +546,8 @@ Timestep #: {self._index}"""
         """
         if hasattr(self, '_phy_data'):
             return self._phy_data['electron_density']
-        # FIXME: If this exists as a separate column in the .amr file then
-        # choose that. Otherwise, the electron and ion densities are assumed
-        # to be the same.
+        if 'electron_mass_density' in self._amr_data.colnames:
+            return self._amr_data['electron_mass_density'] / const.m_e
         return self.hydrogen_density
 
     @property
