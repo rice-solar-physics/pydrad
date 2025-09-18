@@ -63,9 +63,11 @@ docs = [
     "pydrad[all]",
     "sphinx",
     "sphinx-automodapi",
-    "sphinx-changelog",
     "sphinx-gallery",
-    "sphinx-book-theme",
+    "pydata-sphinx-theme",
+    "sphinx-design",
+    "sphinx-astropy",
+    "sphinxcontrib-bibtex",
 ]
 dev = ["pydrad[test,docs]"]
 
@@ -140,7 +142,7 @@ lines_between_types = 1
 
 [tool.codespell]
 skip = "*.fts,*.fits,venv,*.pro,*.bib,*.asdf,*.json"
-# ignore-words-list = ""
+ignore-words-list = "ine"
 
 [tool.ruff]
 target-version = "py311"

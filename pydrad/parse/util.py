@@ -1,14 +1,18 @@
 """
 Utilities related to parsing HYDRAD results
 """
-import pathlib
-
 import astropy.table
+import astropy.units as u
 import numpy as np
+import pathlib
 import plasmapy.particles
+
 from pandas import read_csv
 
+from pydrad import log
+
 __all__ = [
+    'read_master_time',
     'read_amr_file',
     'read_phy_file',
     'read_ine_file',
@@ -16,6 +20,48 @@ __all__ = [
     'read_hstate_file',
     'read_scl_file',
 ]
+
+
+def read_master_time(hydrad_root, read_from_cfg=False):
+    """
+    Get array of times that correspond to each timestep for the entire simulation.
+
+    Parameters
+    ----------
+    hydrad_root : `str` or path-like
+    read_from_cfg : `bool`, optional
+        If True, create the time array from the cadence as specified in
+        `HYDRAD/config/hydrad.cfg` and the start time as given in the first
+        AMR file. Note that this is substantially faster than reading the time
+        from every AMR file, but there may be small differences between these
+        approximate time steps and the exact time steps listed in the AMR files.
+
+    Returns
+    -------
+    : `~astropy.units.Quantity`
+    """
+    hydrad_root = pathlib.Path(hydrad_root)
+    amr_files = sorted((hydrad_root / 'Results').glob('profile*.amr'))
+    if read_from_cfg:
+        log.debug('Creating master time array from config files')
+        # NOTE: Sometimes this file is capitalized and some OSes are sensitive to this
+        cfg_file = hydrad_root / 'HYDRAD' / 'config' / 'hydrad.cfg'
+        if not cfg_file.is_file():
+            log.debug('hydrad.cfg not found; trying HYDRAD.cfg')
+            cfg_file = hydrad_root / 'HYDRAD' / 'config' / 'HYDRAD.cfg'
+        with cfg_file.open() as f:
+            lines = f.readlines()
+        cadence = float(lines[3])
+        with amr_files[0].open() as f:
+            start_time = float(f.readline())
+        time = start_time + np.arange(len(amr_files)) * cadence
+    else:
+        log.debug('Reading master time array from all AMR files')
+        time = np.zeros((len(amr_files),))
+        for i, af in enumerate(amr_files):
+            with af.open() as f:
+                time[i] = f.readline()
+    return sorted(time) * u.s
 
 
 def read_amr_file(filename):
@@ -49,11 +95,7 @@ def read_amr_file(filename):
         format='ascii',
         data_start=4,
     )
-    # NOTE: This is done after creating the table because the
-    # remaining number of columns can be variable and thus we
-    # cannot assign all of the column names at once.
-
-    # The columns we care about are doubles in HYDRAD, while the
+    # NOTE: The columns we care about are doubles in HYDRAD, while the
     # other columns are integers with information about the
     # refinement level of the grid cell.  As a result, if electron
     # mass density is not present in the .amr file, then the
@@ -61,6 +103,9 @@ def read_amr_file(filename):
     if table.dtype[len(columns)-1] == np.int64:
         columns.remove('electron_mass_density')
         del units['electron_mass_density']
+    # NOTE: This is done after creating the table because the
+    # remaining number of columns can be variable and thus we
+    # cannot assign all of the column names at once.
     table.rename_columns(
         table.colnames[:len(columns)],
         columns,
@@ -68,6 +113,7 @@ def read_amr_file(filename):
     for column in columns:
         table[column].unit = units[column]
     return table
+
 
 def read_phy_file(filename):
     """
@@ -247,6 +293,7 @@ def read_hstate_file(filename):
     table.remove_column('coordinate')
     return table
 
+
 def read_scl_file(filename):
     """
     Parse the ``.scl`` files containing the time-scales as a function of position
@@ -277,7 +324,6 @@ def read_scl_file(filename):
         filename,
         format='ascii',
     )
-
     # NOTE: This is done after creating the table because there
     # is an extra column (the free-bound or bound-free timescale)
     # when non-equilibrium ionization is switched on.
@@ -286,8 +332,6 @@ def read_scl_file(filename):
         table.colnames[:n_columns],
         columns[:n_columns],
     )
-
     for column in columns[:n_columns]:
         table[column].unit = units[column]
-
     return table
