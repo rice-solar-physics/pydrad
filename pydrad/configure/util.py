@@ -1,6 +1,7 @@
 """
 Utilities for HYDRAD configuration
 """
+import astropy.units as u
 import os
 import pathlib
 import platform
@@ -8,8 +9,6 @@ import shutil
 import stat
 import subprocess
 import tempfile
-
-import astropy.units as u
 
 from pydrad import log
 
@@ -64,8 +63,7 @@ def run_shell_command(path, shell=True, **kwargs):
         path.name if on_windows else f'./{path.name}',
         cwd=path.parent,
         shell=shell,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         env=os.environ,
         **kwargs,
     )

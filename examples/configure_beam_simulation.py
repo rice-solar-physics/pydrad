@@ -6,10 +6,9 @@ Configure a Beam Heating Simulation
 This example demonstrates a typical configuration of a HYDRAD
 simulation with electron beam heating.
 """
+import astropy.units as u
 import pathlib
 import tempfile
-
-import astropy.units as u
 
 from pydrad.configure import Configure
 from pydrad.configure.data import get_defaults

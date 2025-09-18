@@ -7,10 +7,10 @@ This example demonstrates how to configure a simple hydrad simulation and
 read in and visualize the outputs as a function of time and field-aligned
 spatial coordinate.
 """
+import astropy.units as u
 import pathlib
 import tempfile
 
-import astropy.units as u
 from astropy.visualization import ImageNormalize, LogStretch
 
 from pydrad.configure import Configure

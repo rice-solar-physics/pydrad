@@ -2,6 +2,7 @@
 Animate evolution of hydrodynamic quantities
 """
 import astropy.units as u
+
 from matplotlib.animation import FuncAnimation
 
 from pydrad.visualize.plot import _plot_profile, _setup_figure
@@ -48,8 +49,7 @@ def animate_strand(strand, **kwargs):
         l3a.set_data(p.coordinate.to(u.Mm), p.electron_pressure.to(u.dyne/(u.cm**2)))
         l3b.set_data(p.coordinate.to(u.Mm), p.hydrogen_pressure.to(u.dyne/(u.cm**2)))
         l4.set_data(p.coordinate.to(u.Mm), p.velocity.to(u.km/u.s))
-        fig.suptitle(r'$t={:.0f}$ {}'.format(
-            strand.time[i].value, strand.time[i].unit), y=0.905)
+        fig.suptitle(rf'$t=${strand.time[i]:.0f}', y=0.905)
         return l1a, l1b, l2a, l2b, l3a, l3b, l4
 
     return FuncAnimation(

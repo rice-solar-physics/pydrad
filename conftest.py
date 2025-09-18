@@ -5,6 +5,7 @@ import astropy.units as u
 import pytest
 
 import pydrad.configure
+
 from pydrad.configure.util import get_clean_hydrad
 
 
@@ -112,7 +113,6 @@ def get_configuration_dict():
     }
 
 
-@pytest.fixture(scope='function')
 def configuration():
     return pydrad.configure.Configure(get_configuration_dict(), freeze_date=True)
 
