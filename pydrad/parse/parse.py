@@ -194,7 +194,6 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         return np.arange(
             0, self.loop_length.to(u.cm).value, delta_s.to(u.cm).value)*u.cm
 
-    @u.quantity_input(grid=[u.cm, u.dimensionless_unscaled])
     def to_constant_grid(self, name, grid):
         """
         Interpolate a given quantity onto a spatial grid that is the same at
@@ -208,19 +207,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
             interpolation is done on a grid normalized by the loop length,
             i.e. ranging from 0 to 1.
         """
-        grid = u.Quantity(grid)  # Ensure that it is always a quantity
-        q_uniform = np.zeros(self.time.shape+grid.shape)
-        interpolate_norm = grid.unit.physical_type == 'dimensionless'
-        grid_value = grid.to_value('dimensionless' if interpolate_norm else 'cm')
-        for i, p in enumerate(self):
-            q = getattr(p, name)
-            if interpolate_norm:
-                p_grid = (p.coordinate / self.loop_length).decompose()
-            else:
-                p_grid = p.coordinate.to_value('cm')
-            q_uniform[i, :] = np.interp(grid_value, p_grid, q.value)
-
-        return u.Quantity(q_uniform, q.unit)
+        return u.Quantity([p.to_constant_grid(name, grid) for p in self])
 
     def spatial_average(self, quantity, bounds=None):
         """
@@ -513,7 +500,7 @@ Timestep #: {self._index}"""
     def hydrogen_density(self) -> u.Unit('cm-3'):
         r"""
         Hydrogen density, :math:`n_H=\rho/\bar{m_i}`, as a function of :math:`s`,
-        where :math:`\bar{m_i} is the average ion mass of a H-He plasma.
+        where :math:`\bar{m_i}` is the average ion mass of a H-He plasma.
         """
         if hasattr(self, '_phy_data'):
             return self._phy_data['hydrogen_density']
@@ -582,6 +569,31 @@ Timestep #: {self._index}"""
         if hasattr(self, '_phy_data'):
             return self._phy_data['hydrogen_temperature']
         return self.hydrogen_pressure / (const.k_B*self.hydrogen_density)
+
+    @u.quantity_input(grid=[u.cm, u.dimensionless_unscaled])
+    def to_constant_grid(self, name, grid):
+        """
+        Interpolate a given quantity onto a spatial grid that is the same at
+        each time step.
+
+        Parameters
+        ----------
+        name : `str`
+        grid : `~astropy.units.Quantity`
+            Spatial grid on which to interpolate. If this is unitless, the
+            interpolation is done on a grid normalized by the loop length,
+            i.e. ranging from 0 to 1.
+        """
+        grid = u.Quantity(grid)  # Ensure that it is always a quantity
+        interpolate_norm = grid.unit.physical_type == 'dimensionless'
+        grid_value = grid.to_value(u.dimensionless_unscaled if interpolate_norm else u.cm)
+        q = getattr(self, name)
+        if interpolate_norm:
+            p_grid = (self.coordinate / self.loop_length).decompose()
+        else:
+            p_grid = self.coordinate.to_value('cm')
+        q_uniform = np.interp(grid_value, p_grid, q.value)
+        return u.Quantity(q_uniform, q.unit)
 
     def spatial_average(self, quantity, bounds=None):
         """
