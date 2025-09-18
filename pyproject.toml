@@ -1,7 +1,201 @@
 [build-system]
-
 requires = ["setuptools",
             "setuptools_scm",
             "wheel"]
+build-backend = "setuptools.build_meta"
 
-build-backend = 'setuptools.build_meta'
+[project]
+name = "pydrad"
+dynamic = ["version"]
+authors = [
+    {name="Will Barnes", email="will.t.barnes@gmail.com"}
+]
+license = {file="LICENSE"}
+description = "Tools for configuring and parsing HYDRAD simulations."
+readme = {file="README.md", content-type = "text/markdown"}
+keywords = [
+  "hydrodynamics",
+  "coronal loop",
+  "corona",
+  "solar physics",
+  "solar",
+  "science",
+  "sun",
+]
+classifiers =[
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Astronomy",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "scipy",
+    "matplotlib",
+    "astropy",
+    "Jinja2",
+    "asdf-astropy",
+    "h5py",
+    "plasmapy",
+    "GitPython",
+]
+
+[project.urls]
+Homepage = "https://pydrad.readthedocs.io/"
+Documentation = "https://pydrad.readthedocs.io/"
+Repository = "https://github.com/rice-solar-physics/pydrad"
+Issues = "https://github.com/rice-solar-physics/pydrad/issues"
+
+[project.optional-dependencies]
+all = ["pydrad"]
+test = [
+    "pydrad[all]",
+    "pytest",
+    "pytest-astropy",
+    "pytest-cov",
+]
+docs = [
+    "sphinx",
+    "sphinx-automodapi",
+    "sphinx-changelog",
+    "sphinx-gallery",
+    "sphinx-book-theme",
+]
+dev = ["pydrad[test,docs]"]
+
+[tool.setuptools]
+packages = ["pydrad"]
+
+[tool.setuptools_scm]
+write_to = "pydrad/version.py"
+
+[tool.pytest.ini_options]
+testpaths = [
+    "pydrad",
+    "docs",
+]
+norecursedirs = [
+    "docs/_build",
+    "docs/generated",
+]
+doctest_plus = "enabled"
+text_file_format = "rst"
+addopts = "--doctest-rst"
+remote_data_strict = "False"
+filterwarnings =[
+  "error",
+  # This is due to dependencies building with a numpy version different from
+  # the local installed numpy version, but should be fine
+  # See https://github.com/numpy/numpy/issues/15748#issuecomment-598584838
+  "ignore:numpy.ndarray size changed:RuntimeWarning",
+  "ignore:The unit 'erg' has been deprecated in the VOUnit standard.:astropy.units.core.UnitsWarning",
+  "ignore:datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version.:DeprecationWarning",
+  "ignore:pkg_resources is deprecated as an API.:DeprecationWarning"
+]
+
+[tool.coverage.run]
+branch = true
+omit =[
+  "pydrad/_sunpy_init*",
+  "pydrad/conftest.py",
+  "pydrad/*setup_package*",
+  "pydrad/tests/*",
+  "pydrad/*/tests/*",
+  "pydrad/extern/*",
+  "pydrad/version*",
+  "*/pydrad/_sunpy_init*",
+  "*/pydrad/conftest.py",
+  "*/pydrad/*setup_package*",
+  "*/pydrad/tests/*",
+  "*/pydrad/*/tests/*",
+  "*/pydrad/extern/*",
+  "*/pydrad/version*",
+]
+
+[tool.coverage.report]
+exclude_lines =[
+  # Have to re-enable the standard pragma
+  "pragma: no cover",
+  # Don't complain about packages we have installed
+  "except ImportError",
+  # Don't complain if tests don't hit assertions
+  "raise AssertionError",
+  "raise NotImplementedError",
+  # Don't complain about script hooks
+  "def main(.*):",
+  # Ignore branches that don't pertain to this version of Python
+  "pragma: py{ignore_python_version}",
+  # Don't complain about IPython completion helper
+  "def _ipython_key_completions_",
+]
+
+[tool.isort]
+line_length = 88
+wrap_length = 80
+sections = ["FUTURE", "STDLIB", "FIRSTPARTY", "LOCALFOLDER"]
+known_first_party = ["pydrad", ]
+default_section = "STDLIB"
+multi_line_output = 3
+use_parentheses = true
+include_trailing_comma = true
+force_alphabetical_sort_within_sections = true
+honor_noqa = true
+lines_between_types = 1
+
+[tool.codespell]
+skip = "*.fts,*.fits,venv,*.pro,*.bib,*.asdf,*.json"
+# ignore-words-list = ""
+
+[tool.ruff]
+target-version = "py311"
+line-length = 110
+exclude=[
+  ".git,",
+  "__pycache__",
+  "build",
+  "pydrad/version.py",
+]
+show-fixes = true
+output-format = "full"
+
+lint.select = [
+  "E",
+  "F",
+  "W",
+  "UP",
+  "PT",
+  #"RET",
+  #"TID",
+]
+lint.extend-ignore = [
+  # pycodestyle (E, W)
+  "E501",  # LineTooLong                             # TODO! fix
+  "E741",  # Ambiguous variable name
+
+  # pytest (PT)
+  "PT001",  # Always use pytest.fixture()
+  "PT004",  # Fixtures which don't return anything should have leading _
+  "PT007",  # Parametrize should be lists of tuples  # TODO! fix
+  "PT011",  # Too broad exception assert             # TODO! fix
+  "PT023",  # Always use () on pytest decorators
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Part of configuration, not a package.
+"setup.py" = ["INP001"]
+"conftest.py" = ["INP001"]
+# implicit-namespace-package. The examples are not a package.
+"docs/*.py" = ["INP001"]
+# Module level imports do not need to be at the top of a file here
+"docs/conf.py" = ["E402"]
+"__init__.py" = ["E402", "F401", "F403"]
+"test_*.py" = ["B011", "D", "E402", "S101"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
