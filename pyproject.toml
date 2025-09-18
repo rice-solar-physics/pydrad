@@ -28,7 +28,6 @@ classifiers =[
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -61,6 +60,7 @@ test = [
     "pytest-cov",
 ]
 docs = [
+    "pydrad[all]",
     "sphinx",
     "sphinx-automodapi",
     "sphinx-changelog",
@@ -96,26 +96,16 @@ filterwarnings =[
   "ignore:numpy.ndarray size changed:RuntimeWarning",
   "ignore:The unit 'erg' has been deprecated in the VOUnit standard.:astropy.units.core.UnitsWarning",
   "ignore:datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version.:DeprecationWarning",
-  "ignore:pkg_resources is deprecated as an API.:DeprecationWarning"
+  "ignore:pkg_resources is deprecated as an API.:DeprecationWarning",
 ]
 
 [tool.coverage.run]
 branch = true
 omit =[
-  "pydrad/_sunpy_init*",
   "pydrad/conftest.py",
-  "pydrad/*setup_package*",
   "pydrad/tests/*",
   "pydrad/*/tests/*",
-  "pydrad/extern/*",
   "pydrad/version*",
-  "*/pydrad/_sunpy_init*",
-  "*/pydrad/conftest.py",
-  "*/pydrad/*setup_package*",
-  "*/pydrad/tests/*",
-  "*/pydrad/*/tests/*",
-  "*/pydrad/extern/*",
-  "*/pydrad/version*",
 ]
 
 [tool.coverage.report]
@@ -163,7 +153,6 @@ exclude=[
 ]
 show-fixes = true
 output-format = "full"
-
 lint.select = [
   "E",
   "F",
