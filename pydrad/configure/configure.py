@@ -1,28 +1,27 @@
 """
 Configure HYDRAD simulations
 """
+import asdf
+import astropy.units as u
 import copy
 import datetime
+import numpy as np
 import os
 import pathlib
 import shutil
 import stat
 import tempfile
-from distutils.dir_util import copy_tree
 
-import asdf
-import astropy.units as u
-import numpy as np
+from distutils.dir_util import copy_tree
 from jinja2 import ChoiceLoader, DictLoader, Environment, PackageLoader
 
 from pydrad.configure import filters
-from pydrad.configure.util import (get_equilibrium_heating_rate,
-                                   run_shell_command)
+from pydrad.configure.util import get_equilibrium_heating_rate, run_shell_command
 
 __all__ = ['Configure']
 
 
-class Configure(object):
+class Configure:
     """
     Configure HYDRAD simulations from a single Python `dict`
 
@@ -202,7 +201,7 @@ class Configure(object):
         if hasattr(self, '_freeze_date') and self._freeze_date:
             return self._date
         else:
-            return datetime.datetime.utcnow().strftime('%Y-%m-%d_%H.%M.%S UTC')
+            return datetime.datetime.now(datetime.UTC).strftime('%Y-%m-%d_%H.%M.%S UTC')
 
     @property
     def templates(self,):

@@ -26,14 +26,14 @@ repos:
       - id: check-ast
       - id: check-case-conflict
       - id: trailing-whitespace
-        exclude: ".*(.fits|.fts|.fit|.txt|.pro|.asdf|.json|.dat)$"
+        exclude: ".*(.fits|.fts|.fit|.txt|.pro|.asdf|.json|.dat|.cfg|.h)$"
       - id: check-yaml
       - id: debug-statements
       - id: check-added-large-files
       - id: end-of-file-fixer
-        exclude: ".*(.fits|.fts|.fit|.txt|.pro|.asdf|.json|.bib|tca.*|.dat)$"
+        exclude: ".*(.fits|.fts|.fit|.txt|.pro|.asdf|.json|.bib|tca.*|.dat|.cfg|.h)$"
       - id: mixed-line-ending
-        exclude: ".*(.fits|.fts|.fit|.txt|.bib|.pro|.asdf|.json|tca.*|.dat)$"
+        exclude: ".*(.fits|.fts|.fit|.txt|.bib|.pro|.asdf|.json|tca.*|.dat|.cfg|.h)$"
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.1

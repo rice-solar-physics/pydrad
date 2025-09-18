@@ -97,7 +97,6 @@ filterwarnings =[
   # See https://github.com/numpy/numpy/issues/15748#issuecomment-598584838
   "ignore:numpy.ndarray size changed:RuntimeWarning",
   "ignore:The unit 'erg' has been deprecated in the VOUnit standard.:astropy.units.core.UnitsWarning",
-  "ignore:datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version.:DeprecationWarning",
   "ignore:pkg_resources is deprecated as an API.:DeprecationWarning",
 ]
 
@@ -141,7 +140,7 @@ honor_noqa = true
 lines_between_types = 1
 
 [tool.codespell]
-skip = "*.fts,*.fits,venv,*.pro,*.bib,*.asdf,*.json"
+skip = "venv,*.bib,*.asdf,*.json,pydrad/configure/templates/*"
 ignore-words-list = "ine"
 
 [tool.ruff]
@@ -152,6 +151,7 @@ exclude=[
   "__pycache__",
   "build",
   "pydrad/version.py",
+  "pydrad/configure/templates/*",
 ]
 show-fixes = true
 output-format = "full"
