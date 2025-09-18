@@ -113,6 +113,7 @@ def get_configuration_dict():
     }
 
 
+@pytest.fixture
 def configuration():
     return pydrad.configure.Configure(get_configuration_dict(), freeze_date=True)
 
