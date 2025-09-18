@@ -1,35 +1,34 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
+import datetime
 
-# -- Path setup --------------------------------------------------------------
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-
+from packaging.version import Version
 
 # -- Project information -----------------------------------------------------
 
 project = 'pydrad'
-copyright = '2020, Will Barnes'
-author = 'Will Barnes'
+author = 'Rice Solar Physics Group'
+copyright = f'{datetime.datetime.now().year}, {author}'
 
+# The full version, including alpha/beta/rc tags
+from pydrad import __version__
+
+_version = Version(__version__)
+version = release = str(_version)
+# Avoid "post" appearing in version string in rendered docs
+if _version.is_postrelease:
+    version = release = _version.base_version
+# Avoid long githashes in rendered Sphinx docs
+elif _version.is_devrelease:
+    version = release = f"{_version.base_version}.dev{_version.dev}"
+is_development = _version.is_devrelease
+is_release = not(_version.is_prerelease or _version.is_devrelease)
 
 # -- General configuration ---------------------------------------------------
-
-master_doc = 'index'  # Needed for older versions of sphinx
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinxcontrib.bibtex',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
@@ -41,15 +40,14 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx_automodapi.automodapi',
     'sphinx_automodapi.smart_resolver',
+    'sphinx_design',
 ]
-
-# Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
-
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-# This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+source_suffix = '.rst'
+master_doc = 'index'
+default_role = 'obj'
+napoleon_use_rtype = False
+napoleon_google_docstring = False
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/',
@@ -68,15 +66,55 @@ intersphinx_mapping = {
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
-html_theme = 'sphinx_book_theme'
-
-# -- Sphinx Book Theme Options -----------------------------------------------------
+html_theme = 'pydata_sphinx_theme'
 html_theme_options = {
-    "repository_url": 'https://github.com/rice-solar-physics/pydrad',
-    "use_repository_button": True,
-    "use_issues_button": True,
+    "show_nav_level": 2,
+    "logo": {
+        "text": f"pydrad {version}",
+    },
+    "use_edit_page_button": True,
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/rice-solar-physics/pydrad",
+            "icon": "fa-brands fa-github",
+        },
+    ],
 }
+html_logo = "_static/hydrad-logo.png"
+html_context = {
+    "github_user": "rice-solar-physics",
+    "github_repo": "pydrad",
+    "github_version": "main",
+    "doc_path": "docs",
+}
+# Sidebar removal
+html_sidebars = {
+    "getting_started*": [],
+    "config_tables*": [],
+    "citation*": [],
+    "references*": [],
+}
+
+bibtex_bibfiles = ['references.bib']
+
+# Add any paths that contain custom static files (such as style sheets) here,
+# relative to this directory. They are copied after the builtin static files,
+# so a file named "default.css" will overwrite the builtin "default.css".
+# html_static_path = ['_static']
+
+# Render inheritance diagrams in SVG
+graphviz_output_format = "svg"
+
+graphviz_dot_args = [
+    '-Nfontsize=10',
+    '-Nfontname=Helvetica Neue, Helvetica, Arial, sans-serif',
+    '-Efontsize=10',
+    '-Efontname=Helvetica Neue, Helvetica, Arial, sans-serif',
+    '-Gfontsize=10',
+    '-Gfontname=Helvetica Neue, Helvetica, Arial, sans-serif'
+]
+
 
 # -- Sphinx-gallery ----------------------------------------------------------
 extensions += [
@@ -95,8 +133,8 @@ sphinx_gallery_conf = {
 # -- Generate config parameter tables ------------------------------------------
 import io
 import pathlib
-
 import yaml
+
 from astropy.io import ascii
 from astropy.table import Table
 from jinja2 import Environment
@@ -124,10 +162,10 @@ page = """
     in the config_tables.yml file. Changes to this file will not persist
     after each docs build.
 
-.. _configuration-tables:
+.. _pydrad-hydrad-configuration:
 
-HYDRAD Configuration Parameters
-================================
+HYDRAD Configuration
+====================
 
 The tables below give an exhaustive list of all of the different HYDRAD
 configuration options. If the units are listed, the input must have

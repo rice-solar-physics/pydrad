@@ -1,3 +1,5 @@
+.. _pydrad-getting-started:
+
 Getting Started
 ===============
 
@@ -52,13 +54,8 @@ A description of the HYDRAD code is available on its Github repository,
 
 Below are a few papers describing the HYDRAD code,
 
--  `Bradshaw and Mason
-   (2003a) <http://adsabs.harvard.edu/abs/2003A%26A...401..699B>`__
--  `Bradshaw and Mason
-   (2003b) <http://adsabs.harvard.edu/abs/2003A%26A...407.1127B>`__
--  `Bradshaw and Klimchuk
-   (2011) <http://adsabs.harvard.edu/abs/2011ApJS..194...26B>`__
--  `Bradshaw and Cargill
-   (2013) <http://adsabs.harvard.edu/abs/2013ApJ...770...12B>`__
--  `Reep et al.
-   (2019) <https://adsabs.harvard.edu/abs/2019ApJ...871...18R>`__
+- :cite:t:`bradshaw_self-consistent_2003`
+- :cite:t:`bradshaw_radiative_2003`
+- :cite:t:`bradshaw_what_2011`
+- :cite:t:`bradshaw_influence_2013`
+- :cite:t:`reep_efficient_2019`

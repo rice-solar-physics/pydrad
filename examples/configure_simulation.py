@@ -6,10 +6,9 @@ Configure a Simulation
 This example demonstrates the various ways to configure a HYDRAD
 simulation.
 """
+import astropy.units as u
 import pathlib
 import tempfile
-
-import astropy.units as u
 
 from pydrad.configure import Configure
 from pydrad.configure.data import get_defaults
@@ -27,7 +26,7 @@ from pydrad.configure.util import get_clean_hydrad
 # Mm loop lasting 5000 s heated by a single 200 s nanoflare
 # solved on an adaptive grid.
 # A complete list of configuration parameters can be found in
-# the :ref:`configuration-tables` page.
+# the :ref:`pydrad-hydrad-configuration` page.
 config_dict = {
     'general': {
         'loop_length': 80*u.Mm,
