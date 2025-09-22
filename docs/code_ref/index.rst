@@ -1,3 +1,5 @@
+.. _pydrad-api:
+
 API Reference
 ==============
 

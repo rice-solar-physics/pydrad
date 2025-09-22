@@ -1,69 +1,39 @@
 """
 Interface for easily parsing HYDRAD results
 """
-import pathlib
-
 import astropy.constants as const
 import astropy.units as u
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.interpolate import splev, splrep
+import pathlib
 
 import pydrad.util.constants
+
 from pydrad import log
 from pydrad.configure import Configure
-from pydrad.parse.util import (read_amr_file, read_hstate_file, read_ine_file,
-                               read_phy_file, read_scl_file, read_trm_file)
-from pydrad.visualize import (animate_strand, plot_histogram, plot_profile,
-                              plot_strand, plot_time_distance, plot_time_mesh)
+from pydrad.parse.util import (
+    read_amr_file,
+    read_hstate_file,
+    read_ine_file,
+    read_master_time,
+    read_phy_file,
+    read_scl_file,
+    read_trm_file,
+)
+from pydrad.visualize import (
+    animate_strand,
+    plot_histogram,
+    plot_profile,
+    plot_strand,
+    plot_time_distance,
+    plot_time_mesh,
+)
 
 __all__ = ['Strand', 'Profile', 'InitialProfile']
 
 
-def get_master_time(hydrad_root, read_from_cfg=False):
-    """
-    Get array of times that correspond to each timestep for the entire simulation.
-
-    Parameters
-    ----------
-    hydrad_root : `str` or path-like
-    read_from_cfg : `bool`, optional
-        If True, create the time array from the cadence as specified in
-        `HYDRAD/config/hydrad.cfg` and the start time as given in the first
-        AMR file. Note that this is substantially faster than reading the time
-        from every AMR file, but there may be small differences between these
-        approximate time steps and the exact time steps listed in the AMR files.
-
-    Returns
-    -------
-    : `~astropy.units.Quantity`
-    """
-    hydrad_root = pathlib.Path(hydrad_root)
-    amr_files = sorted((hydrad_root / 'Results').glob('profile*.amr'))
-    if read_from_cfg:
-        log.debug('Creating master time array from config files')
-        # NOTE: Sometimes this file is capitalized and some OSes are sensitive to this
-        cfg_file = hydrad_root / 'HYDRAD' / 'config' / 'hydrad.cfg'
-        if not cfg_file.is_file():
-            log.debug('hydrad.cfg not found; trying HYDRAD.cfg')
-            cfg_file = hydrad_root / 'HYDRAD' / 'config' / 'HYDRAD.cfg'
-        with cfg_file.open() as f:
-            lines = f.readlines()
-        cadence = float(lines[3])
-        with amr_files[0].open() as f:
-            start_time = float(f.readline())
-        time = start_time + np.arange(len(amr_files)) * cadence
-    else:
-        log.debug('Reading master time array from all AMR files')
-        time = np.zeros((len(amr_files),))
-        for i, af in enumerate(amr_files):
-            with af.open() as f:
-                time[i] = f.readline()
-    return sorted(time) * u.s
-
-
-class Strand(object):
+class Strand:
     """
     Container for parsing HYDRAD results
 
@@ -86,8 +56,8 @@ class Strand(object):
         # when slicing.
         self._master_time = kwargs.pop('master_time', None)
         if self._master_time is None:
-            self._master_time = get_master_time(self.hydrad_root,
-                                                read_from_cfg=kwargs.get('read_from_cfg', False))
+            self._master_time = read_master_time(self.hydrad_root,
+                                                 read_from_cfg=kwargs.get('read_from_cfg', False))
         # NOTE: time is only specified when slicing a Strand. When not
         # slicing, it should be read from the results.
         self._time = kwargs.pop('time', self._master_time)
@@ -142,7 +112,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
     @property
     def config(self):
         """
-        Configuration options. This will only work if the simuation was also
+        Configuration options. This will only work if the simulation was also
         configured by pydrad.
         """
         return Configure.load_config(self.hydrad_root / 'pydrad_config.asdf')
@@ -161,10 +131,9 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         """
         Footpoint-to-footpoint loop length
         """
-        with (self.hydrad_root / 'Results' / 'profile0.amr').open() as f:
-            tmp = f.readlines()
-            loop_length = float(tmp[2])
-        return loop_length * u.cm
+        # NOTE: All profiles yield the same loop length
+        # so arbitrarily choose the first one
+        return self[0].loop_length
 
     @property
     def initial_conditions(self):
@@ -225,8 +194,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         return np.arange(
             0, self.loop_length.to(u.cm).value, delta_s.to(u.cm).value)*u.cm
 
-    @u.quantity_input
-    def to_constant_grid(self, name, grid: u.cm, order=1):
+    def to_constant_grid(self, name, grid):
         """
         Interpolate a given quantity onto a spatial grid that is the same at
         each time step.
@@ -235,18 +203,11 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         ----------
         name : `str`
         grid : `~astropy.units.Quantity`
-            Spatial grid to interpolate onto
-        order : `int`
-            Order of the spline interpolation. Default is 1.
+            Spatial grid on which to interpolate. If this is unitless, the
+            interpolation is done on a grid normalized by the loop length,
+            i.e. ranging from 0 to 1.
         """
-        q_uniform = np.zeros(self.time.shape+grid.shape)
-        grid_cm = grid.to(u.cm).value
-        for i, p in enumerate(self):
-            q = getattr(p, name)
-            tsk = splrep(p.coordinate.to(u.cm).value, q.value, k=order)
-            q_uniform[i, :] = splev(grid_cm, tsk, ext=0)
-
-        return q_uniform * q.unit
+        return u.Quantity([p.to_constant_grid(name, grid) for p in self])
 
     def spatial_average(self, quantity, bounds=None):
         """
@@ -277,7 +238,7 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
         plt.show()
 
 
-class Profile(object):
+class Profile:
     """
     Container for HYDRAD results at a given timestep. Typically accessed
     through `pydrad.parse.Strand`
@@ -298,7 +259,7 @@ class Profile(object):
         self.time = time
         self._master_time = kwargs.get('master_time')
         if self._master_time is None:
-            self._master_time = get_master_time(self.hydrad_root,
+            self._master_time = read_master_time(self.hydrad_root,
                                                 read_from_cfg=kwargs.get('read_from_cfg', False))
         # Read results files
         self._read_amr()
@@ -459,6 +420,14 @@ Timestep #: {self._index}"""
 
     @property
     @u.quantity_input
+    def loop_length(self) -> u.cm:
+        """
+        Footpoint-to-footpoint loop length
+        """
+        return self.grid_widths.sum()
+
+    @property
+    @u.quantity_input
     def coordinate(self) -> u.cm:
         """
         Spatial coordinate, :math:`s`, in the field-aligned direction.
@@ -531,7 +500,7 @@ Timestep #: {self._index}"""
     def hydrogen_density(self) -> u.Unit('cm-3'):
         r"""
         Hydrogen density, :math:`n_H=\rho/\bar{m_i}`, as a function of :math:`s`,
-        where :math:`\bar{m_i} is the average ion mass of a H-He plasma.
+        where :math:`\bar{m_i}` is the average ion mass of a H-He plasma.
         """
         if hasattr(self, '_phy_data'):
             return self._phy_data['hydrogen_density']
@@ -600,6 +569,31 @@ Timestep #: {self._index}"""
         if hasattr(self, '_phy_data'):
             return self._phy_data['hydrogen_temperature']
         return self.hydrogen_pressure / (const.k_B*self.hydrogen_density)
+
+    @u.quantity_input(grid=[u.cm, u.dimensionless_unscaled])
+    def to_constant_grid(self, name, grid):
+        """
+        Interpolate a given quantity onto a spatial grid that is the same at
+        each time step.
+
+        Parameters
+        ----------
+        name : `str`
+        grid : `~astropy.units.Quantity`
+            Spatial grid on which to interpolate. If this is unitless, the
+            interpolation is done on a grid normalized by the loop length,
+            i.e. ranging from 0 to 1.
+        """
+        grid = u.Quantity(grid)  # Ensure that it is always a quantity
+        interpolate_norm = grid.unit.physical_type == 'dimensionless'
+        grid_value = grid.to_value(u.dimensionless_unscaled if interpolate_norm else u.cm)
+        q = getattr(self, name)
+        if interpolate_norm:
+            p_grid = (self.coordinate / self.loop_length).decompose()
+        else:
+            p_grid = self.coordinate.to_value('cm')
+        q_uniform = np.interp(grid_value, p_grid, q.value)
+        return u.Quantity(q_uniform, q.unit)
 
     def spatial_average(self, quantity, bounds=None):
         """

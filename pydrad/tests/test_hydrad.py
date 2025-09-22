@@ -1,9 +1,8 @@
 """
 Some basic smoke tests for HYDRAD runs for different configurations
 """
-import sys
-
 import astropy.units as u
+import platform
 import pytest
 
 from pydrad.configure import Configure
@@ -28,8 +27,8 @@ def test_beam_heating_run(tmpdir_factory, configuration, hydrad_clean):
     assert len(strand) == 6
 
 
-@pytest.mark.xfail(condition='darwin' in sys.platform,
-                   reason='OpenMP not included by default on macOS')
+@pytest.mark.skipif('darwin' in platform.system().lower(),
+                    reason='OpenMP not included by default on macOS')
 def test_use_openmp(tmpdir_factory, configuration, hydrad_clean):
     omp_configuration = Configure(configuration.config)
     omp_configuration.config['general']['use_openmp'] = True

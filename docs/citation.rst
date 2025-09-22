@@ -1,3 +1,5 @@
+.. _pydrad-citation:
+
 Citing pydrad
 ===============
 

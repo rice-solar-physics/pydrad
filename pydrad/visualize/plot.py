@@ -1,12 +1,12 @@
 """
 Plotting methods to easily visualize HYDRAD results
 """
-import copy
-
 import astropy.units as u
+import copy
 import matplotlib.colors
 import matplotlib.pyplot as plt
 import numpy as np
+
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 
 __all__ = ['plot_strand',
@@ -202,7 +202,7 @@ def plot_strand(strand, limits=None, cmap='viridis', **kwargs):
 
 def plot_profile(profile, **kwargs):
     """
-    Plot hydrodynamic quantites at a single timestep
+    Plot hydrodynamic quantities at a single timestep
 
     Parameters
     ----------

@@ -67,4 +67,4 @@ target/
 .pytest_cache
 
 # Project specific
-pydrad/_version.py
+pydrad/version.py

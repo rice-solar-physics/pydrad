@@ -2,7 +2,6 @@
 Test HYDRAD simulation setup
 """
 import pathlib
-
 import pytest
 
 from pydrad.configure.data import get_defaults
@@ -23,5 +22,5 @@ def test_generated_files_exist(hydrad, filename):
 def test_default_config():
     default_config = get_defaults()
     assert default_config['radiation']['abundance_dataset'] == 'asplund'
-    assert default_config['initial_conditions']['isothermal'] == False
-    assert default_config['general']['write_file_physical'] == True
+    assert not default_config['initial_conditions']['isothermal']
+    assert default_config['general']['write_file_physical']

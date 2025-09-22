@@ -1,10 +1,9 @@
 """
 Data related to configuration
 """
+import asdf
 import copy
 import importlib
-
-import asdf
 
 
 def get_defaults():

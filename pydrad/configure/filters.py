@@ -4,6 +4,7 @@ Custom Jinja2 filters
 import astropy.units as u
 import numpy as np
 import plasmapy.particles
+
 from jinja2 import Undefined
 
 from pydrad.configure.util import MissingParameter
