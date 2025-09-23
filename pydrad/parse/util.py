@@ -212,11 +212,12 @@ def read_trm_file(filename):
     Parse ``.trm`` files with hydrodynamic equation terms as a function of position.
 
     The files come in sets of 5 rows with variable number of columns:
-        -- Loop coordinate (1 column), and at each position:
-        -- Terms of mass equation (2 columns)
-        -- Terms of momentum equation (6 columns)
-        -- Terms of electron energy equation (11 columns)
-        -- Terms of hydrogen energy equation (11 columns)
+
+    * Loop coordinate (1 column), and at each position:
+    * Terms of mass equation (2 columns)
+    * Terms of momentum equation (6 columns)
+    * Terms of electron energy equation (11 columns)
+    * Terms of hydrogen energy equation (11 columns)
     """
     units = {
         'mass': 'g cm-3 s-1',
