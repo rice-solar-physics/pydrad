@@ -111,6 +111,15 @@ def test_time_arrays_same(hydrad, strand):
     assert u.allclose(strand.time, strand2.time, rtol=0.0, atol=1e-2*u.s)
 
 
+def test_strand_indexing(strand_only_amr):
+    # Make sure indexing is tracked correctly across repeated slicing
+    # of strand
+    assert strand_only_amr[2]._index == 2
+    strand_slice = strand_only_amr[1:4]
+    assert strand_slice[1]._index == 2
+    assert strand_slice[1]._amr_filename == strand_only_amr[2]._amr_filename
+
+
 def test_to_hdf5(strand, tmp_path):
     filename = tmp_path / 'hydrad_results.h5'
     strand.to_hdf5(filename, *VAR_NAMES)
@@ -130,6 +139,7 @@ def test_emission_measure(strand):
     assert isinstance(bins, u.Quantity)
     assert len(bins) == len(em) + 1
 
+
 def test_term_file_output(strand):
     for p in strand:
         # The electron energy equation's numerical viscosity term is always 0:
@@ -145,11 +155,13 @@ def test_term_file_output(strand):
             rtol=0.0,
         )
 
+
 def test_term_file_units(strand):
     assert strand[0].mass_advection.unit == u.Unit('g s-1 cm-3')
     assert strand[0].momentum_gravity.unit == u.Unit('dyne s-1 cm-3')
     assert strand[0].electron_viscous_stress.unit == u.Unit('erg s-1 cm-3')
     assert strand[0].hydrogen_collisions.unit == u.Unit('erg s-1 cm-3')
+
 
 def test_scale_file_output(strand):
     for p in strand:
@@ -158,10 +170,12 @@ def test_scale_file_output(strand):
         assert all(t > (0.0 * u.s) for t in p.collisional_timescale)
         assert all(t > (0.0 * u.s) for t in p.ion_conductive_timescale)
 
+
 def test_scale_file_units(strand):
     assert strand[0].advective_timescale.unit == u.Unit('s')
     assert strand[0].electron_conductive_timescale.unit == u.Unit('s')
     assert strand[0].collisional_timescale.unit == u.Unit('s')
+
 
 def test_amr_file_units(strand, strand_only_amr):
     assert strand[0].mass_density.unit == u.Unit('g cm-3')

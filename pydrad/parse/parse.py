@@ -83,9 +83,21 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
                           master_time=self._master_time,
                           **self._profile_kwargs)
         else:
+            # NOTE: This is a shortcut that allows for quick indexing if you are not taking a slice
+            # from a slice. For example index only will map to the correct index in the full-resolution
+            # time array if you are slicing from the original time array ("master_time"). Otherwise, this
+            # index no longer corresponds and you have to compute it from the master time and the time at
+            # this slice.
+            _index = None
+            # This is a nested for loop because cannot compare two arrays of unequal shape
+            if self.time.shape == self._master_time.shape:
+                if (self.time==self._master_time).all():
+                    log.debug('Using explicit index to slice Strand')
+                    _index = index
             return Profile(self.hydrad_root,
                            self.time[index],
                            master_time=self._master_time,
+                           index=_index,
                            **self._profile_kwargs)
 
     def to_hdf5(self, filename, *variables):
@@ -257,10 +269,22 @@ class Profile:
         if time.shape:
             raise ValueError('time must be a scalar')
         self.time = time
-        self._master_time = kwargs.get('master_time')
-        if self._master_time is None:
-            self._master_time = read_master_time(self.hydrad_root,
-                                                read_from_cfg=kwargs.get('read_from_cfg', False))
+        master_time = kwargs.get('master_time')
+        # NOTE: You should only be passing in the index explicitly if you are slicing from the original time array
+        if (index:=kwargs.get('index')) is None:
+            log.debug('Profile index is None. Calculating index from master time')
+            if master_time is None:
+                log.debug('Master time is None.')
+                read_from_cfg = kwargs.get('read_from_cfg', False)
+                if read_from_cfg:
+                    log.debug('Reading master time from cfg file.')
+                else:
+                    log.debug('Reading master time from amr files.')
+                master_time = read_master_time(self.hydrad_root, read_from_cfg=read_from_cfg)
+            self._index = np.where(self.time == master_time)[0][0]
+        else:
+            log.debug(f'Using explicit index {index} while indexing Profile.')
+            self._index = index
         # Read results files
         self._read_amr()
         if kwargs.get('read_phy', True):
@@ -297,10 +321,6 @@ class Profile:
     @property
     def _scl_filename(self):
         return self.hydrad_root / 'Results' / f'profile{self._index:d}.scl'
-
-    @property
-    def _index(self):
-        return np.where(self.time == self._master_time)[0][0]
 
     def __repr__(self):
         return f"""HYDRAD Timestep Profile
