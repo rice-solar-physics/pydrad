@@ -274,12 +274,8 @@ class Profile:
         if (index:=kwargs.get('index')) is None:
             log.debug('Profile index is None. Calculating index from master time')
             if master_time is None:
-                log.debug('Master time is None.')
                 read_from_cfg = kwargs.get('read_from_cfg', False)
-                if read_from_cfg:
-                    log.debug('Reading master time from cfg file.')
-                else:
-                    log.debug('Reading master time from amr files.')
+                log.debug(f"Reading master time from {'cfg' if read_from_cfg else 'amr'} files.")
                 master_time = read_master_time(self.hydrad_root, read_from_cfg=read_from_cfg)
             self._index = np.where(self.time == master_time)[0][0]
         else:

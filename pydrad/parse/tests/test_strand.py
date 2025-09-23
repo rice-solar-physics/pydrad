@@ -6,7 +6,7 @@ import h5py
 import numpy as np
 import pytest
 
-from pydrad.parse import Strand
+from pydrad.parse import Profile, Strand
 
 VAR_NAMES = [
     'coordinate',
@@ -64,14 +64,23 @@ def strand(hydrad):
     return Strand(hydrad)
 
 @pytest.fixture
+def strand_only_amr_time_cfg(hydrad):
+    return Strand(hydrad,
+                  read_from_cfg=True,
+                  read_phy=False,
+                  read_ine=False,
+                  read_trm=False,
+                  read_hstate=False,
+                  read_scl=False)
+
+@pytest.fixture
 def strand_only_amr(hydrad):
     return Strand(hydrad,
                   read_phy=False,
                   read_ine=False,
                   read_trm=False,
                   read_hstate=False,
-                  read_scl=False,
-                  )
+                  read_scl=False)
 
 
 def test_parse_initial_conditions(strand):
@@ -182,3 +191,18 @@ def test_amr_file_units(strand, strand_only_amr):
     assert strand_only_amr[0].mass_density.unit == u.Unit('g cm-3')
     assert strand[0].electron_mass_density.unit == u.Unit('g cm-3')
     assert strand_only_amr[0].electron_mass_density.unit == u.Unit('g cm-3')
+
+
+def test_profile_instantiation(strand_only_amr, strand_only_amr_time_cfg):
+    # Test various ways to instantiate a Profile
+    # No index, no master time
+    p = Profile(strand_only_amr.hydrad_root, strand_only_amr.time[1])
+    assert p._index == 1
+    # No index, no master time, read from cfg
+    # NOTE: This uses a different strand object as the original time array must also be read from the cfg
+    # file rather than the array file. Otherwise, the values will be slightly different.
+    p = Profile(strand_only_amr_time_cfg.hydrad_root, strand_only_amr_time_cfg.time[1], read_from_cfg=True)
+    assert p._index == 1
+    # No index, master time
+    p = Profile(strand_only_amr.hydrad_root, strand_only_amr.time[1], master_time=strand_only_amr._master_time)
+    assert p._index == 1
