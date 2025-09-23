@@ -90,28 +90,32 @@ def read_amr_file(filename):
         'electron_energy_density': 'erg cm-3',
         'hydrogen_energy_density': 'erg cm-3',
     }
-    table = astropy.table.QTable.read(
+    # NOTE: Using pandas here because it is much faster than using the
+    # I/O functionality in astropy for these types of tables
+    table = read_csv(
         filename,
-        format='ascii',
-        data_start=4,
+        skiprows=4,
+        sep=r'\s+',
+        header=None,
+        engine='c',
     )
     # NOTE: The columns we care about are doubles in HYDRAD, while the
     # other columns are integers with information about the
-    # refinement level of the grid cell.  As a result, if electron
+    # refinement level of the grid cell. As a result, if electron
     # mass density is not present in the .amr file, then the
     # seventh column is an integer.
-    if table.dtype[len(columns)-1] == np.int64:
+    if table.dtypes[len(columns)-1] == np.int64:
         columns.remove('electron_mass_density')
         del units['electron_mass_density']
     # NOTE: This is done after creating the table because the
     # remaining number of columns can be variable and thus we
     # cannot assign all of the column names at once.
-    table.rename_columns(
-        table.colnames[:len(columns)],
-        columns,
+    table = table.truncate(
+        after=len(columns)-1,
+        axis='columns'
     )
-    for column in columns:
-        table[column].unit = units[column]
+    table.rename(columns={i:name for i, name in enumerate(columns)}, inplace=True)
+    table = astropy.table.QTable.from_pandas(table, units=units)
     return table
 
 
