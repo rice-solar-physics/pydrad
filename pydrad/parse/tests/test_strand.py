@@ -6,7 +6,7 @@ import h5py
 import numpy as np
 import pytest
 
-from pydrad.parse import Strand
+from pydrad.parse import Profile, Strand
 
 VAR_NAMES = [
     'coordinate',
@@ -64,14 +64,23 @@ def strand(hydrad):
     return Strand(hydrad)
 
 @pytest.fixture
+def strand_only_amr_time_cfg(hydrad):
+    return Strand(hydrad,
+                  read_from_cfg=True,
+                  read_phy=False,
+                  read_ine=False,
+                  read_trm=False,
+                  read_hstate=False,
+                  read_scl=False)
+
+@pytest.fixture
 def strand_only_amr(hydrad):
     return Strand(hydrad,
                   read_phy=False,
                   read_ine=False,
                   read_trm=False,
                   read_hstate=False,
-                  read_scl=False,
-                  )
+                  read_scl=False)
 
 
 def test_parse_initial_conditions(strand):
@@ -111,6 +120,15 @@ def test_time_arrays_same(hydrad, strand):
     assert u.allclose(strand.time, strand2.time, rtol=0.0, atol=1e-2*u.s)
 
 
+def test_strand_indexing(strand_only_amr):
+    # Make sure indexing is tracked correctly across repeated slicing
+    # of strand
+    assert strand_only_amr[2]._index == 2
+    strand_slice = strand_only_amr[1:4]
+    assert strand_slice[1]._index == 2
+    assert strand_slice[1]._amr_filename == strand_only_amr[2]._amr_filename
+
+
 def test_to_hdf5(strand, tmp_path):
     filename = tmp_path / 'hydrad_results.h5'
     strand.to_hdf5(filename, *VAR_NAMES)
@@ -130,6 +148,7 @@ def test_emission_measure(strand):
     assert isinstance(bins, u.Quantity)
     assert len(bins) == len(em) + 1
 
+
 def test_term_file_output(strand):
     for p in strand:
         # The electron energy equation's numerical viscosity term is always 0:
@@ -145,11 +164,13 @@ def test_term_file_output(strand):
             rtol=0.0,
         )
 
+
 def test_term_file_units(strand):
     assert strand[0].mass_advection.unit == u.Unit('g s-1 cm-3')
     assert strand[0].momentum_gravity.unit == u.Unit('dyne s-1 cm-3')
     assert strand[0].electron_viscous_stress.unit == u.Unit('erg s-1 cm-3')
     assert strand[0].hydrogen_collisions.unit == u.Unit('erg s-1 cm-3')
+
 
 def test_scale_file_output(strand):
     for p in strand:
@@ -158,13 +179,30 @@ def test_scale_file_output(strand):
         assert all(t > (0.0 * u.s) for t in p.collisional_timescale)
         assert all(t > (0.0 * u.s) for t in p.ion_conductive_timescale)
 
+
 def test_scale_file_units(strand):
     assert strand[0].advective_timescale.unit == u.Unit('s')
     assert strand[0].electron_conductive_timescale.unit == u.Unit('s')
     assert strand[0].collisional_timescale.unit == u.Unit('s')
+
 
 def test_amr_file_units(strand, strand_only_amr):
     assert strand[0].mass_density.unit == u.Unit('g cm-3')
     assert strand_only_amr[0].mass_density.unit == u.Unit('g cm-3')
     assert strand[0].electron_mass_density.unit == u.Unit('g cm-3')
     assert strand_only_amr[0].electron_mass_density.unit == u.Unit('g cm-3')
+
+
+def test_profile_instantiation(strand_only_amr, strand_only_amr_time_cfg):
+    # Test various ways to instantiate a Profile
+    # No index, no master time
+    p = Profile(strand_only_amr.hydrad_root, strand_only_amr.time[1])
+    assert p._index == 1
+    # No index, no master time, read from cfg
+    # NOTE: This uses a different strand object as the original time array must also be read from the cfg
+    # file rather than the array file. Otherwise, the values will be slightly different.
+    p = Profile(strand_only_amr_time_cfg.hydrad_root, strand_only_amr_time_cfg.time[1], read_from_cfg=True)
+    assert p._index == 1
+    # No index, master time
+    p = Profile(strand_only_amr.hydrad_root, strand_only_amr.time[1], master_time=strand_only_amr._master_time)
+    assert p._index == 1

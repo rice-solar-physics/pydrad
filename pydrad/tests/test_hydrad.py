@@ -37,4 +37,4 @@ def test_use_openmp(tmpdir_factory, configuration, hydrad_clean):
     omp_configuration.setup_simulation(hydrad_tmp, hydrad_clean, overwrite=True)
     run_shell_command(hydrad_tmp / 'HYDRAD.exe')
     strand = Strand(hydrad_tmp)
-    assert len(strand) == 3
+    assert len(strand) == 6

@@ -90,28 +90,34 @@ def read_amr_file(filename):
         'electron_energy_density': 'erg cm-3',
         'hydrogen_energy_density': 'erg cm-3',
     }
-    table = astropy.table.QTable.read(
+    # NOTE: Purposefully using pandas explicitly as it seems to be faster
+    # than astropy.io.ascii.read for tables with this particular delimiter.
+    # I am not completely sure why this is the case but the difference is
+    # almost an order of magnitude.
+    table = read_csv(
         filename,
-        format='ascii',
-        data_start=4,
+        skiprows=4,
+        sep=r'\s+',
+        header=None,
+        engine='c',
     )
     # NOTE: The columns we care about are doubles in HYDRAD, while the
     # other columns are integers with information about the
-    # refinement level of the grid cell.  As a result, if electron
+    # refinement level of the grid cell. As a result, if electron
     # mass density is not present in the .amr file, then the
     # seventh column is an integer.
-    if table.dtype[len(columns)-1] == np.int64:
+    if table.dtypes[len(columns)-1] == np.int64:
         columns.remove('electron_mass_density')
         del units['electron_mass_density']
     # NOTE: This is done after creating the table because the
     # remaining number of columns can be variable and thus we
     # cannot assign all of the column names at once.
-    table.rename_columns(
-        table.colnames[:len(columns)],
-        columns,
+    table = table.truncate(
+        after=len(columns)-1,
+        axis='columns'
     )
-    for column in columns:
-        table[column].unit = units[column]
+    table.rename(columns={i:name for i, name in enumerate(columns)}, inplace=True)
+    table = astropy.table.QTable.from_pandas(table, units=units)
     return table
 
 
@@ -208,11 +214,12 @@ def read_trm_file(filename):
     Parse ``.trm`` files with hydrodynamic equation terms as a function of position.
 
     The files come in sets of 5 rows with variable number of columns:
-        -- Loop coordinate (1 column), and at each position:
-        -- Terms of mass equation (2 columns)
-        -- Terms of momentum equation (6 columns)
-        -- Terms of electron energy equation (11 columns)
-        -- Terms of hydrogen energy equation (11 columns)
+
+    * Loop coordinate (1 column), and at each position:
+    * Terms of mass equation (2 columns)
+    * Terms of momentum equation (6 columns)
+    * Terms of electron energy equation (11 columns)
+    * Terms of hydrogen energy equation (11 columns)
     """
     units = {
         'mass': 'g cm-3 s-1',
