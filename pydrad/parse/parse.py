@@ -83,15 +83,18 @@ Loop length: {self.loop_length.to(u.Mm):.3f}"""
                           master_time=self._master_time,
                           **self._profile_kwargs)
         else:
-            # NOTE: This is a shortcut that allows for quick indexing if you are not taking a slice
-            # from a slice. For example index only will map to the correct index in the full-resolution
-            # time array if you are slicing from the original time array ("master_time"). Otherwise, this
-            # index no longer corresponds and you have to compute it from the master time and the time at
-            # this slice.
             _index = None
-            # This is a nested for loop because cannot compare two arrays of unequal shape
+            # This is a nested conditional because cannot compare two arrays of unequal shape
             if self.time.shape == self._master_time.shape:
                 if (self.time==self._master_time).all():
+                    # NOTE: This is a shortcut that allows for much faster indexing if you are not taking a slice
+                    # from a slice. For example, index only will map to the correct index in the full-resolution
+                    # time array if you are slicing from the original time array ("master_time"). Otherwise, this
+                    # index no longer corresponds and you have to compute it from the master time and the time at
+                    # this slice. For example, in strand[10:15][0], the 0-index corresponds to 10 in the original
+                    # indexing. As such, the index has to be recomputed which is slower. Whereas in strand[10],
+                    # 10 corresponds to 10 in the original indexing and can just be passed straight through to
+                    # the underlying profile.
                     log.debug('Using explicit index to slice Strand')
                     _index = index
             return Profile(self.hydrad_root,

@@ -90,8 +90,10 @@ def read_amr_file(filename):
         'electron_energy_density': 'erg cm-3',
         'hydrogen_energy_density': 'erg cm-3',
     }
-    # NOTE: Using pandas here because it is much faster than using the
-    # I/O functionality in astropy for these types of tables
+    # NOTE: Purposefully using pandas explicitly as it seems to be faster
+    # than astropy.io.ascii.read for tables with this particular delimiter.
+    # I am not completely sure why this is the case but the difference is
+    # almost an order of magnitude.
     table = read_csv(
         filename,
         skiprows=4,
