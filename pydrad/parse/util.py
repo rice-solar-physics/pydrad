@@ -25,7 +25,7 @@ __all__ = [
 # Do this here as calling this each time adds significant overhead
 # when parsing a file.
 ELEMENT_NAME_MAPPING = {
-    z: plasmapy.particles.element_name(z) for z in range(1,40)
+    z: plasmapy.particles.element_name(z) for z in range(1,31)
 }
 
 
@@ -200,7 +200,7 @@ def read_ine_file(filename, n_s):
     data = [
         np.asarray(
             [lines[(1+n_el)*i_s+1+i_z].split()[1:] for i_s in range(n_s)],
-            dtype=float
+            dtype=np.float64
         )
         for i_z in range(n_el)
     ]

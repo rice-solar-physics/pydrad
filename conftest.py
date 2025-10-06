@@ -87,11 +87,11 @@ def get_configuration_dict():
             'density_dependent_rates': False,
             'elements_equilibrium': [],
             'elements_nonequilibrium': ['hydrogen', 'carbon'],
-            'emissivity_dataset': 'chianti_v7',
+            'emissivity_dataset': 'chianti_v10',
             'nlte_chromosphere': False,
             'optically_thick_radiation': False,
             'ranges_dataset': 'ranges',
-            'rates_dataset': 'chianti_v7',
+            'rates_dataset': 'chianti_v10',
             'use_power_law_radiative_losses': True
         },
         'solver': {
