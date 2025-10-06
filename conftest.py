@@ -83,10 +83,10 @@ def get_configuration_dict():
         },
         'radiation': {
             'abundance_dataset': 'asplund',
-            'decouple_ionization_state_solver': False,
+            'decouple_ionization_state_solver': True,
             'density_dependent_rates': False,
             'elements_equilibrium': [],
-            'elements_nonequilibrium': [],
+            'elements_nonequilibrium': ['hydrogen', 'carbon'],
             'emissivity_dataset': 'chianti_v7',
             'nlte_chromosphere': False,
             'optically_thick_radiation': False,

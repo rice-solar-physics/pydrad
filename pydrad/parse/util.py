@@ -186,8 +186,9 @@ def read_ine_file(filename, n_s):
     """
     # This file is grouped into n_s groups each of length n_el + 1 (because the first entry is
     # the spatial coordinate) such that the total number of lines is n_s*(n_el + 1).
-    # Each line in the group (except the first line) has Z+1 entries corresponding to the ionization
-    # fraction of element Z at the spatial coordinate specified in the first line.
+    # Each line in the group (except the first line) has Z+2 entries corresponding to Z followed
+    # by the ionization fraction of the Z+1 ionization stages of element Z at the spatial
+    # coordinate specified in the first line of the group.
     # Because of the complexity of the structure of this file, we need to parse it line by line.
     with filename.open(mode='r') as f:
         lines = f.readlines()
@@ -197,7 +198,10 @@ def read_ine_file(filename, n_s):
     # The outermost array iterates over all elements. The result is a list of length n_el where each entry
     # contains the ionization fractions at all ionization stages of a given element at all spatial coordinates.
     data = [
-        np.asarray([lines[(1+n_el)*i_s+1+i_z].split()[1:] for i_s in range(n_s)], dtype=float)
+        np.asarray(
+            [lines[(1+n_el)*i_s+1+i_z].split()[1:] for i_s in range(n_s)],
+            dtype=float
+        )
         for i_z in range(n_el)
     ]
     Z = [x.shape[1]-1 for x in data]
@@ -205,7 +209,7 @@ def read_ine_file(filename, n_s):
     for z in Z:
         # A precomputed mapping between Z and element name is used as calling plasmapy.particles.element_name
         # each time leads to significant overhead.
-        colnames += [f'{ELEMENT_NAME_MAPPING[z]}_{i}' for i in range(1,z+2)]
+        colnames += [f'{ELEMENT_NAME_MAPPING[z]}_{i}' for i in range(1, z+2)]
     return astropy.table.Table(data=np.hstack(data), names=colnames, copy=False)
 
 
