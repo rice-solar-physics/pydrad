@@ -324,7 +324,8 @@ class Profile:
     def __repr__(self):
         return f"""HYDRAD Timestep Profile
 -----------------------
-Filename: {self._phy_filename}
+Filename: {self._amr_filename}
+Time: {self.time}
 Timestep #: {self._index}"""
 
     def _read_amr(self):
