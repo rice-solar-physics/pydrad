@@ -162,10 +162,14 @@ def read_phy_file(filename):
         'electron_heat_flux': 'erg s-1 cm-2',
         'hydrogen_heat_flux': 'erg s-1 cm-2',
     }
-    return astropy.table.QTable.read(
-        filename,
-        format='ascii',
-        names=columns,
+    return astropy.table.QTable.from_pandas(
+        read_csv(
+            filename,
+            sep=r'\s+',
+            header=None,
+            engine='c',
+            names=columns,
+        ),
         units=units,
     )
 
