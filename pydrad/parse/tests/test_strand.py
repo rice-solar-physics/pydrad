@@ -61,10 +61,6 @@ VAR_NAMES = [
 
 
 @pytest.fixture
-def strand(hydrad):
-    return Strand(hydrad)
-
-@pytest.fixture
 def strand_only_amr_time_cfg(hydrad):
     return Strand(hydrad,
                   read_from_cfg=True,
@@ -79,16 +75,6 @@ def strand_only_amr(hydrad):
     return Strand(hydrad,
                   read_phy=False,
                   read_ine=False,
-                  read_trm=False,
-                  read_hstate=False,
-                  read_scl=False)
-
-
-@pytest.fixture
-def strand_ine(hydrad):
-    return Strand(hydrad,
-                  read_phy=False,
-                  read_ine=True,
                   read_trm=False,
                   read_hstate=False,
                   read_scl=False)
@@ -219,9 +205,9 @@ def test_profile_instantiation(strand_only_amr, strand_only_amr_time_cfg):
     assert p._index == 1
 
 
-def test_ine_results(strand_ine):
-    for profile in strand_ine:
-        for element in strand_ine.config['radiation']['elements_nonequilibrium']:
+def test_ine_results(strand):
+    for profile in strand:
+        for element in strand.config['radiation']['elements_nonequilibrium']:
             Z = plasmapy.particles.atomic_number(element)
             for i_z in range(1,Z+2):
                 assert hasattr(profile, f'{element}_{i_z}')
