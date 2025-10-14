@@ -22,6 +22,13 @@ __all__ = [
 ]
 
 
+# Do this here as calling this each time adds significant overhead
+# when parsing a file.
+ELEMENT_NAME_MAPPING = {
+    z: plasmapy.particles.element_name(z) for z in range(1,31)
+}
+
+
 def read_master_time(hydrad_root, read_from_cfg=False):
     """
     Get array of times that correspond to each timestep for the entire simulation.
@@ -155,10 +162,14 @@ def read_phy_file(filename):
         'electron_heat_flux': 'erg s-1 cm-2',
         'hydrogen_heat_flux': 'erg s-1 cm-2',
     }
-    return astropy.table.QTable.read(
-        filename,
-        format='ascii',
-        names=columns,
+    return astropy.table.QTable.from_pandas(
+        read_csv(
+            filename,
+            sep=r'\s+',
+            header=None,
+            engine='c',
+            names=columns,
+        ),
         units=units,
     )
 
@@ -175,38 +186,35 @@ def read_ine_file(filename, n_s):
     ----------
     filename: path-like
     n_s: `int`
+        The number of grid cells in the snapshot corresponding to this file.
     """
-    # TODO: clean this up somehow? I've purposefully included
-    # a lot of comments because the format of this file makes
-    # the parsing code quite opaque
-    with pathlib.Path(filename).open() as f:
+    # This file is grouped into n_s groups each of length n_el + 1 (because the first entry is
+    # the spatial coordinate) such that the total number of lines is n_s*(n_el + 1).
+    # Each line in the group (except the first line) has Z+2 entries corresponding to Z followed
+    # by the ionization fraction of the Z+1 ionization stages of element Z at the spatial
+    # coordinate specified in the first line of the group.
+    # Because of the complexity of the structure of this file, we need to parse it line by line.
+    with filename.open(mode='r') as f:
         lines = f.readlines()
-    # First parse all of the population fraction arrays
-    # NOTE: Have to calculate the number of elements we have
-    # computed population fractions for as we do not necessarily
-    # know this ahead of time
-    n_e = int(len(lines)/n_s - 1)
-    # The file is arranged in n_s groups of n_e+1 lines each where the first
-    # line is the coordinate and the subsequent lines are the population fraction
-    # for each element, with each column corresponding to an ion of that element
-    # First, separate by coordinate
-    pop_lists = [lines[i*(n_e+1)+1:(i+1)*(n_e+1)] for i in range(n_s)]
-    # Convert each row of each group into a floating point array
-    pop_lists = [[np.array(l.split(), dtype=float) for l in p] for p in pop_lists]
-    # NOTE: each row has Z+2 entries as the first entry is the atomic number Z
-    # Get these from just the first group as the number of elements is the same
-    # for each
-    Z = np.array([p[0] for p in pop_lists[0]], dtype=int)
-    pop_arrays = [np.zeros((n_s, z+1)) for z in Z]
-    for i, p in enumerate(pop_lists):
-        for j, line in enumerate(p):
-            pop_arrays[j][i, :] = line[1:]  # Skip first entry, it is the atomic number
-    columns = []
+    n_el = int(len(lines)/n_s - 1)
+    # The innermost loop parses the ionization fraction for all ionization stages of a given element Z
+    # at all spatial coordinates and casts it to an array. This innermost array has dimensions (n_s,Z+1).
+    # The outermost array iterates over all elements. The result is a list of length n_el where each entry
+    # contains the ionization fractions at all ionization stages of a given element at all spatial coordinates.
+    data = [
+        np.asarray(
+            [lines[(1+n_el)*i_s+1+i_z].split()[1:] for i_s in range(n_s)],
+            dtype=np.float64
+        )
+        for i_z in range(n_el)
+    ]
+    Z = [x.shape[1]-1 for x in data]
+    colnames = []
     for z in Z:
-        el_name = plasmapy.particles.element_name(z)
-        columns += [f'{el_name}_{i+1}' for i in range(z+1)]
-    data = np.hstack([p for p in pop_arrays])
-    return astropy.table.QTable(data=data, names=columns)
+        # A precomputed mapping between Z and element name is used as calling plasmapy.particles.element_name
+        # each time leads to significant overhead.
+        colnames += [f'{ELEMENT_NAME_MAPPING[z]}_{i}' for i in range(1, z+2)]
+    return astropy.table.Table(data=np.hstack(data), names=colnames, copy=False)
 
 
 def read_trm_file(filename):

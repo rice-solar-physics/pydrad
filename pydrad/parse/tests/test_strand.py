@@ -4,6 +4,7 @@ Test parsing HYDRAD results
 import astropy.units as u
 import h5py
 import numpy as np
+import plasmapy.particles
 import pytest
 
 from pydrad.parse import Profile, Strand
@@ -58,10 +59,6 @@ VAR_NAMES = [
     'radiative_timescale',
 ]
 
-
-@pytest.fixture
-def strand(hydrad):
-    return Strand(hydrad)
 
 @pytest.fixture
 def strand_only_amr_time_cfg(hydrad):
@@ -206,3 +203,13 @@ def test_profile_instantiation(strand_only_amr, strand_only_amr_time_cfg):
     # No index, master time
     p = Profile(strand_only_amr.hydrad_root, strand_only_amr.time[1], master_time=strand_only_amr._master_time)
     assert p._index == 1
+
+
+def test_ine_results(strand):
+    for profile in strand:
+        for element in strand.config['radiation']['elements_nonequilibrium']:
+            Z = plasmapy.particles.atomic_number(element)
+            for i_z in range(1,Z+2):
+                assert hasattr(profile, f'{element}_{i_z}')
+                ion_frac = getattr(profile, f'{element}_{i_z}')
+                assert ion_frac.shape == profile.coordinate.shape
